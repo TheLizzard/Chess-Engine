@@ -3,6 +3,7 @@ from settings import Settings
 from licence import Licence
 from board import GUIBoard
 from help import Help
+import widgets
 
 from functools import partial
 import tkinter as tk
@@ -131,11 +132,12 @@ class App:
         event = event.split(".")
         if event[0] == "file":
             self.file(event[1])
-        if event[0] == "view":
+        elif event[0] == "view":
             self.view(event[1])
-        if event[0] == "help":
+        elif event[0] == "help":
             self.help(event[1])
-        print("playing", event)
+        else:
+            print("playing", event)
 
     def file(self, event):
         if event == "exit":
@@ -154,7 +156,12 @@ class App:
             self.show_help()
 
     def show_fen(self):
-        print("showing fen")
+        w = widgets.CopyableEntryWindow()
+        w.set(self.board.fen())
+
+    def show_pgn(self):
+        w = widgets.CopyableTextWindow()
+        w.set(self.board.pgn())
 
     def show_licence(self):
         Licence()
