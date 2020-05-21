@@ -1,9 +1,11 @@
 from piece import Piece
 import tkinter as tk
 import chess
+import re
 
 from user import User
 from computer import Computer
+from position import Position
 
 
 class GUIBoard:
@@ -66,7 +68,7 @@ class GUIBoard:
         self.delete_sprites()
         for x in range(1, 9):
             for y in range(1, 9):
-                position = (x, y)
+                position = Position(x, y)
                 piece = self.position_to_piece(position, create=True)
                 if piece is not None:
                     self.pieces.append(piece)
@@ -100,19 +102,9 @@ class GUIBoard:
             sprite.destroy()
         self.pieces = []
 
-    def position_to_int(self, position):
-        x, y = position
-        return 8*y+x-9
-
-    def int_to_position(self, _int):
-        x = _int%8+1
-        y = _int//8+1
-        return (x, y)
-
     def position_to_piece(self, position, create=False):
         if create:
-            position_as_int = self.position_to_int(position)
-            piece = self.board.piece_at(position_as_int)
+            piece = self.board.piece_at(position.to_int())
             if piece is None:
                 return None
             colour = "white" if piece.color else "black"
@@ -125,26 +117,6 @@ class GUIBoard:
                 if piece.position == position:
                     return piece
 
-    def position_to_coords(self, position):
-        x, y = position
-        y = 8-y
-        return (int((x-0.5)*self.size+0.5), int((y+0.5)*self.size+0.5))
-
-    def coords_to_position(self, coords):
-        x, y = coords
-        new_x = x//self.size+1
-        new_y = (self.size*8-y)//self.size+1
-        return (int(new_x+0.5), int(new_y+0.5))
-
-    def position_to_place(self, position):
-        x, y = position
-        return chess.FILE_NAMES[x-1]+str(y)
-
-    def positions_to_uci(self, position1, position2):
-        place1 = self.position_to_place(position1)
-        place2 = self.position_to_place(position2)
-        return place1 + place2
-
     def colour_to_bool(self, colour):
         if isinstance(colour, str):
             if colour == "white":
@@ -153,3 +125,19 @@ class GUIBoard:
                 return False
         elif isinstance(colour, bool):
             return colour
+
+    def fen(self):
+        return self.board.fen()
+
+    def pgn(self): # chess.Board is missing .pgn()
+        board = chess.Board()
+        pgn = board.variation_san(self.board.move_stack)
+        pgn = self.clean_pgn(pgn)
+        return pgn
+
+    def clean_pgn(self, pgn):
+        pgn = re.split("\d\. ", pgn)[1:]
+        output = ""
+        for i, move_pair in enumerate(pgn):
+            output += str(i+1)+". "+move_pair.rstrip()+"\n"
+        return output
