@@ -1,12 +1,13 @@
 import chess
-from player import Player
 import time
+
+from player import Player
+from position import Position
 
 
 class User(Player):
     def __init__(self, guiboard, board, master, colour, control):
         super().__init__(board=board, colour=colour)
-        self.copy_all_methods(guiboard)
         self.board = board
         self.master = master
         self.control = control
@@ -15,9 +16,16 @@ class User(Player):
         self.piece_selected = None
         self.alowed_to_play = False
         self.available_move_dots = []
+        self.moved_selected_piece = False
         self.colour = self.colour_to_bool(colour)
-        self.bind_mouse()
         self.my_turn = (self.colour == self.board.turn)
+        self.bind_mouse()
+
+        self.create_piece = self.guiboard.create_piece
+        self.settings = self.guiboard.settings
+        self.update = self.guiboard.update
+        self.root = self.guiboard.root
+        self.size = self.guiboard.size
 
     def go(self):
         if self.board.is_game_over():
@@ -27,13 +35,6 @@ class User(Player):
             while self.my_turn:
                 self.master.update()
                 time.sleep(0.01)
-
-    def copy_all_methods(self, source):
-        target = self
-        for attribute in dir(source):
-            if attribute[0] != "_":
-                method = source.__getattribute__(attribute)
-                setattr(target, attribute, method)
 
     def bind_mouse(self):
         self.master.bind("<Button-1>", self.mouse, True)
@@ -66,44 +67,69 @@ class User(Player):
         name = event.type._name_
         x = event.x
         y = event.y
+        if not self.colour:return None
         if name == "ButtonPress":
-            position = self.coords_to_position((x, y))
-            self.piece_selected = self.position_to_piece(position)
+            self.moved_selected_piece = False
+            self.mouse_down = True
+            position = Position.from_coords((x, y))
             if self.piece_selected is not None:
-                colour = self.colour_to_bool(self.piece_selected.colour)
-                if colour != self.board.turn:
-                    self.piece_selected = None
-                else:
-                    self.show_available_moves()
+                self.move_selected((event.x, event.y))
+                self.unselect()
+            self.select(position)
         elif name == "Motion":
-            if self.piece_selected is not None:
+            if (self.piece_selected is not None) and self.mouse_down:
                 self.piece_selected.place((x, y))
+                self.moved_selected_piece = True
         elif name == "ButtonRelease":
+            self.mouse_down = False
             if self.piece_selected is not None:
-                coords = self.master.coords(self.piece_selected.tkcanvasnum)
-                if coords != []:
-                    new_position = self.coords_to_position(coords)
-                    old_position = self.piece_selected.position
+                self.move_selected((event.x, event.y))
+            self.moved_selected_piece = False
 
-                    if new_position != old_position:
-                        uci = self.positions_to_uci(old_position, new_position)
-                        if self.piece_selected.name == "pawn":
-                            if self.legal_promoting(uci, new_position):
-                                uci += self.askuser_pawn_promotion()
-                        move = chess.Move.from_uci(uci)
-                        if move in self.board.legal_moves:
-                            self.board.push(move)
-                            self.my_turn = False
-                self.piece_selected = None
-                self.remove_available_moves()
-                self.update()
+    def move_selected(self, new_coords):
+        x_out_of_bounds = not (0 < new_coords[0] < self.size*8)
+        y_out_of_bounds = not (0 < new_coords[1] < self.size*8)
+        out_of_bounds = x_out_of_bounds or y_out_of_bounds
+
+        new_position = Position.from_coords(new_coords)
+        old_position = self.piece_selected.position
+
+        if new_position == old_position:
+            if self.moved_selected_piece:
+                self.unselect()
+        else:
+            if not out_of_bounds:
+                uci = old_position + new_position
+                if self.legal_promoting(uci, new_position):
+                    uci += self.askuser_pawn_promotion()
+                move = chess.Move.from_uci(uci)
+                if move in self.board.legal_moves:
+                    self.board.push(move)
+                    self.my_turn = False
+            self.unselect()
+        self.update()
+
+    def select(self, position):
+        piece_selected = self.guiboard.position_to_piece(position)
+        if piece_selected is not None:
+            colour = self.colour_to_bool(piece_selected.colour)
+            if colour == self.board.turn:
+                self.piece_selected = piece_selected
+                self.show_available_moves()
+                return True
+        self.piece_selected = None
+        return False
+
+    def unselect(self):
+        self.piece_selected = None
+        self.remove_available_moves()
 
     def show_available_moves(self):
         piece = self.piece_selected
         for move in self.board.legal_moves:
-            if move.from_square == self.position_to_int(piece.position):
-                position = self.int_to_position(move.to_square)
-                if self.position_to_piece(position) is None:
+            if move.from_square == piece.position.to_int():
+                position = Position.from_int(move.to_square)
+                if self.guiboard.position_to_piece(position) is None:
                     self.draw_available_move(position)
 
     def remove_available_moves(self):
@@ -111,20 +137,20 @@ class User(Player):
             self.master.delete(dot)
 
     def draw_available_move(self, position):
-        place = self.position_to_coords(position)
         radius = self.settings.dot_radius
-        dot = self.draw_dot(place, radius, outline="grey", fill="grey")
+        dot = self.draw_dot(position, radius, outline="grey", fill="grey")
         self.available_move_dots.append(dot)
 
     def draw_dot(self, position, radius, **kwargs):
-        x, y = position
+        x, y = position.to_coords()
         r = radius
         return self.master.create_oval(x-r, y-r, x+r, y+r, **kwargs)
 
     def legal_promoting(self, uci, new_position):
-        if (new_position[1] == 8) or (new_position[1] == 1):
-            potential_move = chess.Move.from_uci(uci+"q")
-            return (potential_move in self.board.legal_moves)
+        if self.piece_selected.name == "pawn":
+            if (new_position[1] == 8) or (new_position[1] == 1):
+                potential_move = chess.Move.from_uci(uci+"q")
+                return (potential_move in self.board.legal_moves)
         return False
 
     def askuser_pawn_promotion(self):
@@ -157,7 +183,7 @@ class User(Player):
 
     def promote(self, event):
         promotions = ("q", "r", "b", "n")
-        position = self.coords_to_position((event.x, event.y))
+        position = Position.from_coords((event.x, event.y))
         if position[1] == 4:
             if 3 <= position[0] <= 6:
                 self.chosen_promotion = promotions[position[0]-3]
