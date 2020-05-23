@@ -6,19 +6,21 @@ from position import Position
 
 
 class User(Player):
-    def __init__(self, guiboard, board, master, colour, control):
+    def __init__(self, guiboard, board, master, colour, callback=None):
         super().__init__(board=board, colour=colour)
         self.board = board
         self.master = master
-        self.control = control
         self.mouse_down = False
+        self.callback = callback
         self.guiboard = guiboard
         self.piece_selected = None
         self.alowed_to_play = False
         self.available_move_dots = []
+        self.user_created_helpers = {}
+        self.user_helper_making = None
         self.moved_selected_piece = False
+        self.user_created_arrow_start = None
         self.colour = self.colour_to_bool(colour)
-        self.my_turn = (self.colour == self.board.turn)
         self.bind_mouse()
 
         self.create_piece = self.guiboard.create_piece
@@ -28,69 +30,125 @@ class User(Player):
         self.size = self.guiboard.size
 
     def go(self):
-        if self.board.is_game_over():
-            return None
-        self.my_turn = True
-        if self.control:
-            while self.my_turn:
-                self.master.update()
-                time.sleep(0.01)
+        pass
+        #if self.board.is_game_over():
+        #    return None
 
     def bind_mouse(self):
-        self.master.bind("<Button-1>", self.mouse, True)
-        self.master.bind("<Button-3>", self.mouse, True)
-        self.master.bind("<B1-Motion>", self.mouse, True)
-        self.master.bind("<B3-Motion>", self.mouse, True)
-        self.master.bind("<ButtonRelease-1>", self.mouse, True)
-        self.master.bind("<ButtonRelease-3>", self.mouse, True)
+        for n in (1, 3):
+            for i in ("<Button-%d>", "<B%d-Motion>", "<ButtonRelease-%d>"):
+                self.master.bind(i%n, self.mouse, True)
 
     def destroy(self):
         self.remove_available_moves()
-        self.unbind()
-        self.my_turn = False
+        print("please del me. I can't unbind")
         super().destroy()
-
-    def unbind(self):
-        self.master.unbind("<Button-1>")
-        self.master.unbind("<Button-3>")
-        self.master.unbind("<B1-Motion>")
-        self.master.unbind("<B3-Motion>")
-        self.master.unbind("<ButtonRelease-1>")
-        self.master.unbind("<ButtonRelease-3>")
 
     def mouse(self, event):
         if not self.alowed_to_play:
-            return None
-        if (not self.my_turn) and self.control:
             return None
         # name can be one of: (ButtonPress, ButtonRelease, Motion)
         name = event.type._name_
         x = event.x
         y = event.y
-        if not self.colour:return None
-        if name == "ButtonPress":
-            self.moved_selected_piece = False
-            self.mouse_down = True
-            position = Position.from_coords((x, y))
-            if self.piece_selected is not None:
-                self.move_selected((event.x, event.y))
-                self.unselect()
-            self.select(position)
+        x_out_of_bounds = not (0 < x < self.size*8)
+        y_out_of_bounds = not (0 < y < self.size*8)
+
+        if not (self.colour == self.board.turn):
+            return None
+        if x_out_of_bounds or y_out_of_bounds:
+            self.master.delete(self.user_helper_making)
+            return None
+
+        if event.num == 1:
+            if name == "ButtonPress":
+                self.delete_object()
+                self.moved_selected_piece = False
+                self.mouse_down = True
+                position = Position.from_coords((x, y))
+                if self.piece_selected is not None:
+                    self.move_selected((event.x, event.y))
+                    self.unselect()
+                    if self.piece_selected is None:
+                        self.unselect()
+                        return None
+                self.select(position)
+            elif name == "ButtonRelease":
+                self.mouse_down = False
+                if self.piece_selected is not None:
+                    self.move_selected((event.x, event.y))
+                self.moved_selected_piece = False
+        elif event.num == 3:
+            if name == "ButtonPress":
+                position = Position.from_coords((x, y))
+                self.user_created_arrow_start = position
+                self.user_helper_making = self.create_ring(position)
+            elif name == "ButtonRelease":
+                start = self.user_created_arrow_start
+                end = Position.from_coords((x, y))
+                if start == end:
+                    _hash = hash(start*2)
+                    if _hash in self.user_created_helpers:
+                        self.delete_object(_hash)
+                        self.master.delete(self.user_helper_making)
+                    else:
+                        ring = self.user_helper_making
+                        self.user_created_helpers.update({_hash: ring})
+                else:
+                    _hash = hash(start+end)
+                    if _hash in self.user_created_helpers:
+                        self.delete_object(_hash)
+                        self.master.delete(self.user_helper_making)
+                    else:
+                        arrow = self.user_helper_making
+                        self.user_created_helpers.update({_hash: arrow})
         elif name == "Motion":
-            if (self.piece_selected is not None) and self.mouse_down:
-                self.piece_selected.place((x, y))
-                self.moved_selected_piece = True
-        elif name == "ButtonRelease":
-            self.mouse_down = False
-            if self.piece_selected is not None:
-                self.move_selected((event.x, event.y))
-            self.moved_selected_piece = False
+            if event.state == 272: # left mouse button
+                if (self.piece_selected is not None) and self.mouse_down:
+                    self.piece_selected.place((x, y))
+                    self.moved_selected_piece = True
+            elif event.state == 1040: # right mouse button
+                start = self.user_created_arrow_start
+                end = Position.from_coords((x, y))
+                if start == end:
+                    self.master.delete(self.user_helper_making)
+                    self.user_helper_making = self.create_ring(start)
+                else:
+                    self.master.delete(self.user_helper_making)
+                    self.user_helper_making = self.create_arrow(start, end)
+
+    def delete_object(self, idx=None):
+        if idx is None:
+            for _, i in self.user_created_helpers.items():
+                self.master.delete(i)
+            self.user_created_helpers = {}
+        else:
+            self.master.delete(self.user_created_helpers[idx])
+            del self.user_created_helpers[idx]
+
+    def create_ring(self, position):
+        coords = position.to_coords()
+        colour = self.settings.ring_colour
+        width = self.settings.ring_width
+        radius = self.settings.ring_radius
+        return self._create_circle_arc(*coords, style="arc", r=radius, end=629,
+                                       outline=colour, width=width, start=270)
+
+    def create_arrow(self, position1, position2):
+        coords1 = position1.to_coords()
+        coords2 = position2.to_coords()
+        width = self.settings.arrow_width
+        colour = self.settings.arrow_colour
+        return self.master.create_line(*coords1, *coords2, arrow="last",
+                                       fill=colour, width=width)
+
+    def _create_circle_arc(self, x, y, r, **kwargs):
+        if "start" in kwargs and "end" in kwargs:
+            kwargs["extent"] = kwargs["end"] - kwargs["start"]
+            del kwargs["end"]
+        return self.master.create_arc(x-r, y-r, x+r, y+r, **kwargs)
 
     def move_selected(self, new_coords):
-        x_out_of_bounds = not (0 < new_coords[0] < self.size*8)
-        y_out_of_bounds = not (0 < new_coords[1] < self.size*8)
-        out_of_bounds = x_out_of_bounds or y_out_of_bounds
-
         new_position = Position.from_coords(new_coords)
         old_position = self.piece_selected.position
 
@@ -98,14 +156,16 @@ class User(Player):
             if self.moved_selected_piece:
                 self.unselect()
         else:
-            if not out_of_bounds:
-                uci = old_position + new_position
-                if self.legal_promoting(uci, new_position):
-                    uci += self.askuser_pawn_promotion()
-                move = chess.Move.from_uci(uci)
-                if move in self.board.legal_moves:
-                    self.board.push(move)
-                    self.my_turn = False
+            uci = (old_position + new_position).to_str()
+            if self.legal_promoting(uci, new_position):
+                uci += self.askuser_pawn_promotion()
+            move = chess.Move.from_uci(uci)
+            if move in self.board.legal_moves:
+                self.board.push(move)
+                self.delete_object()
+                self.remove_available_moves()
+                if self.callback is not None:
+                    self.callback()
             self.unselect()
         self.update()
 
@@ -117,7 +177,7 @@ class User(Player):
                 self.piece_selected = piece_selected
                 self.show_available_moves()
                 return True
-        self.piece_selected = None
+        self.unselect()
         return False
 
     def unselect(self):
@@ -137,7 +197,7 @@ class User(Player):
             self.master.delete(dot)
 
     def draw_available_move(self, position):
-        radius = self.settings.dot_radius
+        radius = self.size/9
         dot = self.draw_dot(position, radius, outline="grey", fill="grey")
         self.available_move_dots.append(dot)
 
