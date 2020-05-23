@@ -26,7 +26,7 @@ class App:
 
         self.widget_kwargs = self.user_settings.widgets
         self.modified_widget_kwargs = self.widget_kwargs.dict()
-        self.modified_widget_kwargs.pop("justify", None)
+        self.justify = self.modified_widget_kwargs.pop("justify", None)
         self.set_up_board()
         self.set_up_eval()
         self.set_up_suggestedmoves()
@@ -49,7 +49,7 @@ class App:
                     continue
                 button = button[0].upper()+button[1:]
                 event = (name+"."+button).lower().replace(" ", "_")
-                command = partial(self.play, event)
+                command = partial(self.menu, event)
                 self.menu_example.add_command(label=button, command=command)
 
     def set_up_eval(self):
@@ -85,7 +85,7 @@ class App:
         self.suggestedmoves_frame.grid_propagate(False)
 
         n_moves_text = tk.Label(self.suggestedmoves_frame, fg=fg, font=font,
-                                bg=bg, justify="left",
+                                bg=bg, justify=self.justify,
                                 **self.modified_widget_kwargs)
         n_moves_text.grid(row=1, column=1)
 
@@ -123,37 +123,103 @@ class App:
         settings = self.user_settings.playbutton
         fg = settings.colour
         bg = settings.background
-        command = partial(self.play, "eval.playbutton")
+        command = partial(self.menu, "eval.playbutton")
         login_button = tk.Button(self.eval_frame, fg=fg, bg=bg, text="Play",
                                  command=command, **self.modified_widget_kwargs)
         login_button.pack(side="right")
 
-    def play(self, event):
+    def menu(self, event):
         event = event.split(".")
         if event[0] == "file":
             self.file(event[1])
+
+        elif event[0] == "edit":
+            self.edit(event[1])
+
         elif event[0] == "view":
             self.view(event[1])
+
+        elif event[0] == "game":
+            self.start_game(event[1])
+
+        elif event[0] == "settings":
+            self.change_settings(event[1])
+
         elif event[0] == "help":
             self.help(event[1])
+
         else:
-            print("playing", event)
+            print("? ", event)
 
     def file(self, event):
-        if event == "exit":
+        if event == "open":
+            print("file.open")
+
+        elif event == "save":
+            print("file.save")
+
+        elif event == "save_as":
+            print("file.save_as")
+
+        elif event == "exit":
             self.root.destroy()
+
+        else:
+            print("? ", event)
+
+    def edit(self, event):
+        if event == "undo_move":
+            print("edit.undo_move")
+
+        elif event == "redo_move":
+            print("edit.redo_move")
+
+        elif event == "change_position":
+            print("edit.change_position")
+
+        else:
+            print("? ", event)
 
     def view(self, event):
         if event == "current_fen":
             self.show_fen()
+
         elif event == "game_pgn":
             self.show_pgn()
+
+    def start_game(self, event):
+        if event == "evaluate":
+            print("game.evaluate")
+
+        elif event == "play_vs_computer":
+            colour = self.ask_if_user_white()
+            self.board.start_comp_v_hum(1-colour)
+
+        elif event == "play_vs_human":
+            self.board.start_hum_v_hum()
+
+        elif event == "play_vs_ai":
+            colour = self.ask_if_user_white()
+            self.board.start_ai_v_hum(1-colour)
+
+        elif event == "play_multiplayer":
+            print("game.play_multiplayer")
+
+    def change_settings(self, event):
+        if event == "game_settings":
+            print("settings.game_settings")
+
+        elif event == "suggested_moves_settings":
+            print("settings.suggested_moves_settings")
 
     def help(self, event):
         if event == "licence":
             self.show_licence()
         elif event == "help":
             self.show_help()
+
+    def ask_if_user_white(self):
+        return self.board.ask_if_user_white()
 
     def show_fen(self):
         w = widgets.CopyableEntryWindow()
