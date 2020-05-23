@@ -12,6 +12,8 @@ class Player:
                 return False
         elif isinstance(colour, bool):
             return colour
+        elif isinstance(colour, int) and ((0 == colour) or (1 == colour)):
+            return colour
 
     def start(self):
         self.alowed_to_play = True
