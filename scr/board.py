@@ -1,6 +1,7 @@
 from piece import Piece
 import tkinter as tk
 import chess
+import time
 import re
 
 from user import User
@@ -26,8 +27,13 @@ class GUIBoard:
         self.set_up_board()
 
     def sleep(self):
-        self.add_user_as_player("black", control=False)
-        self.add_user_as_player("white", control=False)
+        self.add_user_as_player("black")
+        self.add_user_as_player("white")
+        self.players[0].go()
+
+    def done_move(self):
+        self.update()
+        self.players[1-self.board.turn].go()
 
     def play(self):
         if not self.board.is_game_over():
@@ -44,21 +50,28 @@ class GUIBoard:
         self.create_board()
         self.sleep()
 
-    def add_user_as_player(self, colour, control=True):
+    def add_user_as_player(self, colour):
         colour = self.colour_to_bool(colour)
         player = User(guiboard=self, board=self.board, master=self.master,
-                        colour=colour, control=control)
-        player.start()
-        if self.players[1-colour] is not None:
-            self.players[1-colour].destroy()
-            del self.players[1-colour]
-        self.players[1-colour] = player
+                      colour=colour, callback=self.done_move)
+        self.add_player(colour, player)
 
     def add_computer_as_player(self, colour):
         colour = self.colour_to_bool(colour)
-        player = Computer(board=self.board, colour=colour)
+        player = Computer(board=self.board, colour=colour,
+                          callback=self.done_move)
+        self.add_player(colour, player)
+
+    def add_player(self, colour, player):
+        if self.players[1-colour] is not None:
+            self.players[1-colour].destroy()
+            p = self.players[1-colour]
+            del p
         player.start()
         self.players[1-colour] = player
+
+    def add_ai_as_player(self, colour):
+        print("Not available")
 
     def set_up_pieces(self):
         self.pieces = []
@@ -125,6 +138,8 @@ class GUIBoard:
                 return False
         elif isinstance(colour, bool):
             return colour
+        elif isinstance(colour, int) and ((0 == colour) or (1 == colour)):
+            return colour
 
     def fen(self):
         return self.board.fen()
@@ -141,3 +156,46 @@ class GUIBoard:
         for i, move_pair in enumerate(pgn):
             output += str(i+1)+". "+move_pair.rstrip()+"\n"
         return output
+
+    def ask_if_user_white(self):
+        self.colour_chosen = None
+        coords = (3*self.size, 3*self.size, 5*self.size, 4*self.size)
+        r = self.master.create_rectangle(*coords, fill="black")
+        text = "White or black?\nClick on the square bellow"
+        t = self.master.create_text(4*self.size, 3.5*self.size, fill="white",
+                                    font=("", 5), text=text, justify="center")
+        self.master.bind("<Button-1>", self.received_user_colour, True)
+        self.players[0].stop();self.players[1].stop()
+        while self.colour_chosen is None:
+            self.root.update()
+            time.sleep(0.01)
+        self.players[0].start();self.players[1].start()
+        self.master.delete(r)
+        self.master.delete(t)
+        return self.colour_chosen
+
+    def received_user_colour(self, event):
+        if 3*self.size <= event.x <= 5*self.size:
+            if 4*self.size <= event.y <= 5*self.size:
+                w = (event.x-3*self.size)//45 == 0
+                self.colour_chosen = w
+
+    def start_ai_v_hum(self, colour):
+        self.add_user_as_player(colour)
+        self.add_ai_as_player(bool(1-colour))
+        self.reset()
+
+    def start_comp_v_hum(self, colour):
+        self.add_user_as_player(colour)
+        self.add_computer_as_player(bool(1-colour))
+        self.reset()
+
+    def start_hum_v_hum(self):
+        self.add_user_as_player(True)
+        self.add_user_as_player(False)
+        self.reset()
+
+    def reset(self):
+        self.board.reset()
+        self.update()
+        self.players[0].go()
