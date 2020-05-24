@@ -1,4 +1,3 @@
-from ScrollBar import AutoScrollbar
 from settings import Settings
 from licence import Licence
 from board import GUIBoard
@@ -31,7 +30,6 @@ class App:
         self.set_up_eval()
         self.set_up_suggestedmoves()
         self.set_up_movehistory()
-        self.set_up_playbutton()
 
     def set_up_menu(self):
         tearoff = self.user_settings.menu.tearoff
@@ -114,19 +112,11 @@ class App:
 
         self.movehistory_text.pack(side="left", expand=True, fill="y")
 
-        sbar = AutoScrollbar(self.movehistory_frame, self.movehistory_text,
-                             command=self.movehistory_text.yview)
+        sbar = widgets.AutoScrollbar(self.movehistory_frame,
+                                     self.movehistory_text,
+                                     command=self.movehistory_text.yview)
         self.movehistory_text["yscrollcommand"] = sbar.set
-        sbar.pack(side="right", expand=True, fill="y")
-
-    def set_up_playbutton(self):
-        settings = self.user_settings.playbutton
-        fg = settings.colour
-        bg = settings.background
-        command = partial(self.menu, "eval.playbutton")
-        login_button = tk.Button(self.eval_frame, fg=fg, bg=bg, text="Play",
-                                 command=command, **self.modified_widget_kwargs)
-        login_button.pack(side="right")
+        sbar.pack(side="right", expand=True, fill="y")=
 
     def menu(self, event):
         event = event.split(".")
