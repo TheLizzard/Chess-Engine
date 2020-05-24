@@ -1,7 +1,5 @@
 from settings import Settings
-from licence import Licence
 from board import GUIBoard
-from help import Help
 import widgets
 
 from functools import partial
@@ -220,10 +218,10 @@ class App:
         w.set(self.board.pgn())
 
     def show_licence(self):
-        Licence()
+        widgets.LicenceWindow()
 
     def show_help(self):
-        Help()
+        widgets.HelpWindow()
 
     def set_up_board(self):
         self.board = GUIBoard(settings=self.user_settings.gameboard,
