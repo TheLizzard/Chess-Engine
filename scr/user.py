@@ -161,7 +161,7 @@ class User(Player):
                 uci += self.askuser_pawn_promotion()
             move = chess.Move.from_uci(uci)
             if move in self.board.legal_moves:
-                self.board.push(move)
+                self.guiboard.push(move)
                 self.delete_object()
                 self.remove_available_moves()
                 if self.callback is not None:
