@@ -124,3 +124,25 @@ class AutoScrollbar(tk.Scrollbar):
         super().grid(**kwargs)
         self.geometry_manager = "grid"
         self.geometry_manager_kwargs = kwargs
+
+
+class LicenceWindow(TextWindow):
+    def __init__(self):
+        super().__init__()
+        self.insert("end", self.get_text())
+
+    def get_text(self):
+        with open("Licence.txt", "r") as file:
+            data = file.read()
+        return data
+
+
+class HelpWindow(TextWindow):
+    def __init__(self):
+        super().__init__()
+        self.insert("end", self.get_text())
+
+    def get_text(self):
+        with open("Help.txt", "r") as file:
+            data = file.read()
+        return data
