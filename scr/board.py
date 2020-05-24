@@ -41,6 +41,8 @@ class GUIBoard:
             self.update()
 
     def set_up_board(self):
+        self.last_move_colours = (self.settings.last_move_colour_white,
+                                  self.settings.last_move_colour_black)
         self.board = chess.Board()
         self.master = tk.Canvas(self.root, width=self.size*8,
                                 height=self.size*8, **self.kwargs)
@@ -58,7 +60,7 @@ class GUIBoard:
 
     def add_computer_as_player(self, colour):
         colour = self.colour_to_bool(colour)
-        player = Computer(board=self.board, colour=colour,
+        player = Computer(board=self.board, colour=colour, guiboard=self,
                           callback=self.done_move)
         self.add_player(colour, player)
 
@@ -73,7 +75,25 @@ class GUIBoard:
     def add_ai_as_player(self, colour):
         print("Not available")
 
+    def push(self, move):
+        if self.last_move_sqrs[0] is not None:
+            self.master.delete(self.last_move_sqrs[0])
+            self.master.delete(self.last_move_sqrs[1])
+        _from = Position.from_int(move.from_square)
+        _to = Position.from_int(move.to_square)
+        self.last_move_sqrs[0] = self.colour_sqr(_from)
+        self.last_move_sqrs[1] = self.colour_sqr(_to)
+        self.board.push(move)
+
+    def colour_sqr(self, position):
+        colour = position.to_colour()
+        colour = self.last_move_colours[colour]
+        coords = position.to_coords_start()+position.to_coords_end()
+        rectangle = self.master.create_rectangle(coords, fill=colour, width=0)
+        return rectangle
+
     def set_up_pieces(self):
+        self.last_move_sqrs = [None, None]
         self.pieces = []
         self.update()
 
