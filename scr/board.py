@@ -76,9 +76,7 @@ class GUIBoard:
         print("Not available")
 
     def push(self, move):
-        if self.last_move_sqrs[0] is not None:
-            self.master.delete(self.last_move_sqrs[0])
-            self.master.delete(self.last_move_sqrs[1])
+        self.remove_last_sqrs()
         _from = Position.from_int(move.from_square)
         _to = Position.from_int(move.to_square)
         self.last_move_sqrs[0] = self.colour_sqr(_from)
@@ -216,6 +214,12 @@ class GUIBoard:
         self.reset()
 
     def reset(self):
+        self.remove_last_sqrs()
         self.board.reset()
         self.update()
         self.players[0].go()
+
+    def remove_last_sqrs(self):
+        if self.last_move_sqrs[0] is not None:
+            self.master.delete(self.last_move_sqrs[0])
+            self.master.delete(self.last_move_sqrs[1])
