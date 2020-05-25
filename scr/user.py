@@ -80,7 +80,9 @@ class User(Player):
                 if self.piece_selected is not None:
                     self.move_selected((event.x, event.y))
         elif event.num == 3:
-            if name == "ButtonPress":
+            if self.mouse_down:
+                pass
+            elif name == "ButtonPress":
                 position = Position.from_coords((x, y))
                 self.user_created_arrow_start = position
                 self.user_helper_making = self.create_ring(position)
@@ -105,21 +107,22 @@ class User(Player):
                         self.user_created_helpers.update({_hash: arrow})
         elif name == "Motion":
             self.debug.append(event)
-            if event.state & 256: # left mouse button
+            if event.state & 256: # Button 1
                 if (self.piece_selected is not None) and self.mouse_down:
                     self.piece_selected.place((x, y))
                     position = Position.from_coords((x, y))
                     if position != self.piece_selected.position:
                         self.moved_selected_piece = True
-            elif event.state & 1024: # right mouse button
-                start = self.user_created_arrow_start
-                end = Position.from_coords((x, y))
-                if start == end:
-                    self.master.delete(self.user_helper_making)
-                    self.user_helper_making = self.create_ring(start)
-                else:
-                    self.master.delete(self.user_helper_making)
-                    self.user_helper_making = self.create_arrow(start, end)
+            elif event.state & 1024: # Button 3
+                if not self.mouse_down:
+                    start = self.user_created_arrow_start
+                    end = Position.from_coords((x, y))
+                    if start == end:
+                        self.master.delete(self.user_helper_making)
+                        self.user_helper_making = self.create_ring(start)
+                    else:
+                        self.master.delete(self.user_helper_making)
+                        self.user_helper_making = self.create_arrow(start, end)
 
     def delete_object(self, idx=None):
         if idx is None:
