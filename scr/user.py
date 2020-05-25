@@ -59,6 +59,8 @@ class User(Player):
         if not (self.colour == self.board.turn):
             return None
         if x_out_of_bounds or y_out_of_bounds:
+            self.unselect()
+            self.update()
             self.master.delete(self.user_helper_making)
             return None
 
