@@ -103,11 +103,11 @@ class User(Player):
                         arrow = self.user_helper_making
                         self.user_created_helpers.update({_hash: arrow})
         elif name == "Motion":
-            if event.state == 272: # left mouse button
+            if event.state & 256: # left mouse button
                 if (self.piece_selected is not None) and self.mouse_down:
                     self.piece_selected.place((x, y))
                     self.moved_selected_piece = True
-            elif event.state == 1040: # right mouse button
+            elif event.state & 1024: # right mouse button
                 start = self.user_created_arrow_start
                 end = Position.from_coords((x, y))
                 if start == end:
