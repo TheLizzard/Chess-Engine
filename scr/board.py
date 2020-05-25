@@ -16,13 +16,12 @@ class GUIBoard:
                       "q": "queen",
                       "n": "knight",
                       "b": "bishop"}
-    def __init__(self, settings, root, kwargs):
-        #              [white player, black player]
-        self.players = [None, None]
-        # has to be an object like: <Player> or <Computer> or <AI>
-        self.settings = settings
+    def __init__(self, settings, root, kwargs, move_callback=None):
         self.root = root
         self.kwargs = kwargs
+        self.settings = settings
+        self.players = [None, None]
+        self.move_callback = move_callback
         self.size = self.settings.size_of_squares
         self.set_up_board()
 
@@ -31,7 +30,9 @@ class GUIBoard:
         self.add_user_as_player("white")
         self.players[0].go()
 
-    def done_move(self):
+    def done_move(self, move=None):
+        if move is not None:
+            self.board.push(move)
         self.update()
         self.players[1-self.board.turn].go()
 
@@ -60,7 +61,7 @@ class GUIBoard:
 
     def add_computer_as_player(self, colour):
         colour = self.colour_to_bool(colour)
-        player = Computer(board=self.board, colour=colour, guiboard=self,
+        player = Computer(board=self.board, colour=colour,
                           callback=self.done_move)
         self.add_player(colour, player)
 
@@ -82,6 +83,8 @@ class GUIBoard:
         self.last_move_sqrs[0] = self.colour_sqr(_from)
         self.last_move_sqrs[1] = self.colour_sqr(_to)
         self.board.push(move)
+        if self.move_callback is not None:
+            self.move_callback()
 
     def colour_sqr(self, position):
         colour = position.to_colour()
@@ -133,7 +136,7 @@ class GUIBoard:
             sprite.destroy()
         self.pieces = []
 
-    def position_to_piece(self, position, create=False):
+    def position_to_piece(self, position, board=None, create=False):
         if create:
             piece = self.board.piece_at(position.to_int())
             if piece is None:
@@ -169,7 +172,7 @@ class GUIBoard:
         return pgn
 
     def clean_pgn(self, pgn):
-        pgn = re.split("\d\. ", pgn)[1:]
+        pgn = re.split("\d+\. ", pgn)[1:]
         output = ""
         for i, move_pair in enumerate(pgn):
             output += str(i+1)+". "+move_pair.rstrip()+"\n"
@@ -223,3 +226,14 @@ class GUIBoard:
         if self.last_move_sqrs[0] is not None:
             self.master.delete(self.last_move_sqrs[0])
             self.master.delete(self.last_move_sqrs[1])
+
+    def moves_to_san(self, moves): # board dependant
+        board = self.board.copy()
+        output = []
+        for move in moves:
+            output.append(self.move_to_san(move, board))
+            board.push(move)
+        return output
+
+    def move_to_san(self, move, board):
+        return board.san(move)
