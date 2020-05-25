@@ -79,7 +79,6 @@ class User(Player):
                 self.mouse_down = False
                 if self.piece_selected is not None:
                     self.move_selected((event.x, event.y))
-                self.moved_selected_piece = False
         elif event.num == 3:
             if name == "ButtonPress":
                 position = Position.from_coords((x, y))
@@ -109,7 +108,9 @@ class User(Player):
             if event.state & 256: # left mouse button
                 if (self.piece_selected is not None) and self.mouse_down:
                     self.piece_selected.place((x, y))
-                    self.moved_selected_piece = True
+                    position = Position.from_coords((x, y))
+                    if position != self.piece_selected.position:
+                        self.moved_selected_piece = True
             elif event.state & 1024: # right mouse button
                 start = self.user_created_arrow_start
                 end = Position.from_coords((x, y))
