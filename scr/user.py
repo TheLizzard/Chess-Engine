@@ -69,10 +69,8 @@ class User(Player):
                 if self.piece_selected is not None:
                     self.move_selected((event.x, event.y))
                     self.unselect()
-                    if self.piece_selected is None:
-                        self.unselect()
-                        return None
-                self.select(position)
+                else:
+                    self.select(position)
             elif name == "ButtonRelease":
                 self.mouse_down = False
                 if self.piece_selected is not None:
@@ -214,7 +212,7 @@ class User(Player):
         return False
 
     def askuser_pawn_promotion(self):
-        self.alowed_to_play = False
+        self.stop()
         master = self.master
         self.chosen_promotion = None
         x1, y1 = (2*self.size, 3*self.size)
@@ -237,8 +235,8 @@ class User(Player):
         q.destroy(), r.destroy(), b.destroy(), n.destroy()
         self.master.delete(rectangle)
         self.master.delete(text)
-        self.alowed_to_play = True
         self.remove_available_moves()
+        self.start()
         return self.chosen_promotion
 
     def promote(self, event):
