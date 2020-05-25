@@ -146,3 +146,17 @@ class HelpWindow(TextWindow):
         with open("Help.txt", "r") as file:
             data = file.read()
         return data
+
+
+class Tk(tk.Tk):
+    def __init__(self, *args, **kwargs):
+        self.binds = []
+        super().__init__(*args, **kwargs)
+
+    def bind_update(self, func):
+        self.binds.append(func)
+
+    def update(self, *args, **kwargs):
+        for func in self.binds:
+            func()
+        super().update(*args, **kwargs)
