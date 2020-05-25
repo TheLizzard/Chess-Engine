@@ -29,6 +29,8 @@ class User(Player):
         self.root = self.guiboard.root
         self.size = self.guiboard.size
 
+        self.debug = []
+
     def go(self):
         pass
         #if self.board.is_game_over():
@@ -101,6 +103,7 @@ class User(Player):
                         arrow = self.user_helper_making
                         self.user_created_helpers.update({_hash: arrow})
         elif name == "Motion":
+            self.debug.append(event)
             if event.state & 256: # left mouse button
                 if (self.piece_selected is not None) and self.mouse_down:
                     self.piece_selected.place((x, y))
@@ -231,11 +234,9 @@ class User(Player):
         self.master.bind("<Button-1>", self.promote, True)
         while self.chosen_promotion is None:
             self.root.update()
-        self.bind_mouse()
         q.destroy(), r.destroy(), b.destroy(), n.destroy()
         self.master.delete(rectangle)
         self.master.delete(text)
-        self.remove_available_moves()
         self.start()
         return self.chosen_promotion
 
