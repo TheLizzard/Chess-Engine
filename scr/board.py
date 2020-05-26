@@ -77,11 +77,7 @@ class GUIBoard:
         print("Not available")
 
     def push(self, move):
-        self.remove_last_sqrs()
-        _from = Position.from_int(move.from_square)
-        _to = Position.from_int(move.to_square)
-        self.last_move_sqrs[0] = self.colour_sqr(_from)
-        self.last_move_sqrs[1] = self.colour_sqr(_to)
+        self.update_last_moved(move)
         self.board.push(move)
         if self.move_callback is not None:
             self.move_callback()
@@ -237,3 +233,11 @@ class GUIBoard:
 
     def move_to_san(self, move, board):
         return board.san(move)
+
+    def update_last_moved(self, move):
+        self.remove_last_sqrs()
+        if move is not None:
+            _from = Position.from_int(move.from_square)
+            _to = Position.from_int(move.to_square)
+            self.last_move_sqrs[0] = self.colour_sqr(_from)
+            self.last_move_sqrs[1] = self.colour_sqr(_to)
