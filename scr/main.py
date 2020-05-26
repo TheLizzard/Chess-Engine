@@ -18,8 +18,9 @@ class App:
         self.set_up_tk()
         self.update_board()
         self.done_set_up = True
+        self.undone_move_stack = []
         self.root.update()
-        self.start_analysing()
+        #self.start_analysing()
 
     def set_up_tk(self):
         self.root = widgets.Tk()
@@ -37,6 +38,11 @@ class App:
         self.set_up_eval()
         self.set_up_suggestedmoves()
         self.set_up_movehistory()
+        self.bind_keys()
+
+    def bind_keys(self):
+        self.root.bind("<Control-z>", self.undo_move)
+        self.root.bind("<Control-Shift-Z>", self.redo_move)
 
     def set_up_menu(self):
         tearoff = self.settings.menu.tearoff
@@ -164,10 +170,10 @@ class App:
 
     def edit(self, event):
         if event == "undo_move":
-            print("edit.undo_move")
+            self.undo_move()
 
         elif event == "redo_move":
-            print("edit.redo_move")
+            self.redo_move()
 
         elif event == "change_position":
             print("edit.change_position")
@@ -182,10 +188,23 @@ class App:
         elif event == "game_pgn":
             self.show_pgn()
 
+    def undo_move(self, event=None):
+        if len(self.board.board.move_stack) != 0:
+            move = self.board.board.pop()
+            self.board.update()
+            self.undone_move_stack.append(move)
+            self.moved(clear_undo_stack=False)
+
+    def redo_move(self, event=None):
+        if len(self.undone_move_stack) != 0:
+            move = self.undone_move_stack.pop()
+            self.board.board.push(move)
+            self.board.update()
+            self.moved(clear_undo_stack=False)
+
     def start_game(self, event):
         if event == "evaluate":
             self.start_analysing()
-            print("game.evaluate")
 
         elif event == "play_vs_computer":
             self.stop_analysing()
@@ -247,32 +266,37 @@ class App:
         self.board.update()
 
     def update(self):
-        if self.done_set_up and self.analysing:
-            if self.analyses is not None:
-                score = self.analyses.score
-                moves = self.analyses.moves
+        if self.done_set_up and self.analysing and (self.analyses is not None):
+            score = self.analyses.score
+            moves = self.analyses.moves
 
-                if (score is None) or (moves is None):
-                    return None
+            if (score is None) or (moves is None):
+                return None
 
-                try:
-                    score = score.white().score(mate_score=10000)
-                    moves = self.board.moves_to_san(moves)[:4]
+            score = score.white()#.score(mate_score=10000)
+            score = str(score).replace("+", "")
+            moves = self.board.moves_to_san(moves)[:4]
 
-                    self.eval_text.config(text=score)
-                    self.suggestedmoves_text.config(text=" ".join(moves))
-                except Exception as error:
-                    pass
+            self.eval_text.config(text=score)
+            self.suggestedmoves_text.config(text=" ".join(moves))
 
-    def moved(self):
+    def update_pgn(self):
         self.movehistory_text.config(state="normal")
         old_pgn = self.movehistory_text.get("1.0", "end")[:-1]
         new_pgn = self.pgn()
         diff = self.find_diff_pgn(old_pgn, new_pgn)
         self.movehistory_text.insert("end", diff)
         self.movehistory_text.config(state="disabled")
-        self.analyses.kill()
-        self.start_analysing()
+
+    def moved(self, clear_undo_stack=True):
+        if clear_undo_stack:
+            self.undone_move_stack = []
+        try:
+            self.update_pgn()
+        except:None
+        if self.analysing:
+            self.analyses.kill()
+            self.start_analysing()
 
     def find_diff_pgn(self, pgn1, pgn2):
         if pgn1 == "\n":
