@@ -33,8 +33,6 @@ class User(Player):
 
     def go(self):
         pass
-        #if self.board.is_game_over():
-        #    return None
 
     def bind_mouse(self):
         for n in (1, 3):
@@ -89,6 +87,8 @@ class User(Player):
             elif name == "ButtonRelease":
                 start = self.user_created_arrow_start
                 end = Position.from_coords((x, y))
+                if start == None:
+                    return None
                 if start == end:
                     _hash = hash(start*2)
                     if _hash in self.user_created_helpers:
@@ -117,6 +117,8 @@ class User(Player):
                 if not self.mouse_down:
                     start = self.user_created_arrow_start
                     end = Position.from_coords((x, y))
+                    if start == None:
+                        return None
                     if start == end:
                         self.master.delete(self.user_helper_making)
                         self.user_helper_making = self.create_ring(start)
