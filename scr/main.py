@@ -11,7 +11,6 @@ import time
 
 class App:
     def __init__(self):
-        self.move_stack_lock = threading.Lock()
         self.settings = Settings()
         self.analysing = False
         self.analyses = None
@@ -21,7 +20,7 @@ class App:
         self.done_set_up = True
         self.undone_move_stack = []
         self.root.update()
-        #self.start_analysing()
+        self.start_analysing()
 
     def set_up_tk(self):
         self.root = widgets.Tk()
@@ -190,22 +189,24 @@ class App:
             self.show_pgn()
 
     def undo_move(self, event=None):
-        self.move_stack_lock.acquire()
-        if len(self.board.board.move_stack) != 0:
+        if len(self.board.board.move_stack) > 0:
             move = self.board.board.pop()
-            self.board.update()
             self.undone_move_stack.append(move)
             self.moved(clear_undo_stack=False)
-        self.move_stack_lock.release()
+            if len(self.board.board.move_stack) > 0:
+                last_move = self.board.board.peek()
+            else:
+                last_move = None
+            self.board.update_last_moved(last_move)
+            self.board.update()
 
     def redo_move(self, event=None):
-        self.move_stack_lock.acquire()
         if len(self.undone_move_stack) != 0:
             move = self.undone_move_stack.pop()
             self.board.board.push(move)
-            self.board.update()
             self.moved(clear_undo_stack=False)
-        self.move_stack_lock.release()
+            self.board.update_last_moved(move)
+            self.board.update()
 
     def start_game(self, event):
         if event == "evaluate":
@@ -298,7 +299,8 @@ class App:
             self.undone_move_stack = []
         try:
             self.update_pgn()
-        except:None
+        except:
+            raise
         if self.analysing:
             self.analyses.kill()
             self.start_analysing()
