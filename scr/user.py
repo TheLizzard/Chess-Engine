@@ -10,11 +10,12 @@ class User(Player):
         super().__init__(board=board, colour=colour)
         self.board = board
         self.master = master
-        self.mouse_down = False
         self.callback = callback
         self.guiboard = guiboard
         self.piece_selected = None
         self.alowed_to_play = False
+        self.left_mouse_down = False
+        self.right_mouse_down = False
         self.available_move_dots = []
         self.user_created_helpers = {}
         self.user_helper_making = None
@@ -65,8 +66,9 @@ class User(Player):
         if event.num == 1:
             if name == "ButtonPress":
                 self.delete_object()
+                self.right_mouse_down = True
+                self.left_mouse_down = False
                 self.moved_selected_piece = False
-                self.mouse_down = True
                 position = Position.from_coords((x, y))
                 if self.piece_selected is not None:
                     self.move_selected((event.x, event.y))
@@ -74,21 +76,24 @@ class User(Player):
                 else:
                     self.select(position)
             elif name == "ButtonRelease":
-                self.mouse_down = False
+                self.right_mouse_down = False
                 if self.piece_selected is not None:
                     self.move_selected((event.x, event.y))
         elif event.num == 3:
-            if self.mouse_down:
+            if self.right_mouse_down:
                 pass
             elif name == "ButtonPress":
+                self.left_mouse_down = True
                 position = Position.from_coords((x, y))
                 self.user_created_arrow_start = position
                 self.user_helper_making = self.create_ring(position)
             elif name == "ButtonRelease":
-                start = self.user_created_arrow_start
-                end = Position.from_coords((x, y))
-                if start == None:
+                if not self.left_mouse_down:
                     return None
+                self.left_mouse_down = False
+                start = self.user_created_arrow_start
+                self.user_created_arrow_start = None
+                end = Position.from_coords((x, y))
                 if start == end:
                     _hash = hash(start*2)
                     if _hash in self.user_created_helpers:
@@ -106,24 +111,24 @@ class User(Player):
                         arrow = self.user_helper_making
                         self.user_created_helpers.update({_hash: arrow})
         elif name == "Motion":
+            if self.user_helper_making is not None:
+                self.master.delete(self.user_helper_making)
             self.debug.append(event)
             if event.state & 256: # Button 1
-                if (self.piece_selected is not None) and self.mouse_down:
+                if (self.piece_selected is not None) and self.right_mouse_down:
                     self.piece_selected.place((x, y))
                     position = Position.from_coords((x, y))
                     if position != self.piece_selected.position:
                         self.moved_selected_piece = True
             elif event.state & 1024: # Button 3
-                if not self.mouse_down:
+                if not self.left_mouse_down:
+                    return None
+                elif not self.right_mouse_down:
                     start = self.user_created_arrow_start
                     end = Position.from_coords((x, y))
-                    if start == None:
-                        return None
                     if start == end:
-                        self.master.delete(self.user_helper_making)
                         self.user_helper_making = self.create_ring(start)
                     else:
-                        self.master.delete(self.user_helper_making)
                         self.user_helper_making = self.create_arrow(start, end)
 
     def delete_object(self, idx=None):
