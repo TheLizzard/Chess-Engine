@@ -30,8 +30,6 @@ class User(Player):
         self.root = self.guiboard.root
         self.size = self.guiboard.size
 
-        self.debug = []
-
     def go(self):
         pass
 
@@ -113,7 +111,6 @@ class User(Player):
         elif name == "Motion":
             if self.user_helper_making is not None:
                 self.master.delete(self.user_helper_making)
-            self.debug.append(event)
             if event.state & 256: # Button 1
                 if (self.piece_selected is not None) and self.right_mouse_down:
                     self.piece_selected.place((x, y))
