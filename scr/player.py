@@ -23,3 +23,12 @@ class Player:
 
     def destroy(self):
         self.stop()
+
+    def undo_move(self, move):
+        pass
+
+    def redo_move(self, move):
+        pass
+
+    def go(self):
+        pass
