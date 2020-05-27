@@ -189,21 +189,16 @@ class App:
             self.show_pgn()
 
     def undo_move(self, event=None):
-        if len(self.board.board.move_stack) > 0:
-            move = self.board.board.pop()
+        if len(self.board.move_stack) > 0:
+            move = self.board.undo_move()
             self.undone_move_stack.append(move)
             self.moved(clear_undo_stack=False)
-            if len(self.board.board.move_stack) > 0:
-                last_move = self.board.board.peek()
-            else:
-                last_move = None
-            self.board.update_last_moved(last_move)
             self.board.update()
 
     def redo_move(self, event=None):
         if len(self.undone_move_stack) != 0:
             move = self.undone_move_stack.pop()
-            self.board.board.push(move)
+            self.board.redo_move(move)
             self.moved(clear_undo_stack=False)
             self.board.update_last_moved(move)
             self.board.update()
