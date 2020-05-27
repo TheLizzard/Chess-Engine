@@ -241,3 +241,23 @@ class GUIBoard:
             _to = Position.from_int(move.to_square)
             self.last_move_sqrs[0] = self.colour_sqr(_from)
             self.last_move_sqrs[1] = self.colour_sqr(_to)
+
+    def undo_move(self):
+        move = self.board.pop()
+        if len(self.board.move_stack) > 0:
+            last_move = self.board.peek()
+            self.update_last_moved(last_move)
+        else:
+            self.remove_last_sqrs()
+        for player in self.players:
+            player.undo_move(move)
+        return move
+
+    def redo_move(self, move):
+        self.board.push(move)
+        for player in self.players:
+            player.redo_move(move)
+
+    @property
+    def move_stack(self):
+        return self.board.move_stack
