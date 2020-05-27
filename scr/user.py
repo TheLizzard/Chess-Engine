@@ -30,9 +30,6 @@ class User(Player):
         self.root = self.guiboard.root
         self.size = self.guiboard.size
 
-    def go(self):
-        pass
-
     def bind_mouse(self):
         for n in (1, 3):
             for i in ("<Button-%d>", "<B%d-Motion>", "<ButtonRelease-%d>"):
@@ -256,3 +253,11 @@ class User(Player):
         if position[1] == 4:
             if 3 <= position[0] <= 6:
                 self.chosen_promotion = promotions[position[0]-3]
+
+    def undo_move(self, move):
+        self.remove_available_moves()
+        self.master.delete(self.user_helper_making)
+
+    def redo_move(self, move):
+        self.remove_available_moves()
+        self.master.delete(self.user_helper_making)
