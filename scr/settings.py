@@ -11,10 +11,11 @@ TUPLE_REGEX = "\((([\w. \"]+),* *)+\)"
 
 DEFAULT_SETTINGS = """Menu:
     "tearoff" = False
-    "File" = ("Open", "Save", "Save as", "-------", "Exit")
-    "Edit" = ("Undo Move", "Redo Move", "---------------", "Change Position")
+    "File" = ("Open", "Save", "Save as", "-----", "Exit")
+    "Edit" = ("Undo Move", "Redo Move", "-----", "Change Position")
     "View" = ("Current FEN", "Game PGN")
-    "Game" = ("Play vs AI", "Play Multiplayer")
+    "Game" = ("Evaluate", "-", "Play vs Computer", "Play vs Human", "Play vs AI", "Play Multiplayer")
+    "Settings" = ("Game Settings", "Suggested Moves Settings")
     "Help" = ("Licence", "Help")
 
 widgets:
@@ -23,41 +24,46 @@ widgets:
     "justify" = "left"
 
 GameBoard:
-    "size_of_squares" = 45
-    "dark_squares" = "black"
+    "size_of_squares" = 60
+    "dark_squares" = "grey"
     "light_squares" = "white"
     "chess_pieces_set_number" = 2
-    "scale_for_pieces" = 1.5
-    "font" = ("", 7)
+    "scale_for_pieces" = 1.4
+    "font" = ("", 9)
+    "last_move_colour_white" = "#DDDDDD"
+    "last_move_colour_black" = "#555555"
+    "arrow_colour" = "light green"
+    "arrow_width" = 5
+    "ring_colour" = "light green"
+    "ring_width" = 4
+    "ring_radius" = 27
+    "available_moves_dots_colour" = "black"
+
+Root:
+    "background" = "grey"
 
 Evaluation:
     "width" = 160
     "height" = 45
     "colour" = "white"
-    "background" = "black"
+    "background" = "grey"
     "font" = ("Lucida Console", 20)
-
-PlayButton:
-    "colour" = "white"
-    "background" = "black"
+    "stockfish" = "Stockfish/stockfish_10_x64"
 
 SuggestedMoves:
-    "width" = 160
-    "height" = 45
-    "line_width" = 19
-    "line_height" = 20
     "colour" = "white"
-    "background" = "black"
+    "background" = "grey"
     "font" = ("Lucida Console", 10)
 
 MoveHistory:
     "width" = 160
-    "height" = 270
+    "height" = 380
     "line_width" = 19
-    "line_height" = 20
+    "line_height" = 30
     "auto_hide_scrollbar" = True
     "colour" = "white"
-    "background" = "black"
+    "background" = "grey"
+    "cursor_colour" = "white"
     "font" = ("Lucida Console", 10)"""
 
 
