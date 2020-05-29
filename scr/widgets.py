@@ -1,4 +1,7 @@
+#https://stackoverflow.com/questions/40617515/python-tkinter-text-modified-callback
+from functools import partial
 import tkinter as tk
+import re
 
 
 class TextWindow:
@@ -160,3 +163,143 @@ class Tk(tk.Tk):
         for func in self.binds:
             func()
         super().update(*args, **kwargs)
+
+
+class CustomText(tk.Text):
+    def __init__(self, *args, **kwargs):
+        self.binds = []
+        self.highlight_number = 0
+
+        super().__init__(*args, **kwargs)
+        self._orig = self._w + "_orig"
+        self.tk.call("rename", self._w, self._orig)
+        self.tk.createcommand(self._w, self._proxy)
+
+        self.unbind("<Control-a>")
+        self.bind("<Control-KeyRelease-a>", self.select_all)
+        self.bind("<Control-v>", self.paste)
+
+    def _proxy(self, command, *args):
+        cmd = (self._orig, command) + args
+
+        if command in ("insert", "delete", "replace"):
+            result = self.generate_event(cmd)
+            if result == "break":
+                return "break"
+
+        return self.tk.call(cmd)
+
+    def generate_event(self, cmd):
+        for bind in self.binds:
+            if bind(cmd) == "break":
+                return "break"
+
+    def bind_modified(self, function):
+        self.binds.append(function)
+
+    def unbind_modified(self, function):
+        if self.binds.count(function) > 0:
+            self.binds.remove(function)
+
+    def paste(self, event):
+        if len(self.tag_ranges("sel")) != 0:
+            self.delete("sel.first", "sel.last")
+
+    def select_all(self, event):
+        self.tag_add("sel", "0.0", "end")
+        self.mark_set("insert", "end")
+
+
+class Question:
+    def __init__(self):
+        self.root = Tk()
+        self.root.resizable(False, False)
+
+    def destroy(self):
+        self.root.destroy()
+
+    def ask_for_ip(self):
+        self.result = None
+        font = ("Lucida Console", 18)
+        kwargs = {"borderwidth": 0, "highlightthickness": 0}
+
+        text = "What IP do you want to connect to?"
+        self.label = tk.Label(self.root, text=text, **kwargs)
+        self.label.grid(row=1, column=1, columnspan=2, sticky="news")
+
+        self.entry = CustomText(self.root, height=1, width=15, font=font,
+                                **kwargs)
+        self.entry.grid(row=2, column=1)
+        self.entry.bind_modified(self.check_ip)
+
+        self.button = tk.Button(self.root, text="Done",
+                                command=self._ask_for_ip, **kwargs)
+        self.button.grid(row=2, column=2, sticky="news")
+
+        while self.result is None:
+            self.root.update()
+
+        return self.result
+
+    def _ask_for_ip(self):
+        if self.check_ip():
+            self.result = self.entry.get("0.0", "end").replace("\n", "")
+
+    def check_ip(self, event=None):
+        text = self.entry.get("0.0", "end").replace("\n", "")
+        if (event is not None) and (event[1] == "insert"):
+            new_char = event[3]
+            if new_char == "\n":
+                self._ask_for_ip()
+            if (new_char != ".") and (not new_char.isdigit()):
+                return "break"
+            else:
+                pos = int(self.entry.index("insert").split(".")[1])
+                text = text[:pos]+new_char+text[pos:]
+        result = re.match("^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$", text)
+        if result is None:
+            self.entry.config(bg="white")
+            return False
+        else:
+            self.entry.config(bg="light green")
+            return True
+
+    def ask_user(self, question, answers, mapping=None):
+        self.result = None
+        self.buttons = []
+        kwargs = {"borderwidth": 0, "highlightthickness": 0}
+
+        if (mapping is not None) and (len(answers) != len(mapping)):
+            raise ValueError("The length of mapping and answer"\
+                             "should be the same")
+
+        self.label = tk.Label(self.root, text=question, **kwargs)
+        self.label.grid(row=1, column=1, columnspan=len(answers),
+                        sticky="news")
+        for i, answer in enumerate(answers):
+            if mapping is None:
+                event = answer
+            else:
+                event = mapping[i]
+            cmd = partial(self._ask_user, event)
+            button = tk.Button(self.root, text=answer, command=cmd)
+            button.grid(row=2, column=i+1, sticky="news")
+            self.buttons.append(button)
+
+        while self.result is None:
+            self.root.update()
+
+        return self.result
+
+    def _ask_user(self, event):
+        self.result = event
+
+
+if __name__ == "__main__":
+    a = Question()
+    print(a.ask_for_ip())
+    a.destroy()
+
+    a = Question()
+    print(a.ask_user("Do you want?", ("y", "n"), (True, False)))
+    a.destroy()
