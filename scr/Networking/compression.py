@@ -29,6 +29,20 @@ def get_check_sum(bits_to_sum, bits=None):
     return Bits.from_int(sum, bits=bits)
 
 def compress_move(move):
+    """
+    Bits:
+     ------------------- ---------------------- ------------- -------------
+    |  1, 2, 3, 4, 5, 6 |  7, 8, 9, 10, 11, 12 |    13, 14   |    15, 16   |
+     ------------------- ---------------------- ------------- -------------
+    |    from_square    |       to_square      | promoting   | checksum    |
+     ------------------- ---------------------- ------------- -------------
+    |  0 = A1           |                      | 0 = default | sum of all  |
+    |  1 = A2           |  same as             | 0 = knight  | other bits  |
+    |  2 = A3           |  from_square         | 0 = bishop  | mod 4       |
+    |   ...             |                      | 0 = rook    | can be: 00, |
+    | 63 = H8           |                      | 0 = queen   | 01, 10, 11  |
+     ------------------- ---------------------- ------------- -------------
+    """
     position1 = Bits.from_int(move.from_square, bits=6)
     position2 = Bits.from_int(move.to_square, bits=6)
     position = position1.concatenate(position2)
@@ -67,6 +81,18 @@ def _compress_fen(fen):
     return fen
 
 def compress_fen(fen):
+    """
+    If there are 2 numbers separated by a "/" add them and remove the "/"
+    The rest of the "/"s are removed.
+    For each character in the modifed FEN string do:
+        Each piece is 5 bits:
+            bits[0] = 1 # to show that it is a piece
+            bits[1] = colour of the piece
+            bits[2:] = piece type (taken from LETTER_TO_NUMBER)
+        Each number is 7 bits:
+            bits[0] = 0 # to show that it is a number not a piece
+            bits[1:] = number
+    """
     fen = _compress_fen(fen).replace("/", "")
     new_fen = Bits()
     i = 0
