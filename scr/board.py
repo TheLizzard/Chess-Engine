@@ -1,12 +1,17 @@
-from piece import Piece
 import tkinter as tk
+import widgets
 import chess
 import time
 import re
 
-from user import User
-from computer import Computer
+from piece import Piece
 from position import Position
+from Players.user import User
+from Players.computer import Computer
+from Players.multiplayer import Multiplayer
+from Players.test import Test
+
+from Networking.connector import get_ip
 
 
 class GUIBoard:
@@ -16,9 +21,10 @@ class GUIBoard:
                       "q": "queen",
                       "n": "knight",
                       "b": "bishop"}
-    def __init__(self, settings, root, kwargs, move_callback=None):
+    def __init__(self, settings, root, kwargs, undo, move_callback=None):
         self.root = root
         self.kwargs = kwargs
+        self.allowed_undo = undo
         self.settings = settings
         self.players = [None, None]
         self.move_callback = move_callback
@@ -75,6 +81,30 @@ class GUIBoard:
 
     def add_ai_as_player(self, colour):
         print("Not available")
+
+    def start_multiplayer(self):
+        ip_text = "Your IP is: "+get_ip()
+        colour = self.ask_user(ip_text+"\nDo you want to be the server?",
+                               ("y", "n"), (True, False))
+        if not colour:
+            window = widgets.Question()
+            ip = window.ask_for_ip()
+            window.destroy()
+        else:
+            ip = None
+        player = Multiplayer(ip=ip, guiboard=self, board=self.board,
+                             master=self.master, colour=colour,
+                             callback=self.done_move)
+        self.add_player(colour, player)
+        #test = Test(ip=ip, master=self.master, board=self.board,
+        #            colour=1-colour, callback=self.done_move)
+        self.add_player(1-colour, player)
+
+    def ask_user(self, question, answers, mapping=None):
+        window = widgets.Question()
+        result = window.ask_user(question, answers, mapping)
+        window.destroy()
+        return result
 
     def push(self, move):
         self.update_last_moved(move)
@@ -175,27 +205,11 @@ class GUIBoard:
         return output
 
     def ask_if_user_white(self):
-        self.colour_chosen = None
-        coords = (3*self.size, 3*self.size, 5*self.size, 4*self.size)
-        r = self.master.create_rectangle(*coords, fill="black")
-        text = "White or black?\nClick on the square bellow"
-        t = self.master.create_text(4*self.size, 3.5*self.size, fill="white",
-                                    font=("", 5), text=text, justify="center")
-        self.master.bind("<Button-1>", self.received_user_colour, True)
         self.players[0].stop();self.players[1].stop()
-        while self.colour_chosen is None:
-            self.root.update()
-            time.sleep(0.01)
+        colour = self.ask_user("Do you want to be black or white?",
+                               ("w", "b"), (1, 0))
         self.players[0].start();self.players[1].start()
-        self.master.delete(r)
-        self.master.delete(t)
-        return self.colour_chosen
-
-    def received_user_colour(self, event):
-        if 3*self.size <= event.x <= 5*self.size:
-            if 4*self.size <= event.y <= 5*self.size:
-                w = (event.x-3*self.size)//45 == 0
-                self.colour_chosen = w
+        return colour
 
     def start_ai_v_hum(self, colour):
         self.add_user_as_player(colour)
@@ -243,20 +257,33 @@ class GUIBoard:
             self.last_move_sqrs[1] = self.colour_sqr(_to)
 
     def undo_move(self):
-        move = self.board.pop()
-        if len(self.board.move_stack) > 0:
-            last_move = self.board.peek()
-            self.update_last_moved(last_move)
+        if self.allowed_undo[1-self.board.turn]:
+            move = self.board.pop()
+            if len(self.board.move_stack) > 0:
+                last_move = self.board.peek()
+                self.update_last_moved(last_move)
+            else:
+                self.remove_last_sqrs()
+            for player in self.players:
+                player.undo_move(move)
+            return move
         else:
-            self.remove_last_sqrs()
-        for player in self.players:
-            player.undo_move(move)
-        return move
+            return "break"
 
     def redo_move(self, move):
-        self.board.push(move)
-        for player in self.players:
-            player.redo_move(move)
+        if self.allowed_undo[1-self.board.turn]:
+            self.board.push(move)
+            for player in self.players:
+                player.redo_move(move)
+        else:
+            return "break"
+
+    def start_player(self):
+        self.players[1-self.board.turn].go()
+
+    @property
+    def double_undo_redo(self):
+        return isinstance(self.players[1-self.board.turn], Computer)
 
     @property
     def move_stack(self):
