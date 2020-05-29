@@ -15,6 +15,7 @@ class App:
         self.analysing = False
         self.analyses = None
         self.done_set_up = False
+        self.allowed_undo = [True, True]
         self.set_up_tk()
         self.update_board()
         self.done_set_up = True
@@ -27,7 +28,7 @@ class App:
         self.root.bind_update(self.update)
         self.root.resizable(False, False)
         self.root.title("Chess.py")
-        self.root.config(bg="black")
+        self.root.config(bg=self.settings.root.background)
         self.set_up_menu()
         self.root.config(menu=self.menubar)
 
@@ -191,17 +192,28 @@ class App:
     def undo_move(self, event=None):
         if len(self.board.move_stack) > 0:
             move = self.board.undo_move()
-            self.undone_move_stack.append(move)
-            self.moved(clear_undo_stack=False)
-            self.board.update()
+            if move != "break":
+                self.undone_move_stack.append(move)
+                self.moved(clear_undo_stack=False)
+                if (event != "go") and self.board.double_undo_redo:
+                    self.undo_move("go")
+                else:
+                    self.board.update()
+                    self.board.start_player()
 
     def redo_move(self, event=None):
         if len(self.undone_move_stack) != 0:
             move = self.undone_move_stack.pop()
-            self.board.redo_move(move)
-            self.moved(clear_undo_stack=False)
-            self.board.update_last_moved(move)
-            self.board.update()
+            if self.board.redo_move(move) == "break":
+                self.undone_move_stack.append(move)
+            else:
+                self.moved(clear_undo_stack=False)
+                self.board.update_last_moved(move)
+                if (event != "go") and self.board.double_undo_redo:
+                    self.redo_move("go")
+                else:
+                    self.board.update()
+                    self.board.start_player()
 
     def start_game(self, event):
         if event == "evaluate":
@@ -210,7 +222,7 @@ class App:
         elif event == "play_vs_computer":
             self.stop_analysing()
             colour = self.ask_if_user_white()
-            self.board.start_comp_v_hum(1-colour)
+            self.board.start_comp_v_hum(colour)
 
         elif event == "play_vs_human":
             self.stop_analysing()
@@ -219,11 +231,11 @@ class App:
         elif event == "play_vs_ai":
             self.stop_analysing()
             colour = self.ask_if_user_white()
-            self.board.start_ai_v_hum(1-colour)
+            self.board.start_ai_v_hum(colour)
 
         elif event == "play_multiplayer":
             self.stop_analysing()
-            print("game.play_multiplayer")
+            self.board.start_multiplayer()
 
     def change_settings(self, event):
         if event == "game_settings":
@@ -261,6 +273,7 @@ class App:
     def set_up_board(self):
         self.board = GUIBoard(settings=self.settings.gameboard,
                               root=self.root, move_callback=self.moved,
+                              undo=self.allowed_undo,
                               kwargs=self.modified_widget_kwargs)
 
     def update_board(self):
