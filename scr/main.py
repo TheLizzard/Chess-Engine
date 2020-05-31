@@ -14,10 +14,11 @@ class App:
         self.settings = Settings()
         self.analysing = False
         self.analyses = None
+        self.allowed_analyses = True
         self.done_set_up = False
         self.allowed_undo = [True, True]
         self.set_up_tk()
-        self.update_board()
+        self.board.update()
         self.done_set_up = True
         self.undone_move_stack = []
         self.root.update()
@@ -148,7 +149,10 @@ class App:
             self.change_settings(event[1])
 
         elif event[0] == "help":
-            self.help(event[1])
+            if event[1] == "licence":
+                widgets.LicenceWindow()
+            elif event[1] == "help":
+                widgets.HelpWindow()
 
         else:
             print("? ", event)
@@ -184,10 +188,12 @@ class App:
 
     def view(self, event):
         if event == "current_fen":
-            self.show_fen()
+            w = widgets.CopyableTextWindow()
+            w.set(self.board.fen())
 
         elif event == "game_pgn":
-            self.show_pgn()
+            w = widgets.CopyableTextWindow()
+            w.set(self.board.pgn())
 
     def undo_move(self, event=None):
         if len(self.board.move_stack) > 0:
@@ -208,7 +214,6 @@ class App:
                 self.undone_move_stack.append(move)
             else:
                 self.moved(clear_undo_stack=False)
-                self.board.update_last_moved(move)
                 if (event != "go") and self.board.double_undo_redo:
                     self.redo_move("go")
                 else:
@@ -217,24 +222,33 @@ class App:
 
     def start_game(self, event):
         if event == "evaluate":
-            self.start_analysing()
+            if self.allowed_analyses:
+                self.start_analysing()
 
         elif event == "play_vs_computer":
+            self.allowed_analyses = False
             self.stop_analysing()
-            colour = self.ask_if_user_white()
+            self.clear_pgn()
+            colour = self.board.ask_if_user_white()
             self.board.start_comp_v_hum(colour)
 
         elif event == "play_vs_human":
+            self.allowed_analyses = True
             self.stop_analysing()
+            self.clear_pgn()
             self.board.start_hum_v_hum()
 
         elif event == "play_vs_ai":
+            self.allowed_analyses = False
             self.stop_analysing()
-            colour = self.ask_if_user_white()
+            self.clear_pgn()
+            colour = self.board.ask_if_user_white()
             self.board.start_ai_v_hum(colour)
 
         elif event == "play_multiplayer":
+            self.allowed_analyses = False
             self.stop_analysing()
+            self.clear_pgn()
             self.board.start_multiplayer()
 
     def change_settings(self, event):
@@ -244,40 +258,11 @@ class App:
         elif event == "suggested_moves_settings":
             print("settings.suggested_moves_settings")
 
-    def help(self, event):
-        if event == "licence":
-            self.show_licence()
-        elif event == "help":
-            self.show_help()
-
-    def ask_if_user_white(self):
-        return self.board.ask_if_user_white()
-
-    def show_fen(self):
-        w = widgets.CopyableEntryWindow()
-        w.set(self.board.fen())
-
-    def show_pgn(self):
-        w = widgets.CopyableTextWindow()
-        w.set(self.pgn())
-
-    def pgn(self):
-        return self.board.pgn()
-
-    def show_licence(self):
-        widgets.LicenceWindow()
-
-    def show_help(self):
-        widgets.HelpWindow()
-
     def set_up_board(self):
         self.board = GUIBoard(settings=self.settings.gameboard,
                               root=self.root, move_callback=self.moved,
                               undo=self.allowed_undo,
                               kwargs=self.modified_widget_kwargs)
-
-    def update_board(self):
-        self.board.update()
 
     def update(self):
         if self.done_set_up and self.analysing and (self.analyses is not None):
@@ -297,10 +282,15 @@ class App:
     def update_pgn(self):
         self.movehistory_text.config(state="normal")
         old_pgn = self.movehistory_text.get("1.0", "end")[:-1]
-        new_pgn = self.pgn()
-        diff = self.find_diff_pgn(old_pgn, new_pgn)
+        new_pgn = self.board.pgn()
+        diff, c = self.find_diff_pgn(old_pgn, new_pgn)
+        if c is not None:
+            self.clear_pgn()
         self.movehistory_text.insert("end", diff)
         self.movehistory_text.config(state="disabled")
+
+    def clear_pgn(self):
+        self.movehistory_text.delete("0.0", "end")
 
     def moved(self, clear_undo_stack=True):
         if clear_undo_stack:
@@ -316,15 +306,18 @@ class App:
     def find_diff_pgn(self, pgn1, pgn2):
         if pgn1 == "\n":
             pgn1 = ""
-        return pgn2[len(pgn1)-len(pgn2):][:-1]
+        if pgn1 not in pgn2:
+            return pgn2, "clear"
+        return pgn2[len(pgn1)-len(pgn2):][:-1], None
 
     def start_analysing(self):
-        self.analysing = True
-        self.analyses = Analyse(self.board.board)
-        thread = threading.Thread(target=self.analyses.start)
-        thread.deamon = True
-        thread.start()
-        self.eval_frame.grid()
+        if self.allowed_analyses:
+            self.analysing = True
+            self.analyses = Analyse(self.board.board)
+            thread = threading.Thread(target=self.analyses.start)
+            thread.deamon = True
+            thread.start()
+            self.eval_frame.grid()
 
     def stop_analysing(self):
         self.analysing = False
