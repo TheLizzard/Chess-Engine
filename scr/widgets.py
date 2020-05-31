@@ -1,6 +1,9 @@
 #https://stackoverflow.com/questions/40617515/python-tkinter-text-modified-callback
 from functools import partial
+from tkinter import ttk
 import tkinter as tk
+import threading
+import time
 import re
 
 
@@ -212,14 +215,26 @@ class CustomText(tk.Text):
 
 class Question:
     def __init__(self):
+        self.result = None
         self.root = Tk()
         self.root.resizable(False, False)
 
     def destroy(self):
         self.root.destroy()
 
+    def get(self):
+        return self.result
+
+    def wait(self):
+        while self.result is None:
+            time.sleep(0.01)
+            self.root.update()
+
+    def add_custom(self, cls, *args, **kwargs):
+        widget = cls(self.root, *args, **kwargs)
+        widget.grid(column=1, columnspan=10, sticky="news")
+
     def ask_for_ip(self):
-        self.result = None
         font = ("Lucida Console", 18)
         kwargs = {"borderwidth": 0, "highlightthickness": 0}
 
@@ -235,11 +250,6 @@ class Question:
         self.button = tk.Button(self.root, text="Done",
                                 command=self._ask_for_ip, **kwargs)
         self.button.grid(row=2, column=2, sticky="news")
-
-        while self.result is None:
-            self.root.update()
-
-        return self.result
 
     def _ask_for_ip(self):
         if self.check_ip():
@@ -264,8 +274,7 @@ class Question:
             self.entry.config(bg="light green")
             return True
 
-    def ask_user(self, question, answers, mapping=None):
-        self.result = None
+    def ask_user_multichoice(self, question, answers, mapping=None):
         self.buttons = []
         kwargs = {"borderwidth": 0, "highlightthickness": 0}
 
@@ -281,21 +290,213 @@ class Question:
                 event = answer
             else:
                 event = mapping[i]
-            cmd = partial(self._ask_user, event)
+            cmd = partial(self._ask_user_multichoice, event)
             button = tk.Button(self.root, text=answer, command=cmd)
             button.grid(row=2, column=i+1, sticky="news")
             self.buttons.append(button)
 
-        while self.result is None:
+    def _ask_user_multichoice(self, event):
+        self.result = event
+
+    def ask_user_entry(self, question):
+        commmand = self._ask_user_entry
+        self.root.bind("<Return>", commmand)
+        self.label = tk.Label(self.root, text=question)
+        self.entry = tk.Entry(self.root)
+        self.button = tk.Button(self.root, text="Done", command=commmand)
+
+        self.label.grid(row=1, column=1, columnspan=2, sticky="news")
+        self.entry.grid(row=2, column=1, sticky="news")
+        self.button.grid(row=2, column=2, sticky="news")
+
+    def _ask_user_entry(self, event=None):
+        self.result = self.entry.get()
+
+
+class ScrolledListboxes(tk.Frame):
+    def __init__(self, *args, width=None, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        kwargs = {"borderwidth": 0, "highlightthickness": 0}
+        self.sbar = tk.Scrollbar(self, command=self.scrollbar_change, **kwargs)
+        kwargs.update({"selectbackground": "white", "activestyle": "none",
+                       "width": width})
+        self.lb1 = tk.Listbox(self, yscrollcommand=self.sbar.set, **kwargs)
+        self.sep = ttk.Separator(self, orient="vertical")
+        self.lb2 = tk.Listbox(self, yscrollcommand=self.sbar.set, **kwargs)
+
+        self.lb1.grid(row=1, column=1, sticky="news")
+        self.sep.grid(row=1, column=2, sticky="news")
+        self.lb2.grid(row=1, column=3, sticky="news")
+        self.sbar.grid(row=1, column=4, sticky="news")
+
+        self.lb1.bind("<Button-4>", self.mouse_wheel)
+        self.lb1.bind("<Button-5>", self.mouse_wheel)
+        self.lb2.bind("<Button-5>", self.mouse_wheel)
+        self.lb2.bind("<Button-4>", self.mouse_wheel)
+
+    def scrollbar_change(self, *args):
+        self.lb1.yview(*args)
+        self.lb2.yview(*args)
+
+    def mouse_wheel(self, event):
+        direction = 2*event.num-9
+        delta = direction
+        self.lb1.yview("scroll", delta, "units")
+        self.lb2.yview("scroll", delta, "units")
+        return "break"
+
+    def insert(self, position, data1, data2):
+        self.lb1.insert(position, data1)
+        self.lb2.insert(position, data2)
+
+    def delete(self, position1, position2):
+        self.lb1.delete(position1, position2)
+        self.lb2.delete(position1, position2)
+
+    def clear(self):
+        self.delete("0", "end")
+
+    def yview(self, yview=None):
+        if yview is None:
+            return self.lb1.yview()
+        self.lb1.yview(yview)
+        self.lb2.yview(yview)
+
+
+class Logger:
+    def __init__(self):
+        self.old_data = []
+        self.new_data = []
+        self.running = True
+        self.paused = False
+        self.blacklisted = []
+        self.user_wants_to_see = None
+        thread = threading.Thread(target=self.start_up)
+        thread.deamon = True
+        thread.start()
+
+    def start_up(self):
+        self.root = tk.Tk()
+        self.root.title("Logger")
+        self.root.resizable(False, False)
+        self.root.bind("<Control-r>", self.add_blacklist)
+        self.b_frame = tk.Frame(self.root)
+        self.entry = CustomText(self.root, height=1, width=34)
+        self.button = tk.Button(self.b_frame, text="Clear", command=self.clear)
+        self.pbutton = tk.Button(self.b_frame, text="◼", command=self.pause)
+        self.listbox = ScrolledListboxes(self.root, width=23)
+
+        self.entry.grid(row=1, column=1, sticky="news")
+        self.button.grid(row=1, column=1)
+        self.pbutton.grid(row=1, column=2)
+
+        self.b_frame.grid(row=1, column=2, sticky="news")
+        self.listbox.grid(row=2, column=1, columnspan=2, sticky="news")
+
+        self.entry.bind("<Escape>", self.delete_input)
+        self.entry.bind_modified(self.modified)
+
+        self.mainloop()
+
+    def add_blacklist(self, event):
+        paused = self.paused
+        self.paused = True
+        self.pbutton["text"] = "▶"
+
+        self.blacklist(self.get_blacklist())
+        self.reset()
+
+        self.paused = not paused
+        self.pause()
+
+    def blacklist(self, item):
+        if item != "":
+            self.blacklisted.append(item)
+
+    def get_blacklist(self):
+        window = Question()
+        window.ask_user_entry("What do you want to blacklist?")
+
+        kwargs = {"text": "Clear all blacklisted",
+                  "command": self.clear_blacklisted}
+        window.add_custom(tk.Button, **kwargs)
+
+        window.wait()
+        window.destroy()
+        return window.result
+
+    def clear_blacklisted(self):
+        self.blacklisted = []
+
+    def pause(self):
+        self.paused = not self.paused
+        if self.paused:
+            self.pbutton["text"] = "▶"
+        else:
+            self.pbutton["text"] = "◼"
+
+    def clear(self):
+        self.old_data = []
+        self.new_data = []
+        self.reset()
+
+    def modified(self, cmd):
+        if (cmd[1] == "insert") and (cmd[3] == "\n"):
+            return "break"
+
+    def delete_input(self, event):
+        self.entry.delete("0.0", "end")
+
+    def mainloop(self):
+        while self.running:
+            user_wants_to_see = self.entry.get("0.0", "end")
+            user_wants_to_see = user_wants_to_see.replace("\n", "")
+            self.update_list(user_wants_to_see)
+            time.sleep(0.01)
             self.root.update()
 
-        return self.result
+    def update_list(self, show_sequence):
+        if self.user_wants_to_see == show_sequence:
+            self.add_new()
+        else:
+            self.user_wants_to_see = show_sequence
+            self.reset()
 
-    def _ask_user(self, event):
-        self.result = event
+    def reset(self):
+        self.listbox.clear()
+        self.old_data += self.new_data
+        self.new_data = []
+        self.add(self.old_data)
+
+    def add(self, _list):
+        show_sequence = self.user_wants_to_see
+        for sequence, data in _list:
+            show = show_sequence in sequence
+            for blacklist in self.blacklisted:
+                if blacklist in sequence:
+                    show = False
+            if show:
+                self.listbox.insert("end", sequence, data)
+
+    def add_new(self):
+        self.add(self.new_data)
+        self.old_data += self.new_data
+        self.new_data = []
+
+    def log(self, sequence, *args, sep=" | "):
+        args = tuple(map(str, args))
+        if not self.paused:
+            self.new_data.append((str(sequence), sep.join(args)))
+        else:
+            return "break"
+
+    def kill(self):
+        self.running = False
 
 
 if __name__ == "__main__":
+    """
     a = Question()
     print(a.ask_for_ip())
     a.destroy()
@@ -303,3 +504,7 @@ if __name__ == "__main__":
     a = Question()
     print(a.ask_user("Do you want?", ("y", "n"), (True, False)))
     a.destroy()
+    """
+    l = Logger()
+    for i in range(20):
+        l.log("connection.recv.heartbeat")
