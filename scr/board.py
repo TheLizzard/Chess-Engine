@@ -36,9 +36,8 @@ class GUIBoard:
         self.add_user_as_player("white")
         self.players[0].go()
 
-    def done_move(self, move=None):
-        if move is not None:
-            self.board.push(move)
+    def done_move(self, move):
+        self.push(move)
         self.update()
         self.players[1-self.board.turn].go()
 
@@ -88,7 +87,9 @@ class GUIBoard:
                                ("y", "n"), (True, False))
         if not colour:
             window = widgets.Question()
-            ip = window.ask_for_ip()
+            window.ask_for_ip()
+            window.wait()
+            ip = window.result
             window.destroy()
         else:
             ip = None
@@ -96,18 +97,19 @@ class GUIBoard:
                              master=self.master, colour=colour,
                              callback=self.done_move)
         self.add_player(colour, player)
-        #test = Test(ip=ip, master=self.master, board=self.board,
-        #            colour=1-colour, callback=self.done_move)
+        #player = Test(ip="127.0.0.1", master=self.master, board=self.board,
+        #              colour=1-colour, callback=self.done_move)
         self.add_player(1-colour, player)
 
     def ask_user(self, question, answers, mapping=None):
         window = widgets.Question()
-        result = window.ask_user(question, answers, mapping)
+        window.ask_user_multichoice(question, answers, mapping)
+        window.wait()
+        result = window.result
         window.destroy()
         return result
 
     def push(self, move):
-        self.update_last_moved(move)
         self.board.push(move)
         if self.move_callback is not None:
             self.move_callback()
@@ -126,6 +128,7 @@ class GUIBoard:
 
     def update(self, **kwargs):
         self.delete_sprites()
+        self.update_last_moved()
         for x in range(1, 9):
             for y in range(1, 9):
                 position = Position(x, y)
@@ -248,9 +251,10 @@ class GUIBoard:
     def move_to_san(self, move, board):
         return board.san(move)
 
-    def update_last_moved(self, move):
+    def update_last_moved(self):
         self.remove_last_sqrs()
-        if move is not None:
+        if len(self.board.move_stack) > 0:
+            move = self.board.peek()
             _from = Position.from_int(move.from_square)
             _to = Position.from_int(move.to_square)
             self.last_move_sqrs[0] = self.colour_sqr(_from)
@@ -259,11 +263,6 @@ class GUIBoard:
     def undo_move(self):
         if self.allowed_undo[1-self.board.turn]:
             move = self.board.pop()
-            if len(self.board.move_stack) > 0:
-                last_move = self.board.peek()
-                self.update_last_moved(last_move)
-            else:
-                self.remove_last_sqrs()
             for player in self.players:
                 player.undo_move(move)
             return move
