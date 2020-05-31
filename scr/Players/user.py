@@ -176,9 +176,8 @@ class User(Player):
         self.update()
 
     def push(self, move):
-        self.guiboard.push(move)
         if self.callback is not None:
-            self.callback()
+            self.callback(move)
 
     def select(self, position):
         piece_selected = self.guiboard.position_to_piece(position)
