@@ -49,6 +49,7 @@ class Reciever:
 
 class Connector:
     def __init__(self, ip=None, port=None, server=False):
+        self.connected = False
         self.ip = ip
         self.port = port
         self.our_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -68,6 +69,7 @@ class Connector:
             self.their_sock = self.our_sock
             self.recver = Reciever(self.their_sock, self.recieve)
             self.recver.go()
+            self.connected = True
 
     def bind(self, function):
         self.receive_callback = function
@@ -77,14 +79,20 @@ class Connector:
             self.receive_callback(event)
 
     def send_data(self, data):
-        self.their_sock.send(data)
+        if self.connected:
+            self.their_sock.send(data)
+        else:
+            return "not connected"
 
     def wait_for_connection(self):
         self.their_sock, self.their_address = self.our_sock.accept()
         self.recver = Reciever(self.their_sock, self.recieve)
         self.recver.go()
+        self.connected = True
 
     def kill(self):
+        if not self.connected:
+            return "not connected"
         self.recver.stop()
         self.recver.kill()
         try:
@@ -100,4 +108,3 @@ def get_ip():
     ip = sock.getsockname()[0]
     sock.close()
     return ip
-
