@@ -16,28 +16,31 @@ import widgets
 
 
 class Test(Player):
-    def __init__(self, ip, master, board, colour, debug=False, callback=None):
-        self.debug = debug
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         if self.debug:
             self.logger = widgets.Logger()
-            self.logger.blacklist("heartbeat")
+            #self.logger.blacklist("heartbeat")
         self.event_queue = []
         self.event_lock = Lock()
-        self.master = master
-        self.board = board
-        self.colour = colour
-        self.callback = callback
-        self.build_connection(ip, colour)
+
+        if self.colour:
+            ip = None
+        else:
+            window = widgets.Question()
+            window.ask_for_ip()
+            window.wait()
+            ip = window.result
+            window.destroy()
+
+        self.build_connection(ip, self.colour)
         self.last_self_heartbeat = int(time.time())
         self.last_other_heartbeat = int(time.time())
-        self.update()
+        self._update()
 
     def push(self, move):
-        if self.debug:
-            self.logger.log("push.move", move)
         self.send_move(move)
-        if self.callback is not None:
-            self.callback()
+        self.callback(move)
 
     def build_connection(self, ip, colour):
         if self.debug:
@@ -56,7 +59,7 @@ class Test(Player):
         self.event_queue.append(event)
         self.event_lock.release()
 
-    def update(self):
+    def _update(self):
         self.event_lock.acquire()
         event_queue = copy.deepcopy(self.event_queue)
         self.event_queue = []
@@ -73,7 +76,7 @@ class Test(Player):
             else:
                 if self.debug:
                     self.logger.log("connection.recv.largepacket", event.data)
-        self.master.after(100, self.update)
+        self.tk_object.after(100, self._update)
 
     def check_alive(self):
         if time.time()-self.last_self_heartbeat > 3:
@@ -110,8 +113,7 @@ class Test(Player):
         move = chess.Move.from_uci(input("uci move: "))
         self.send_move(move)
 
-        if self.callback is not None:
-            self.callback()
+        #self.callback()
 
     def go(self):
         pass
