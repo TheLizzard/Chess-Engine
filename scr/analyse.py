@@ -15,7 +15,11 @@ class Analyse:
         self.score = None
         self.moves = None
 
-    def start(self):
+    def start(self) -> None:
+        """
+        This is a very simple engine to get the best move and the current
+        score by using Stockfish. This implementation uses a endless loop.
+        """
         engine = chess.engine.SimpleEngine.popen_uci(STOCKFISH_LACATION)
 
         with engine.analysis(self.board) as analysis:
@@ -27,8 +31,8 @@ class Analyse:
                     break
         engine.quit()
 
-    def stop(self):
+    def stop(self) -> None:
         self.running = False
 
-    def kill(self):
+    def kill(self) -> None:
         self.running = False
