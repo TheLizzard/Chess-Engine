@@ -8,10 +8,12 @@ import tkinter as tk
 import threading
 import time
 
+SETTINGS = Settings()
+
 
 class App:
     def __init__(self):
-        self.settings = Settings()
+        self.file_open = None
         self.analysing = False
         self.analyses = None
         self.allowed_analyses = True
@@ -29,11 +31,11 @@ class App:
         self.root.bind_update(self.update)
         self.root.resizable(False, False)
         self.root.title("Chess.py")
-        self.root.config(bg=self.settings.root.background)
+        self.root.config(bg=SETTINGS.root.background)
         self.set_up_menu()
         self.root.config(menu=self.menubar)
 
-        self.widget_kwargs = self.settings.widgets
+        self.widget_kwargs = SETTINGS.widgets
         self.modified_widget_kwargs = self.widget_kwargs.dict()
         self.justify = self.modified_widget_kwargs.pop("justify", None)
         self.set_up_board()
@@ -47,12 +49,12 @@ class App:
         self.root.bind("<Control-Shift-Z>", self.redo_move)
 
     def set_up_menu(self):
-        tearoff = self.settings.menu.tearoff
+        tearoff = SETTINGS.menu.tearoff
         self.menubar = tk.Menu(self.root, tearoff=tearoff)
 
-        self.settings.menu.pop("tearoff")
+        SETTINGS.menu.pop("tearoff")
 
-        for name, _list in self.settings.menu.items():
+        for name, _list in SETTINGS.menu.items():
             name = name[0].upper()+name[1:]
             self.submenu = tk.Menu(self.menubar, tearoff=tearoff)
             self.menubar.add_cascade(label=name, menu=self.submenu)
@@ -66,7 +68,7 @@ class App:
                 self.submenu.add_command(label=button, command=command)
 
     def set_up_eval(self):
-        settings = self.settings.evaluation
+        settings = SETTINGS.evaluation
         width = settings.width
         height = settings.height
         fg = settings.colour
@@ -86,7 +88,7 @@ class App:
         self.eval_text.config(text="2.2")
 
     def set_up_suggestedmoves(self):
-        settings = self.settings.suggestedmoves
+        settings = SETTINGS.suggestedmoves
         fg = settings.colour
         bg = settings.background
         font = settings.font
@@ -98,7 +100,7 @@ class App:
         self.suggestedmoves_text.config(text="No moves to suggest")
 
     def set_up_movehistory(self):
-        settings = self.settings.movehistory
+        settings = SETTINGS.movehistory
         width = settings.width
         height = settings.height
         fg = settings.colour
@@ -259,8 +261,7 @@ class App:
             print("settings.suggested_moves_settings")
 
     def set_up_board(self):
-        self.board = GUIBoard(settings=self.settings.gameboard,
-                              root=self.root, move_callback=self.moved,
+        self.board = GUIBoard(root=self.root, move_callback=self.moved,
                               undo=self.allowed_undo,
                               kwargs=self.modified_widget_kwargs)
 
