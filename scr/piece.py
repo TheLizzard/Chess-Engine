@@ -1,20 +1,21 @@
 from PIL import Image, ImageTk
 import tkinter as tk
 
+from settings import Settings
 
+SETTINGS = Settings().gameboard
 SPRITES_LOCATION = "Sprites/"
 
 
 class Piece:
-    def __init__(self, name, position, colour, settings, master):
+    def __init__(self, name, position, colour, master):
         self.name = name
         self.colour = colour
         self.master = master
         self.tkcanvasnum = None
         self.position = position
-        self.settings = settings
-        self.sqr_size = settings.size_of_squares
-        self.set = settings.chess_pieces_set_number
+        self.sqr_size = SETTINGS.size_of_squares
+        self.set = SETTINGS.chess_pieces_set_number
         self.filename = self.get_filename(name=name, colour=colour,
                                           set=self.set)
         self.image = self.get_image(filename=self.filename)
