@@ -74,6 +74,9 @@ class Connector:
     def bind(self, function):
         self.receive_callback = function
 
+    def unbind(self):
+        self.receive_callback = None
+
     def recieve(self, event):
         if self.receive_callback is not None:
             self.receive_callback(event)
