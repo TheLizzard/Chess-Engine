@@ -4,14 +4,18 @@ import chess
 import time
 import re
 
-from piece import Piece
-from position import Position
 from Players.user import User
 from Players.computer import Computer
 from Players.multiplayer import Multiplayer
 from Players.test import Test
 
+from piece import Piece
+from position import Position
 from Networking.connector import get_ip
+from settings import Settings
+
+SETTINGS = Settings()
+BOARD_SETTINGS = SETTINGS.gameboard
 
 
 class GUIBoard:
@@ -21,14 +25,13 @@ class GUIBoard:
                       "q": "queen",
                       "n": "knight",
                       "b": "bishop"}
-    def __init__(self, settings, root, kwargs, undo, move_callback=None):
+    def __init__(self, root, kwargs, undo, move_callback=None):
         self.root = root
         self.kwargs = kwargs
         self.allowed_undo = undo
-        self.settings = settings
         self.players = [None, None]
         self.move_callback = move_callback
-        self.size = self.settings.size_of_squares
+        self.size = BOARD_SETTINGS.size_of_squares
         self.set_up_board()
 
     def sleep(self):
@@ -47,27 +50,27 @@ class GUIBoard:
             self.update()
 
     def set_up_board(self):
-        self.last_move_colours = (self.settings.last_move_colour_white,
-                                  self.settings.last_move_colour_black)
+        self.last_move_colours = (BOARD_SETTINGS.last_move_colour_white,
+                                  BOARD_SETTINGS.last_move_colour_black)
         self.board = chess.Board()
         self.master = tk.Canvas(self.root, width=self.size*8,
                                 height=self.size*8, **self.kwargs)
         self.master.grid(row=1, column=1, rowspan=3)
-        self.white_sqrs = self.settings.light_squares
-        self.black_sqrs = self.settings.dark_squares
+        self.white_sqrs = BOARD_SETTINGS.light_squares
+        self.black_sqrs = BOARD_SETTINGS.dark_squares
         self.create_board()
         self.sleep()
 
     def add_user_as_player(self, colour):
         colour = self.colour_to_bool(colour)
-        player = User(guiboard=self, board=self.board, master=self.master,
-                      colour=colour, callback=self.done_move)
+        player = User(self.board, self.master, colour, self.pieces,
+                      self.update, self.done_move)
         self.add_player(colour, player)
 
     def add_computer_as_player(self, colour):
         colour = self.colour_to_bool(colour)
-        player = Computer(board=self.board, colour=colour,
-                          callback=self.done_move)
+        player = Computer(self.board, self.master, colour, self.pieces,
+                          self.update, self.done_move)
         self.add_player(colour, player)
 
     def add_player(self, colour, player):
@@ -85,20 +88,11 @@ class GUIBoard:
         ip_text = "Your IP is: "+get_ip()
         colour = self.ask_user(ip_text+"\nDo you want to be the server?",
                                ("y", "n"), (True, False))
-        if not colour:
-            window = widgets.Question()
-            window.ask_for_ip()
-            window.wait()
-            ip = window.result
-            window.destroy()
-        else:
-            ip = None
-        player = Multiplayer(ip=ip, guiboard=self, board=self.board,
-                             master=self.master, colour=colour,
-                             callback=self.done_move)
+        player = Multiplayer(self.board, self.master, colour, self.pieces,
+                             self.update, self.done_move, False)
         self.add_player(colour, player)
-        #player = Test(ip="127.0.0.1", master=self.master, board=self.board,
-        #              colour=1-colour, callback=self.done_move)
+        #player = Test(self.board, self.master, not colour, self.pieces,
+        #              self.update, self.done_move, True)
         self.add_player(1-colour, player)
 
     def ask_user(self, question, answers, mapping=None):
@@ -126,23 +120,23 @@ class GUIBoard:
         self.pieces = []
         self.update()
 
-    def update(self, **kwargs):
-        self.delete_sprites()
-        self.update_last_moved()
-        for x in range(1, 9):
-            for y in range(1, 9):
-                position = Position(x, y)
-                piece = self.position_to_piece(position, create=True)
-                if piece is not None:
-                    self.pieces.append(piece)
-                    piece.show()
+    def update(self, redraw=True):
+        if redraw:
+            self.delete_sprites()
+            self.update_last_moved()
+            for x in range(1, 9):
+                for y in range(1, 9):
+                    position = Position(x, y)
+                    piece = self.position_to_piece(position, create=True)
+                    if piece is not None:
+                        self.pieces.append(piece)
+                        piece.show()
         self.root.update()
 
     def create_piece(self, **kwargs):
-        kwargs.update({"settings": self.settings})
         kwargs.update({"master": self.master})
         new_piece = Piece(**kwargs)
-        new_piece.resize_scale(scale=self.settings.scale_for_pieces)
+        new_piece.resize_scale(scale=BOARD_SETTINGS.scale_for_pieces)
         return new_piece
 
     def create_board(self):
@@ -163,9 +157,9 @@ class GUIBoard:
     def delete_sprites(self):
         for sprite in self.pieces:
             sprite.destroy()
-        self.pieces = []
+        self.pieces.clear() # can't use `self.pieces = []`
 
-    def position_to_piece(self, position, board=None, create=False):
+    def position_to_piece(self, position, create=False):
         if create:
             piece = self.board.piece_at(position.to_int())
             if piece is None:
@@ -182,13 +176,8 @@ class GUIBoard:
 
     def colour_to_bool(self, colour):
         if isinstance(colour, str):
-            if colour == "white":
-                return True
-            elif colour == "black":
-                return False
-        elif isinstance(colour, bool):
-            return colour
-        elif isinstance(colour, int) and ((0 == colour) or (1 == colour)):
+            return colour == "white"
+        else:
             return colour
 
     def fen(self):
