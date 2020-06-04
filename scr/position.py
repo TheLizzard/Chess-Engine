@@ -12,29 +12,29 @@ class Move:
         self.position1 = position1
         self.position2 = position2
 
-    def to_str(self):
+    def to_str(self) -> str:
         place1 = self.position1.to_place()
         place2 = self.position2.to_place()
         return place1 + place2
 
-    def __hash__(self):
+    def __hash__(self) -> int:
         string = str(self.position1.to_int())+str(self.position2.to_int())
         return int(string)
 
 
 class Position:
-    def __init__(self, x, y):
+    def __init__(self, x: int, y: int):
         self.x = x
         self.y = y
 
-    def __add__(self, other): #returns a Move object
+    def __add__(self, other) -> Move:
         if isinstance(other, self.__class__):
             return Move(self, other)
         else:
             raise ValueError(repr(other)+"has to be an instance"\
                              " of: "+self.__class__.__name__)
 
-    def __mul__(self, other): #returns a Move object
+    def __mul__(self, other) -> Move:
         if isinstance(other, int):
             return Move(self, self)
         else:
@@ -55,7 +55,7 @@ class Position:
         out += " x="+str(self.x)+" y="+str(self.y)+">"
         return out
 
-    def __getitem__(self, key):
+    def __getitem__(self, key: int) -> int:
         if isinstance(key, int):
             if key == 0:
                 return self.x
@@ -65,43 +65,46 @@ class Position:
                 raise IndexError("Key must be eather 0 or 1"\
                                  "for x or y not "+str(key))
 
-    def to_coords(self):
+    def __int__(self) -> int:
+        return self.to_int()
+
+    def to_coords(self) -> tuple:
         x = (self.x-0.5)*SIZE
         y = (8.5-self.y)*SIZE
         return (self.round(x), self.round(y))
 
-    def to_coords_start(self):
+    def to_coords_start(self) -> tuple:
         x = (self.x-1)*SIZE
         y = (8-self.y)*SIZE
         return (self.round(x), self.round(y))
 
-    def to_coords_end(self):
+    def to_coords_end(self) -> tuple:
         x = (self.x)*SIZE
         y = (9-self.y)*SIZE
         return (self.round(x), self.round(y))
 
-    def to_place(self):
+    def to_place(self) -> str:
         return chess.FILE_NAMES[self.x-1]+str(self.y)
 
-    def to_int(self):
+    def to_int(self) -> int:
         return 8*self.y+self.x-9
 
-    def to_colour(self):
-        return int(self.to_place(), 35)%2 # Converts to base 35 first.
+    def to_colour(self) -> bool:
+        return bool(int(self.to_place(), 35)%2) # Converts to base 35 first.
 
     @staticmethod
-    def round(x):
+    def round(x: int) -> int:
         return int(x+0.5)
 
     @classmethod
-    def from_coords(cls, coords):
+    def from_coords(cls, coords: tuple):
         x, y = coords
         new_x = x//SIZE+1
         new_y = (SIZE*8-y)//SIZE+1
         return cls(Position.round(new_x), Position.round(new_y))
 
     @classmethod
-    def from_int(cls, _int):
+    def from_int(cls, _int: int):
         x = _int%8+1
         y = _int//8+1
         return cls(x, y)
