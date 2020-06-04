@@ -31,33 +31,33 @@ class Player:
 
         self.alowed_to_play = False
 
-    def start(self):
+    def start(self) -> None:
         self.alowed_to_play = True
 
-    def stop(self):
+    def stop(self) -> None:
         self.alowed_to_play = False
 
-    def destroy(self):
+    def destroy(self) -> None:
         """
             After this method is called the player must stop immediately.
         """
         self.stop()
 
-    def undo_move(self, move):
+    def undo_move(self, move: chess.Move) -> str:
         """
             Called when the user wants to undo a move.
             If "break" is returned the undo will be blocked
         """
         pass
 
-    def redo_move(self, move):
+    def redo_move(self, move: chess.Move) -> str:
         """
             Called when the user wants to redo a move.
             If "break" is returned the redo will be blocked
         """
         pass
 
-    def go(self):
+    def go(self) -> None:
         """
             Called every time the GUIBoard needs the player to move
             Always call with the move `self.callback(move)`
@@ -65,7 +65,7 @@ class Player:
         """
         pass
 
-    def colour_to_bool(self, colour):
+    def colour_to_bool(self, colour) -> bool:
         if isinstance(colour, str):
             return colour == "white"
         else:
