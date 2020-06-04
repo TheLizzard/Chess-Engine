@@ -79,10 +79,10 @@ class Connector:
             self.receive_callback(event)
 
     def send_data(self, data):
-        if self.connected:
-            self.their_sock.send(data)
-        else:
-            return "not connected"
+        if not self.connected:
+            return None
+            raise ValueError("Socket not connected.")
+        self.their_sock.send(data)
 
     def wait_for_connection(self):
         self.their_sock, self.their_address = self.our_sock.accept()
@@ -91,15 +91,14 @@ class Connector:
         self.connected = True
 
     def kill(self):
-        if not self.connected:
-            return "not connected"
-        self.recver.stop()
-        self.recver.kill()
-        try:
-            self.our_sock.close()
-            self.their_sock.close()
-        except:
-            pass
+        if self.connected:
+            self.recver.stop()
+            self.recver.kill()
+            try:
+                self.our_sock.close()
+                self.their_sock.close()
+            except:
+                pass
 
 
 def get_ip():
