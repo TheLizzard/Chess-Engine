@@ -3,6 +3,9 @@ Defines the Player class that can be inherited from.
 """
 
 
+import chess
+
+
 class Player:
     def __init__(self, board, master, colour, pieces, update, callback,
                  debug=False):
