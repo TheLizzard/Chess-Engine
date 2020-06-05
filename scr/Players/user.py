@@ -8,6 +8,7 @@ the tkinter events can't be stoped.
 """
 
 
+import tkinter as tk
 import chess
 import time
 
@@ -132,7 +133,7 @@ class User(Player):
                     else:
                         self.user_helper_making = self.create_arrow(start, end)
 
-    def create_user_helping_object(self, start: Postion, end: Postion) -> None:
+    def create_user_helping_object(self, start: Position, end: Position) -> None:
         """
         This creates a object that can help the user like:
             rings (can be created by clicking the right mouse button)
@@ -338,7 +339,7 @@ class User(Player):
         self.remove_available_moves()
         self.stop_user_created_object()
 
-    def redo_move(self, move chess.Move) -> str:
+    def redo_move(self, move: chess.Move) -> str:
         self.remove_available_moves()
         self.stop_user_created_object()
 
