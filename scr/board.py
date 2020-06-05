@@ -1,5 +1,4 @@
 import tkinter as tk
-import widgets
 import chess
 import time
 import re
@@ -13,6 +12,7 @@ from piece import Piece
 from position import Position
 from Networking.connector import get_ip
 from settings import Settings
+import widgets
 
 SETTINGS = Settings()
 BOARD_SETTINGS = SETTINGS.gameboard
@@ -25,223 +25,278 @@ class GUIBoard:
                       "q": "queen",
                       "n": "knight",
                       "b": "bishop"}
-    def __init__(self, root, kwargs, undo, move_callback=None):
+    def __init__(self, root: tk.Tk, kwargs: dict, move_callback=None):
         self.root = root
         self.kwargs = kwargs
-        self.allowed_undo = undo
+        self.undo_stack = []
         self.players = [None, None]
         self.move_callback = move_callback
         self.size = BOARD_SETTINGS.size_of_squares
         self.set_up_board()
 
-    def sleep(self):
-        self.add_user_as_player("black")
-        self.add_user_as_player("white")
-        self.players[0].go()
-
-    def done_move(self, move):
+    def done_move(self, move: chess.Move) -> None:
         self.push(move)
         self.update()
         self.players[1-self.board.turn].go()
 
-    def play(self):
+    def play(self) -> None:
         if not self.board.is_game_over():
             self.player[1-self.board.turn].go()
             self.update()
 
-    def set_up_board(self):
+    def set_up_board(self) -> None:
+        """
+        This sets up the board by displaying all of the squares. It
+        also starts 2 user players.
+        """
+        # Load the colours to show the user the last move that was played
+        # and the colours for the black and white squares on the board
         self.last_move_colours = (BOARD_SETTINGS.last_move_colour_white,
                                   BOARD_SETTINGS.last_move_colour_black)
+        self.white_sqrs = BOARD_SETTINGS.light_squares
+        self.black_sqrs = BOARD_SETTINGS.dark_squares
+        # Get a new chess Board and create a tkinter canvas
         self.board = chess.Board()
         self.master = tk.Canvas(self.root, width=self.size*8,
                                 height=self.size*8, **self.kwargs)
         self.master.grid(row=1, column=1, rowspan=3)
-        self.white_sqrs = BOARD_SETTINGS.light_squares
-        self.black_sqrs = BOARD_SETTINGS.dark_squares
+        # This accualy sets up the squares
         self.create_board()
-        self.sleep()
 
-    def add_user_as_player(self, colour):
-        colour = self.colour_to_bool(colour)
-        player = User(self.board, self.master, colour, self.pieces,
-                      self.update, self.done_move)
-        self.add_player(colour, player)
+        # Start 2 user players playing as white and black
+        self.add_user_as_player(True)
+        self.add_user_as_player(False)
+        self.players[0].go()
 
-    def add_computer_as_player(self, colour):
-        colour = self.colour_to_bool(colour)
-        player = Computer(self.board, self.master, colour, self.pieces,
-                          self.update, self.done_move)
-        self.add_player(colour, player)
-
-    def add_player(self, colour, player):
-        if self.players[1-colour] is not None:
-            self.players[1-colour].destroy()
-            p = self.players[1-colour]
-            del p
-        player.start()
-        self.players[1-colour] = player
-
-    def add_ai_as_player(self, colour):
-        print("Not available")
-
-    def start_multiplayer(self):
-        ip_text = "Your IP is: "+get_ip()
-        colour = self.ask_user(ip_text+"\nDo you want to be the server?",
-                               ("y", "n"), (True, False))
-        player = Multiplayer(self.board, self.master, colour, self.pieces,
-                             self.update, self.done_move, False)
-        self.add_player(colour, player)
-        #player = Test(self.board, self.master, not colour, self.pieces,
-        #              self.update, self.done_move, True)
-        self.add_player(1-colour, player)
-
-    def ask_user(self, question, answers, mapping=None):
-        window = widgets.Question()
-        window.ask_user_multichoice(question, answers, mapping)
-        window.wait()
-        result = window.result
-        window.destroy()
-        return result
-
-    def push(self, move):
-        self.board.push(move)
-        if self.move_callback is not None:
-            self.move_callback()
-
-    def colour_sqr(self, position):
-        colour = position.to_colour()
-        colour = self.last_move_colours[colour]
-        coords = position.to_coords_start()+position.to_coords_end()
-        rectangle = self.master.create_rectangle(coords, fill=colour, width=0)
-        return rectangle
-
-    def set_up_pieces(self):
-        self.last_move_sqrs = [None, None]
-        self.pieces = []
-        self.update()
-
-    def update(self, redraw=True):
-        if redraw:
-            self.delete_sprites()
-            self.update_last_moved()
-            for x in range(1, 9):
-                for y in range(1, 9):
-                    position = Position(x, y)
-                    piece = self.position_to_piece(position, create=True)
-                    if piece is not None:
-                        self.pieces.append(piece)
-                        piece.show()
-        self.root.update()
-
-    def create_piece(self, **kwargs):
-        kwargs.update({"master": self.master})
-        new_piece = Piece(**kwargs)
-        new_piece.resize_scale(scale=BOARD_SETTINGS.scale_for_pieces)
-        return new_piece
-
-    def create_board(self):
+    def create_board(self) -> None:
+        """
+        This sets up the board by displaying all of the squares.
+        """
         fill_white = False
         size = self.size
+        # For each of the squares on the board
         for x in range(size, size*8+1, size):
             for y in range(size, size*8+1, size):
+                # calculate the correct fill
                 fill_white = not fill_white
                 if fill_white:
                     fill = self.white_sqrs
                 else:
                     fill = self.black_sqrs
+                # fill in the square
                 self.master.create_rectangle((x-size, y-size, x, y),
                                              fill=fill, width=0)
             fill_white = not fill_white
-        self.set_up_pieces()
+        self.set_up_pieces() # Set up the pieces
 
-    def delete_sprites(self):
+    def push(self, move: chess.Move) -> None:
+        """
+        Pushes the move and tells the parent about it.
+        """
+        # Reset the undo_stack
+        self.undo_stack = []
+        self.board.push(move)
+        self.move_callback()
+
+    def set_up_pieces(self) -> None:
+        """
+        Sets up the pieces by resetting `self.last_move_sqrs` and `self.pieces`
+        """
+        self.last_move_sqrs = [None, None]
+        self.pieces = []
+        self.update()
+
+    def update(self, redraw=True) -> None:
+        """
+        This redraws the pieces on the board if `redraw` is True
+        Else just updates the root.
+        """
+        if redraw:
+            # Remove all of the pieces' sprites
+            self.delete_sprites()
+            self.update_last_moved()
+            # For each square on the board
+            for x in range(1, 9):
+                for y in range(1, 9):
+                    position = Position(x, y)
+                    # Check what piece must be there and create it
+                    piece = self.position_to_piece(position, create=True)
+                    if piece is not None:
+                        self.pieces.append(piece) # Add it to self.pieces
+                        piece.show() # Show it to the screen
+        self.root.update()
+
+    def create_piece(self, **kwargs) -> Piece:
+        """
+        Creates a new piece and resizes it
+        """
+        kwargs.update({"master": self.master})
+        new_piece = Piece(**kwargs)
+        new_piece.resize_scale(scale=BOARD_SETTINGS.scale_for_pieces)
+        return new_piece
+
+    def delete_sprites(self) -> None:
+        """
+        Delete all of the pieces' sprites
+        """
         for sprite in self.pieces:
             sprite.destroy()
-        self.pieces.clear() # can't use `self.pieces = []`
+        self.pieces.clear() # Can't use `self.pieces = []`
 
-    def position_to_piece(self, position, create=False):
+    def position_to_piece(self, position: Position, create=False) -> Piece:
+        """
+        This returns the piece from a given square by eather:
+            creating a new piece (if create is True) or
+            find the piece in `self.pieces` (if create is False)
+        """
         if create:
+            # Find the correct piece type and colour
             piece = self.board.piece_at(position.to_int())
             if piece is None:
                 return None
-            colour = "white" if piece.color else "black"
-            letter = piece.symbol().lower()
-            name = self.LETTER_TO_NAME[letter]
-            piece = self.create_piece(name=name, colour=colour, position=position)
+            name = self.LETTER_TO_NAME[piece.symbol().lower()]
+            # Create the new piece
+            piece = self.create_piece(name=name, colour=piece.color,
+                                      position=position)
             return piece
         else:
+            # Find the piece with the matching position and return it
+            # This may return None if the piece is not found
             for piece in self.pieces:
                 if piece.position == position:
                     return piece
 
-    def colour_to_bool(self, colour):
-        if isinstance(colour, str):
-            return colour == "white"
-        else:
-            return colour
-
-    def fen(self):
+    def fen(self) -> str:
+        """
+        Returns the fen string of the current board position
+        """
         return self.board.fen()
 
-    def pgn(self): # chess.Board is missing .pgn()
+    def pgn(self) -> str: # chess.Board is missing .pgn()
+        """
+        Returns the PGN current board state in sans notation.
+        """
         board = chess.Board()
         pgn = board.variation_san(self.board.move_stack)
         pgn = self.clean_pgn(pgn)
         return pgn
 
-    def clean_pgn(self, pgn):
+    def clean_pgn(self, pgn: str) -> str:
+        """
+        This cleans the fen string from "1. e4 e5 2. d4 exd4" to
+        "1. e4 e5\n2. d4 exd4"
+        """
         pgn = re.split("\d+\. ", pgn)[1:]
         output = ""
         for i, move_pair in enumerate(pgn):
             output += str(i+1)+". "+move_pair.rstrip()+"\n"
         return output
 
-    def ask_if_user_white(self):
-        self.players[0].stop();self.players[1].stop()
-        colour = self.ask_user("Do you want to be black or white?",
-                               ("w", "b"), (1, 0))
-        self.players[0].start();self.players[1].start()
-        return colour
+    # This is the part where the players are accually created and added to
+    # the board using the board player protocol
 
-    def start_ai_v_hum(self, colour):
-        self.add_user_as_player(colour)
-        self.add_ai_as_player(bool(1-colour))
-        self.reset()
+    def add_user_as_player(self, colour: bool) -> None:
+        """
+        This adds an user as the player.
+        """
+        player = User(self.board, self.master, colour, self.pieces,
+                      self.update, self.done_move, self.request_undo_move,
+                      self.request_redo_move)
+        self.add_player(colour, player)
 
-    def start_comp_v_hum(self, colour):
-        self.add_user_as_player(colour)
-        self.add_computer_as_player(bool(1-colour))
-        self.reset()
+    def add_computer_as_player(self, colour: bool) -> None:
+        """
+        This adds a computer as the player. The computer is played by
+        Stockfish.
+        """
+        player = Computer(self.board, self.master, colour, self.pieces,
+                          self.update, self.done_move, self.request_undo_move,
+                          self.request_redo_move)
+        self.add_player(colour, player)
 
-    def start_hum_v_hum(self):
-        self.add_user_as_player(True)
-        self.add_user_as_player(False)
-        self.reset()
+    def add_ai_as_player(self, colour: bool) -> None:
+        """
+        This adds an ai as the player.
+        """
+        if type(colour) != bool:raise
+        print("Not available")
 
-    def reset(self):
+    def start_multiplayer(self) -> None:
+        """
+        This adds 2 players which are the same object in memory.
+        There is not difference between being the server and the client.
+        They both do the same but the server always plays as white.
+        """
+        # This shows the user's IP and asks if the user wants to play as
+        # black or white
+        ip_text = "Your IP is: "+get_ip()
+        colour = self.ask_user(ip_text+"\nDo you want to be the server?",
+                               ("yes", "no"), (True, False))
+        player = Multiplayer(self.board, self.master, colour, self.pieces,
+                             self.update, self.done_move,
+                             self.request_undo_move, self.request_redo_move,
+                             debug=True)
+        self.add_player(colour, player)
+        # This is only for testing purposess.
+        """
+        player = Test(self.board, self.master, not colour, self.pieces,
+                      self.update, self.done_move, self.request_undo_move,
+                      self.request_redo_move, debug=True)
+        """
+        self.add_player(not colour, player)
+
+    def add_player(self, colour: bool, player) -> None:
+        """
+        This adds the player to `self.players`. If there is already a
+        player taking the board we need to delete it.
+        """
+        if self.players[not colour] is not None:
+            self.players[not colour].destroy()
+            old_player = self.players[not colour]
+            del old_player
+        player.start() # We need to start the player.
+        self.players[not colour] = player
+
+    def reset(self) -> None:
+        """
+        Reset the board by clearing the board and addeing new pieces.
+        """
         self.remove_last_sqrs()
         self.board.reset()
         self.update()
         self.players[0].go()
 
-    def remove_last_sqrs(self):
-        if self.last_move_sqrs[0] is not None:
-            self.master.delete(self.last_move_sqrs[0])
-            self.master.delete(self.last_move_sqrs[1])
-
-    def moves_to_san(self, moves): # board dependant
+    def moves_to_san(self, moves: list) -> list:
+        """
+        It changes a list of `chess.Move`s to a list of str containg
+        the sans representation of the moves.
+        Note: be careful as the moves are board dependant!
+        With a different board you might get a lot of errors. Call this
+        inside a `try` `except` block.
+        """
+        # create a deepcopy of the board so that we don't effect the real one
         board = self.board.copy()
         output = []
+        # for each one of the moves push the move and add the sans
+        # representation of it to the output
         for move in moves:
             output.append(self.move_to_san(move, board))
             board.push(move)
         return output
 
-    def move_to_san(self, move, board):
+    def move_to_san(self, move: chess.Move, board: chess.Board):
+        """
+        Converts a `chess.Move` to a str of the sans representation of the move
+        """
         return board.san(move)
 
-    def update_last_moved(self):
+    def update_last_moved(self) -> None:
+        """
+        Update the sprites that show the last played move. This is done by
+        using the `peek` method of `chess.Board` to see the last move.
+        """
         self.remove_last_sqrs()
+        # We need to check if any moves have been played
         if len(self.board.move_stack) > 0:
             move = self.board.peek()
             _from = Position.from_int(move.from_square)
@@ -249,30 +304,78 @@ class GUIBoard:
             self.last_move_sqrs[0] = self.colour_sqr(_from)
             self.last_move_sqrs[1] = self.colour_sqr(_to)
 
-    def undo_move(self):
-        if self.allowed_undo[1-self.board.turn]:
-            move = self.board.pop()
-            for player in self.players:
-                player.undo_move(move)
-            return move
-        else:
-            return "break"
+    def remove_last_sqrs(self) -> None:
+        """
+        Removes the sprites showing the last played move.
+        """
+        if self.last_move_sqrs[0] is not None:
+            self.master.delete(self.last_move_sqrs[0])
+            self.master.delete(self.last_move_sqrs[1])
 
-    def redo_move(self, move):
-        if self.allowed_undo[1-self.board.turn]:
-            self.board.push(move)
-            for player in self.players:
-                player.redo_move(move)
-        else:
-            return "break"
+    def colour_sqr(self, position: Position) -> int:
+        """
+        Colours in a square.
+        """
+        colour = position.to_colour()
+        colour = self.last_move_colours[colour]
+        coords = position.to_coords_start()+position.to_coords_end()
+        rectangle = self.master.create_rectangle(coords, fill=colour, width=0)
+        return rectangle
 
-    def start_player(self):
+    def request_undo_move(self) -> str:
+        """
+        This is called when a player requests an undo of a move.
+        This is in the board player protocol.
+        """
+        if len(self.board.move_stack) == 0:
+            return "break"
+        move = self.board.peek()
+        for player in self.players:
+            result = player.undo_move(move)
+            if result == "break":
+                return "break"
+        # If None of the current players rejected the undo
+        self.board.pop()
+        self.undo_stack.append(move)
+        self.update()
+
+    def request_redo_move(self):
+        """
+        This is called when a player requests a redo of a move.
+        This is in the board player protocol.
+        """
+        if len(self.undo_stack) == 0:
+            return "break"
+        move = self.undo_stack[-1]
+        for player in self.players:
+            result = player.redo_move(move)
+            if result == "break":
+                return "break"
+        # If None of the current players rejected the redo
+        self.undo_stack.pop()
+        self.board.push(move)
+        self.update()
+
+    def start_player(self) -> None:
+        """
+        Starts the player that is supposed to be playing on
+        the board with now
+        """
         self.players[1-self.board.turn].go()
 
-    @property
-    def double_undo_redo(self):
-        return isinstance(self.players[1-self.board.turn], Computer)
-
-    @property
-    def move_stack(self):
-        return self.board.move_stack
+    def ask_user(self, question: str, answers: tuple, mapping: tuple=None):
+        """
+        Asks the user a question in a new tkinter window and returns
+        the result as the answer if mapping isn't defined.
+        If mapping is defined than that element of the tuple will be returned
+        Example use:
+            board.ask_user("This is the question", ("Answer 1", "Answer 2"),
+                           (1, 2))
+            # If the user clicks on "Answer 1" than `1` will be returned
+            # If the user clicks on "Answer 2" than `2` will be returned
+        """
+        window = widgets.Question()
+        window.ask_user_multichoice(question, answers, mapping)
+        result = window.wait()
+        window.destroy()
+        return result
