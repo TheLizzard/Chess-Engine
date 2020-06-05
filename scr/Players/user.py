@@ -1,3 +1,4 @@
+#https://stackoverflow.com/questions/15269682/python-tkinter-canvas-fail-to-bind-keyboard
 """
 Defines the User class where the user can move pieces and draw
 arrows andrings to help them.
@@ -14,6 +15,7 @@ import time
 
 from .player import Player
 
+import widgets
 from piece import Piece
 from position import Position
 from settings import Settings
@@ -38,6 +40,18 @@ class User(Player):
         self.user_created_arrow_start = None
         self.size = BOARD_SETTINGS.size_of_squares
         self.bind_mouse()
+        self.bind_keys()
+
+    def position_to_piece(self, position: Position) -> Piece:
+        for piece in self.pieces:
+            if piece.position == position:
+                return piece
+
+    def push(self, move: chess.Move) -> None:
+        """
+        Calls callback with the move as by the board, player protocol
+        """
+        self.callback(move)
 
     def bind_mouse(self) -> None:
         """
@@ -50,6 +64,35 @@ class User(Player):
         for n in (1, 3):
             for i in ("<Button-%d>", "<B%d-Motion>", "<ButtonRelease-%d>"):
                 self.master.bind(i%n, self.mouse, True)
+
+    def bind_keys(self) -> None:
+        """
+        This binds the keys that are responsible for undo and redo moves.
+        """
+        self.master.bind("<Button-1>", self.get_focus, True)
+        self.master.bind("<Control-z>", self.send_undo_move)
+        self.master.bind("<Control-Shift-Z>", self.send_redo_move)
+
+    def get_focus(self, _):
+        """
+        This gets keyboard focus on the tkinter canvas so that key bindings
+        would work. Taken from StackOverflow
+        """
+        self.master.focus_set()
+
+    def send_undo_move(self, _) -> None:
+        """
+        This sends an undo request to GUIBoard through the player board
+        protocol
+        """
+        self.request_undo()
+
+    def send_redo_move(self, _) -> None:
+        """
+        This sends a redo request to GUIBoard through the player board
+        protocol
+        """
+        self.request_redo()
 
     def destroy(self) -> None:
         """
@@ -207,7 +250,7 @@ class User(Player):
 
     def _create_circle_arc(self, x: int, y: int, r: int, **kwargs) -> None:
         """
-        Used to create an arc. Taken from stackoverflow
+        Used to create an arc. Taken from StackOverflow
         """
         if "start" in kwargs and "end" in kwargs:
             kwargs["extent"] = kwargs["end"] - kwargs["start"]
@@ -237,31 +280,19 @@ class User(Player):
             self.unselect()
         self.update()
 
-    def push(self, move: chess.Move) -> None:
-        """
-        Calls callback with the move as by the board, player protocol
-        """
-        self.callback(move)
-
     def select(self, position: Position) -> None:
         """
         Selects the piece the user has clicked.
         """
         piece_selected = self.position_to_piece(position)
         if piece_selected is not None:
-            colour = self.colour_to_bool(piece_selected.colour)
-            if colour == self.board.turn:
+            if piece_selected.colour == self.board.turn:
                 self.piece_selected = piece_selected
                 self.show_available_moves()
                 return None
         self.unselect()
 
-    def position_to_piece(self, position: Position) -> Piece:
-        for piece in self.pieces:
-            if piece.position == position:
-                return piece
-
-    def unselect(self):
+    def unselect(self) -> None:
         """
         Unselects the selected piece
         """
@@ -304,36 +335,14 @@ class User(Player):
 
     def askuser_pawn_promotion(self) -> str:
         self.stop()
-        master = self.master
-        self.chosen_promotion = None
-        x1, y1 = (2*self.size, 3*self.size)
-        x2, y2 = (x1+4*self.size, y1+2*self.size)
-        rectangle = master.create_rectangle((x1, y1, x2, y2), fill="black",
-                                            outline="red", width=3)
-        x, y = (4*self.size, 3.5*self.size)
-        text = "What do you want to promote to?"
-        font = USER_SETTINGS.font
-        text = master.create_text((x, y), text=text, fill="white", font=font)
-        q = self.create_piece(name="queen", colour="white", position=(3, 4))
-        r = self.create_piece(name="rook", colour="white", position=(4, 4))
-        b = self.create_piece(name="bishop", colour="white", position=(5, 4))
-        n = self.create_piece(name="knight", colour="white", position=(6, 4))
-        q.show(), r.show(), b.show(), n.show()
-        self.master.bind("<Button-1>", self.promote, True)
-        while self.chosen_promotion is None:
-            self.update(redraw=False)
-        q.destroy(), r.destroy(), b.destroy(), n.destroy()
-        self.master.delete(rectangle)
-        self.master.delete(text)
+        window = widgets.Question()
+        window.ask_user_multichoice("What do you want to promote to?",
+                                    ("Queen", "Rook", "Bishop", "Knight"),
+                                    mapping=("q", "r", "b", "k"))
+        chosen_promotion = window.wait()
+        window.destroy()
         self.start()
-        return self.chosen_promotion
-
-    def promote(self, event: tk.Event) -> None:
-        promotions = ("q", "r", "b", "n")
-        position = Position.from_coords((event.x, event.y))
-        if position[1] == 4:
-            if 3 <= position[0] <= 6:
-                self.chosen_promotion = promotions[position[0]-3]
+        return chosen_promotion
 
     def undo_move(self, move: chess.Move) -> str:
         self.remove_available_moves()
