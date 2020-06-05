@@ -22,6 +22,16 @@ The protocol for compressing moves is:
 Note: numbers on the top represend the bit number
 The checksum is redundant as the TCP packets have their own checksum but
 there is no other use for the 2 bits.
+
+Special moves and meanings:
+ ------ ------ -----------------------------------------
+| Move | Code | Meaning                                 |
+ ------ ------ -----------------------------------------
+| A1A1 |   0  | Undo last move                          |
+| A2A2 |   1  | Recved undo request and not allowing it |
+| A3A3 |   2  | Recved undo request and allowing it     |
+ ------ ------ -----------------------------------------
+
 """
 
 
@@ -92,8 +102,6 @@ def decompress_move(compressed: Bits, errors="strict") -> chess.Move:
     cpro, check = compressed[12:14], compressed[14:]
     if str(compressed[:14]).count("1")%len(check) != int(check):
         return None
-    if compressed == Bits.from_int(0, bits=16):
-        return chess.Move(from_square=None, to_square=None)
     pos1 = int(cpos1)
     pos2 = int(cpos2)
     pro = int(cpro)+2
