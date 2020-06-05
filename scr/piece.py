@@ -2,13 +2,15 @@ from PIL import Image, ImageTk
 import tkinter as tk
 
 from settings import Settings
+from position import Position
 
 SETTINGS = Settings().gameboard
 SPRITES_LOCATION = "Sprites/"
 
 
 class Piece:
-    def __init__(self, name, position, colour, master):
+    def __init__(self, name: str, position: Position, colour: bool,
+                 master: tk.Canvas):
         self.name = name
         self.colour = colour
         self.master = master
@@ -21,18 +23,26 @@ class Piece:
         self.image = self.get_image(filename=self.filename)
         self.size = self.image.size
 
-    def get_image(self, filename):
+    def get_image(self, filename: str) -> Image:
         return Image.open(filename)
 
-    def get_filename(self, name, colour, set):
+    def get_filename(self, name: str, colour: bool, set: int) -> str:
+        if colour:
+            colour = "white"
+        else:
+            colour = "black"
         filename = SPRITES_LOCATION+"set."+str(set)+"/"+name+"."+colour+".png"
         return filename
 
-    def place(self, pos):
+    def place(self, coords: tuple) -> None:
+        """
+        Displays the piece on the tkinter canvas at `coords` where `coords`
+        is a tuple of tkinter canvas coords
+        """
         self.tkimage = ImageTk.PhotoImage(self.image)
-        self.tkcanvasnum = self.master.create_image(pos, image=self.tkimage)
+        self.tkcanvasnum = self.master.create_image(coords, image=self.tkimage)
 
-    def show(self, position=None):
+    def show(self, position: tuple=None) -> None:
         if position is None:
             x, y = self.position
         else:
@@ -43,14 +53,15 @@ class Piece:
         self.tkimage = ImageTk.PhotoImage(self.image)
         self.tkcanvasnum = self.master.create_image(pos, image=self.tkimage)
 
-    def destroy(self):
+    def destroy(self) -> None:
         if self.tkcanvasnum is not None:
             self.master.delete(self.tkcanvasnum)
 
-    def resize(self, scale=None, height=None, width=None):
+    def resize(self, scale=None, height=None, width=None) -> None:
         if scale is not None:
             if (height is not None) or (width is not None):
-                raise ValueError("Can't specify the scale with the (height or width)")
+                raise ValueError("Can't specify the scale with the (height" \
+                                 " or width)")
             else:
                 self.resize_scale(scale=scale)
             return None
@@ -66,14 +77,14 @@ class Piece:
             self.size = (width, height)
         self._resize()
 
-    def resize_max(self, max_height, max_width):
+    def resize_max(self, max_height, max_width) -> None:
         self.resize(max_height)
         self.resize(max_width)
 
-    def _resize(self):
+    def _resize(self) -> None:
         size = tuple(map(lambda x:int(x+0.5), self.size))
-        self.image = self.image.resize(size, 0)  # 0 for Image.NEAREST
+        self.image = self.image.resize(size, Image.NEAREST)
 
-    def resize_scale(self, scale):
+    def resize_scale(self, scale) -> None:
         self.size = tuple(map(lambda x:x*scale, self.size))
         self._resize()
