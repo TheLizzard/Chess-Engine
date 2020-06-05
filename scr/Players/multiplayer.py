@@ -7,7 +7,7 @@ from .user import User
 from Networking.bits import Bits
 from Networking.compression import compress_move, decompress_move
 from Networking.compression import compress_fen, decompress_fen
-from Networking.connector import Connector
+from Networking.connector import Connector, Event
 import widgets
 
 
@@ -61,7 +61,7 @@ class Multiplayer(User):
             compressed = compress_move(move).to_bytes()
             self.connector.send_data(compressed)
 
-    def receiver(self, event: connector.Event) -> None:
+    def receiver(self, event: Event) -> None:
         """
         This adds the event to the event queue to be handled by _update.
         The event can't be handled here as tkinter will complain about
