@@ -18,15 +18,16 @@ class App:
         self.analyses = None
         self.allowed_analyses = True
         self.done_set_up = False
-        self.allowed_undo = [True, True]
         self.set_up_tk()
         self.board.update()
         self.done_set_up = True
-        self.undone_move_stack = []
         self.root.update()
         self.start_analysing()
 
     def set_up_tk(self):
+        """
+        Sets up the tkinter part of the program and GUIBoard.
+        """
         self.root = widgets.Tk()
         self.root.bind_update(self.update)
         self.root.resizable(False, False)
@@ -38,15 +39,11 @@ class App:
         self.widget_kwargs = SETTINGS.widgets
         self.modified_widget_kwargs = self.widget_kwargs.dict()
         self.justify = self.modified_widget_kwargs.pop("justify", None)
-        self.set_up_board()
+        self.board = GUIBoard(root=self.root, move_callback=self.moved,
+                              kwargs=self.modified_widget_kwargs)
         self.set_up_eval()
         self.set_up_suggestedmoves()
         self.set_up_movehistory()
-        self.bind_keys()
-
-    def bind_keys(self):
-        self.root.bind("<Control-z>", self.undo_move)
-        self.root.bind("<Control-Shift-Z>", self.redo_move)
 
     def set_up_menu(self):
         tearoff = SETTINGS.menu.tearoff
@@ -162,6 +159,13 @@ class App:
     def file(self, event):
         if event == "open":
             print("file.open")
+            """
+            filename = widgets.askopen()
+            if filename is not None:
+                with open(filename, "r") as file:
+                    data = file.read()
+                self.file_open = filename
+            """
 
         elif event == "save":
             print("file.save")
@@ -177,10 +181,10 @@ class App:
 
     def edit(self, event):
         if event == "undo_move":
-            self.undo_move()
+            self.board.request_undo_move()
 
         elif event == "redo_move":
-            self.redo_move()
+            self.board.request_redo_move()
 
         elif event == "change_position":
             print("edit.change_position")
@@ -197,61 +201,54 @@ class App:
             w = widgets.CopyableTextWindow()
             w.set(self.board.pgn())
 
-    def undo_move(self, event=None):
-        if len(self.board.move_stack) > 0:
-            move = self.board.undo_move()
-            if move != "break":
-                self.undone_move_stack.append(move)
-                self.moved(clear_undo_stack=False)
-                if (event != "go") and self.board.double_undo_redo:
-                    self.undo_move("go")
-                else:
-                    self.board.update()
-                    self.board.start_player()
-
-    def redo_move(self, event=None):
-        if len(self.undone_move_stack) != 0:
-            move = self.undone_move_stack.pop()
-            if self.board.redo_move(move) == "break":
-                self.undone_move_stack.append(move)
-            else:
-                self.moved(clear_undo_stack=False)
-                if (event != "go") and self.board.double_undo_redo:
-                    self.redo_move("go")
-                else:
-                    self.board.update()
-                    self.board.start_player()
-
     def start_game(self, event):
         if event == "evaluate":
+            # This is only active when `self.allowed_analyses` is True
             if self.allowed_analyses:
+                # Start analysing the position
                 self.start_analysing()
 
         elif event == "play_vs_computer":
-            self.allowed_analyses = False
-            self.stop_analysing()
-            self.clear_pgn()
-            colour = self.board.ask_if_user_white()
-            self.board.start_comp_v_hum(colour)
+            # Add user as `colour` and computer as `not colour`
+            colour = self.ask_if_user_white()
+            self.board.add_user_as_player(colour)
+            self.board.add_computer_as_player(not colour)
+            self.reset(False)
 
         elif event == "play_vs_human":
-            self.allowed_analyses = True
-            self.stop_analysing()
-            self.clear_pgn()
-            self.board.start_hum_v_hum()
+            # Add the 2 user players and reset the board
+            self.board.add_user_as_player(True)
+            self.board.add_user_as_player(False)
+            self.reset(True)
 
         elif event == "play_vs_ai":
-            self.allowed_analyses = False
-            self.stop_analysing()
-            self.clear_pgn()
-            colour = self.board.ask_if_user_white()
-            self.board.start_ai_v_hum(colour)
+            # Add user as `colour` and AI as `not colour`
+            colour = self.ask_if_user_white()
+            self.board.add_user_as_player(colour)
+            self.board.add_ai_as_player(not colour)
+            self.reset(False)
 
         elif event == "play_multiplayer":
-            self.allowed_analyses = False
-            self.stop_analysing()
-            self.clear_pgn()
+            # Start multiplayer
             self.board.start_multiplayer()
+            self.reset(False)
+
+    def ask_if_user_white(self) -> bool:
+        """
+        Asks the user what colour they want to play as.
+        """
+        colour = self.board.ask_user("Do you want to be black or white?",
+                               ("white", "black"), (True, False))
+        return colour
+
+    def reset(self, allowed_analyses: bool) -> None:
+        """
+        This resets the board, clears the pgn and sets allowed_analyses
+        """
+        self.allowed_analyses = allowed_analyses
+        self.stop_analysing()
+        self.clear_pgn()
+        self.board.reset()
 
     def change_settings(self, event):
         if event == "game_settings":
@@ -259,11 +256,6 @@ class App:
 
         elif event == "suggested_moves_settings":
             print("settings.suggested_moves_settings")
-
-    def set_up_board(self):
-        self.board = GUIBoard(root=self.root, move_callback=self.moved,
-                              undo=self.allowed_undo,
-                              kwargs=self.modified_widget_kwargs)
 
     def update(self):
         if self.done_set_up and self.analysing and (self.analyses is not None):
@@ -275,10 +267,13 @@ class App:
 
             score = score.white()#.score(mate_score=10000)
             score = str(score).replace("+", "")
-            moves = self.board.moves_to_san(moves)[:4]
-
             self.eval_text.config(text=score)
-            self.suggestedmoves_text.config(text=" ".join(moves))
+
+            try:
+                moves = self.board.moves_to_san(moves)[:4]
+                self.suggestedmoves_text.config(text=" ".join(moves))
+            except:
+                pass
 
     def update_pgn(self):
         self.movehistory_text.config(state="normal")
@@ -293,13 +288,8 @@ class App:
     def clear_pgn(self):
         self.movehistory_text.delete("0.0", "end")
 
-    def moved(self, clear_undo_stack=True):
-        if clear_undo_stack:
-            self.undone_move_stack = []
-        try:
-            self.update_pgn()
-        except:
-            raise
+    def moved(self):
+        self.update_pgn()
         if self.analysing:
             self.analyses.kill()
             self.start_analysing()
@@ -316,6 +306,7 @@ class App:
             self.analysing = True
             self.analyses = Analyse(self.board.board)
             self.analyses.start()
+            self.eval_frame.grid()
 
     def stop_analysing(self):
         self.analysing = False
