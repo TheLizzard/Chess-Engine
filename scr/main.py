@@ -315,10 +315,7 @@ class App:
         if self.allowed_analyses:
             self.analysing = True
             self.analyses = Analyse(self.board.board)
-            thread = threading.Thread(target=self.analyses.start)
-            thread.deamon = True
-            thread.start()
-            self.eval_frame.grid()
+            self.analyses.start()
 
     def stop_analysing(self):
         self.analysing = False
