@@ -20,13 +20,13 @@ class TextWindow:
         self.button.grid(row=2, column=1, columnspan=2, sticky="news")
         self.disable()
 
-    def disable(self):
+    def disable(self) -> None:
         self.text.config(state="disabled")
 
-    def enable(self):
+    def enable(self) -> None:
         self.text.config(state="normal")
 
-    def insert(self, *args):
+    def insert(self, *args) -> None:
         if self.text["state"] == "disabled":
             self.enable()
         self.text.insert(*args)
@@ -43,11 +43,11 @@ class CopyableWindow:
         self.button_c.grid(row=1, column=2, sticky="news")
         self.button.grid(row=2, column=1, columnspan=2, sticky="news")
 
-    def add_widget(self, widget):
+    def add_widget(self, widget) -> None:
         self.widget = widget
         self.widget.grid(row=1, column=1, sticky="news")
 
-    def copy(self):
+    def copy(self) -> None:
         self.root.clipboard_clear()
         self.root.clipboard_append(self.get())
         self.root.update()
@@ -59,13 +59,13 @@ class CopyableEntryWindow(CopyableWindow):
         self.text = tk.Entry(self.root)
         super().add_widget(self.text)
 
-    def set(self, string):
+    def set(self, string: str) -> None:
         self.widget.insert(0, string)
 
-    def clear(self):
+    def clear(self) -> None:
         self.widget.delete(0, "end")
 
-    def get(self):
+    def get(self) -> str:
         return self.widget.get()
 
 
@@ -75,26 +75,26 @@ class CopyableTextWindow(CopyableWindow):
         self.text = tk.Text(self.root)
         super().add_widget(self.text)
 
-    def set(self, string):
+    def set(self, string: str) -> None:
         self.text.insert("0.0", string)
 
-    def clear(self):
+    def clear(self) -> None:
         self.text.delete("0.0", "end")
 
-    def get(self):
+    def get(self) -> str:
         return self.text.get("0.0", "end")
 
 
 class AutoScrollbar(tk.Scrollbar):
-    def __init__(self, master, text_widget, **kwargs):
+    def __init__(self, master, text_widget: tk.Text, **kwargs):
         super().__init__(master, **kwargs)
         self.geometry_manager_kwargs = {}
         self.text_widget = text_widget
         self.geometry_manager = None
         self.hidden = True
 
-    def set(self, lo, hi):
-        if float(lo) <= 0.0 and float(hi) >= 1.0:
+    def set(self, low, high) -> None:
+        if float(low) <= 0.0 and float(high) >= 1.0:
             if not self.hidden:
                 if self.geometry_manager == "grid":
                     self.grid_remove()
@@ -116,17 +116,17 @@ class AutoScrollbar(tk.Scrollbar):
                 self.hidden = False
         super().set(lo, hi)
 
-    def pack(self, **kwargs):
+    def pack(self, **kwargs) -> None:
         super().pack(**kwargs)
         self.geometry_manager = "pack"
         self.geometry_manager_kwargs = kwargs
 
-    def place(self, **kwargs):
+    def place(self, **kwargs) -> None:
         super().place(**kwargs)
         self.geometry_manager = "place"
         self.geometry_manager_kwargs = kwargs
 
-    def grid(self, **kwargs):
+    def grid(self, **kwargs) -> None:
         super().grid(**kwargs)
         self.geometry_manager = "grid"
         self.geometry_manager_kwargs = kwargs
@@ -137,7 +137,7 @@ class LicenceWindow(TextWindow):
         super().__init__()
         self.insert("end", self.get_text())
 
-    def get_text(self):
+    def get_text(self) -> str:
         with open("Licence.txt", "r") as file:
             data = file.read()
         return data
@@ -148,7 +148,7 @@ class HelpWindow(TextWindow):
         super().__init__()
         self.insert("end", self.get_text())
 
-    def get_text(self):
+    def get_text(self) -> str:
         with open("Help.txt", "r") as file:
             data = file.read()
         return data
@@ -159,10 +159,10 @@ class Tk(tk.Tk):
         self.binds = []
         super().__init__(*args, **kwargs)
 
-    def bind_update(self, func):
+    def bind_update(self, func) -> None:
         self.binds.append(func)
 
-    def update(self, *args, **kwargs):
+    def update(self, *args, **kwargs) -> None:
         for func in self.binds:
             func()
         super().update(*args, **kwargs)
@@ -192,23 +192,24 @@ class CustomText(tk.Text):
 
         return self.tk.call(cmd)
 
-    def generate_event(self, cmd):
+    def generate_event(self, cmd: tuple) -> str:
         for bind in self.binds:
             if bind(cmd) == "break":
                 return "break"
 
-    def bind_modified(self, function):
-        self.binds.append(function)
+    def bind_modified(self, function) -> None:
+        if function not in binds:
+            self.binds.append(function)
 
-    def unbind_modified(self, function):
-        if self.binds.count(function) > 0:
+    def unbind_modified(self, function) -> None:
+        if self.binds.count(function) == 1:
             self.binds.remove(function)
 
-    def paste(self, event):
+    def paste(self, event: tk.Event) -> None:
         if len(self.tag_ranges("sel")) != 0:
             self.delete("sel.first", "sel.last")
 
-    def select_all(self, event):
+    def select_all(self, event: tk.Event) -> None:
         self.tag_add("sel", "0.0", "end")
         self.mark_set("insert", "end")
 
@@ -219,7 +220,7 @@ class Question:
         self.root = Tk()
         self.root.resizable(False, False)
 
-    def destroy(self):
+    def destroy(self) -> None:
         self.root.destroy()
 
     def get(self):
@@ -229,12 +230,17 @@ class Question:
         while self.result is None:
             time.sleep(0.01)
             self.root.update()
+        return self.result
 
-    def add_custom(self, cls, *args, **kwargs):
+    def add_custom(self, cls, *args, **kwargs) -> None:
+        """
+        Adds a custom widget with custom args+kwargs at the bottom
+        of the window
+        """
         widget = cls(self.root, *args, **kwargs)
         widget.grid(column=1, columnspan=10, sticky="news")
 
-    def ask_for_ip(self):
+    def ask_for_ip(self) -> None:
         font = ("Lucida Console", 18)
         kwargs = {"borderwidth": 0, "highlightthickness": 0}
 
@@ -251,11 +257,11 @@ class Question:
                                 command=self._ask_for_ip, **kwargs)
         self.button.grid(row=2, column=2, sticky="news")
 
-    def _ask_for_ip(self):
+    def _ask_for_ip(self) -> None:
         if self.check_ip():
             self.result = self.entry.get("0.0", "end").replace("\n", "")
 
-    def check_ip(self, event=None):
+    def check_ip(self, event: tk.Event=None) -> bool:
         text = self.entry.get("0.0", "end").replace("\n", "")
         if (event is not None) and (event[1] == "insert"):
             new_char = event[3]
@@ -270,11 +276,10 @@ class Question:
         if result is None:
             self.entry.config(bg="white")
             return False
-        else:
-            self.entry.config(bg="light green")
-            return True
+        self.entry.config(bg="light green")
+        return True
 
-    def ask_user_multichoice(self, question, answers, mapping=None):
+    def ask_user_multichoice(self, question, answers, mapping=None) -> None:
         self.buttons = []
         kwargs = {"borderwidth": 0, "highlightthickness": 0}
 
@@ -295,10 +300,10 @@ class Question:
             button.grid(row=2, column=i+1, sticky="news")
             self.buttons.append(button)
 
-    def _ask_user_multichoice(self, event):
+    def _ask_user_multichoice(self, event) -> None:
         self.result = event
 
-    def ask_user_entry(self, question):
+    def ask_user_entry(self, question) -> None:
         commmand = self._ask_user_entry
         self.root.bind("<Return>", commmand)
         self.label = tk.Label(self.root, text=question)
@@ -309,7 +314,7 @@ class Question:
         self.entry.grid(row=2, column=1, sticky="news")
         self.button.grid(row=2, column=2, sticky="news")
 
-    def _ask_user_entry(self, event=None):
+    def _ask_user_entry(self, event=None) -> None:
         self.result = self.entry.get()
 
 
@@ -335,26 +340,26 @@ class ScrolledListboxes(tk.Frame):
         self.lb2.bind("<Button-5>", self.mouse_wheel)
         self.lb2.bind("<Button-4>", self.mouse_wheel)
 
-    def scrollbar_change(self, *args):
+    def scrollbar_change(self, *args) -> None:
         self.lb1.yview(*args)
         self.lb2.yview(*args)
 
-    def mouse_wheel(self, event):
+    def mouse_wheel(self, event) -> str:
         direction = 2*event.num-9
         delta = direction
         self.lb1.yview("scroll", delta, "units")
         self.lb2.yview("scroll", delta, "units")
         return "break"
 
-    def insert(self, position, data1, data2):
+    def insert(self, position, data1: str, data2: str) -> None:
         self.lb1.insert(position, data1)
         self.lb2.insert(position, data2)
 
-    def delete(self, position1, position2):
+    def delete(self, position1, position2) -> None:
         self.lb1.delete(position1, position2)
         self.lb2.delete(position1, position2)
 
-    def clear(self):
+    def clear(self) -> None:
         self.delete("0", "end")
 
     def yview(self, yview=None):
@@ -376,7 +381,7 @@ class Logger:
         thread.deamon = True
         thread.start()
 
-    def start_up(self):
+    def start_up(self) -> None:
         self.root = tk.Tk()
         self.root.title("Logger")
         self.root.resizable(False, False)
@@ -399,7 +404,7 @@ class Logger:
 
         self.mainloop()
 
-    def add_blacklist(self, event):
+    def add_blacklist(self, _) -> None:
         paused = self.paused
         self.paused = True
         self.pbutton["text"] = "▶"
@@ -410,11 +415,11 @@ class Logger:
         self.paused = not paused
         self.pause()
 
-    def blacklist(self, item):
+    def blacklist(self, item: str) -> None:
         if item != "":
             self.blacklisted.append(item)
 
-    def get_blacklist(self):
+    def get_blacklist(self) -> str:
         window = Question()
         window.ask_user_entry("What do you want to blacklist?")
 
@@ -426,29 +431,29 @@ class Logger:
         window.destroy()
         return window.result
 
-    def clear_blacklisted(self):
+    def clear_blacklisted(self) -> None:
         self.blacklisted = []
 
-    def pause(self):
+    def pause(self) -> None:
         self.paused = not self.paused
         if self.paused:
             self.pbutton["text"] = "▶"
         else:
             self.pbutton["text"] = "◼"
 
-    def clear(self):
+    def clear(self) -> None:
         self.old_data = []
         self.new_data = []
         self.reset()
 
-    def modified(self, cmd):
+    def modified(self, cmd) -> str:
         if (cmd[1] == "insert") and (cmd[3] == "\n"):
             return "break"
 
-    def delete_input(self, event):
+    def delete_input(self, _) -> None:
         self.entry.delete("0.0", "end")
 
-    def mainloop(self):
+    def mainloop(self) -> None:
         while self.running:
             user_wants_to_see = self.entry.get("0.0", "end")
             user_wants_to_see = user_wants_to_see.replace("\n", "")
@@ -456,20 +461,20 @@ class Logger:
             time.sleep(0.01)
             self.root.update()
 
-    def update_list(self, show_sequence):
+    def update_list(self, show_sequence: str) -> None:
         if self.user_wants_to_see == show_sequence:
             self.add_new()
         else:
             self.user_wants_to_see = show_sequence
             self.reset()
 
-    def reset(self):
+    def reset(self) -> None:
         self.listbox.clear()
         self.old_data += self.new_data
         self.new_data = []
         self.add(self.old_data)
 
-    def add(self, _list):
+    def add(self, _list: list) -> None:
         show_sequence = self.user_wants_to_see
         for sequence, data in _list:
             show = show_sequence in sequence
@@ -479,32 +484,43 @@ class Logger:
             if show:
                 self.listbox.insert("end", sequence, data)
 
-    def add_new(self):
+    def add_new(self) -> None:
         self.add(self.new_data)
         self.old_data += self.new_data
         self.new_data = []
 
-    def log(self, sequence, *args, sep=" | "):
+    def log(self, sequence: str, *args, sep: str=" | ") -> str:
         args = tuple(map(str, args))
         if not self.paused:
             self.new_data.append((str(sequence), sep.join(args)))
         else:
             return "break"
 
-    def kill(self):
+    def kill(self) -> None:
         self.running = False
 
 
-if __name__ == "__main__":
-    """
-    a = Question()
-    print(a.ask_for_ip())
-    a.destroy()
+def _info(text: str) -> None:
+    root = tk.Tk()
+    root.resizable(False, False)
+    root.title("Info")
+    label = tk.Label(root, text=text)
+    button = tk.Button(root, text="Ok", command=root.destroy)
+    label.grid(row=1, column=1, sticky="news")
+    button.grid(row=2, column=1, sticky="news")
+    root.mainloop()
 
-    a = Question()
-    print(a.ask_user("Do you want?", ("y", "n"), (True, False)))
-    a.destroy()
-    """
-    l = Logger()
-    for i in range(20):
-        l.log("connection.recv.heartbeat")
+def info(text: str) -> None:
+    thread = threading.Thread(target=_info, args=(text, ))
+    thread.deamon = True
+    thread.start()
+
+def askopen() -> None:
+    return None
+
+def asksave() -> None:
+    return None
+
+
+if __name__ == "__main__":
+    pass
