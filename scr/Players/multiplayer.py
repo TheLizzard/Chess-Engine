@@ -23,8 +23,7 @@ class Multiplayer(User):
         else:
             window = widgets.Question()
             window.ask_for_ip()
-            window.wait()
-            ip = window.result
+            ip = window.wait()
             window.destroy()
 
         self.build_connection(ip, self.colour)
@@ -97,10 +96,10 @@ class Multiplayer(User):
                     # Now we have to destroy this so we don't try to
                     # send any more moves.
                     self.destroy()
-            elif len(bits) == 1:
+            elif len(bits) == 8:
                 # We recved a heartbeat from the other player
                 self.recieved_heartbeat(bits)
-            elif len(bits) == 2:
+            elif len(bits) == 16:
                 # We recved a move from the other player
                 self.recieved_move(event)
             else:
@@ -149,9 +148,9 @@ class Multiplayer(User):
             if self.debug:
                 self.logger.log("connection.recv.garbage")
             return None
-        if move == chess.Move(from_square=None, to_square=None):
-            # If the move is an "undo move" than show that to GUIBoard.
-            self.update(move)
+        if move.from_square == move.to_square:
+            # A special move
+            self.special_move(move)
             return None
         # If the move is valid we need to make sure the promotion value
         # is also valid.
@@ -168,8 +167,8 @@ class Multiplayer(User):
         It can be used for a simple chat plugin later.
         """
         if self.debug:
-            self.logger.log("connection.recv.large_packet", bits)
-        print(repr(event.data))
+            self.logger.log("connection.recv.large_packet", len(bits), bits)
+        print(repr(bits))
 
     def destroy(self) -> None:
         """
@@ -178,3 +177,53 @@ class Multiplayer(User):
         self.connector.unbind()
         self.connector.kill()
         super().destroy()
+
+    def special_move(self, move: chess.Move) -> None:
+        """
+        This deals with all of the special moves that are outlined in
+        `Networking/compression.py`
+        """
+        code = move.from_square
+        if code == 0:
+            # other user requested undo
+            self.undo()
+        elif code == 1:
+            # we requested undo and they rejected
+            widgets.info("The other player declined your undo request.")
+        elif code == 2:
+            # we requested undo and they accepted
+            self.request_undo()
+        else:
+            print("Illigal code: "+str(code))
+
+    def send_special_move(self, code: int) -> None:
+        """
+        This sends a special move to the other player. Those moves
+        are accually illegal but they encode for something.
+        """
+        self.send_move(chess.Move(from_square=code, to_square=code))
+
+    def undo(self) -> str:
+        """
+        This is called when the other player want to undo and we
+        can eather allow them or block them.
+        """
+        # Ask the user if they want to allow or block the undo request
+        window = widgets.Question()
+        window.ask_user_multichoice("The other player requested a move back.",
+                                    ("Accept", "Decline"), (True, False))
+        allowed = window.wait()
+        window.destroy()
+        if allowed:
+            # Send confermation that we allowed it
+            self.send_special_move(code=2)
+            self.request_undo()
+        else:
+            # Send confermation that we blocked it
+            self.send_special_move(code=1)
+
+    def redo_move(self, move: chess.Move) -> str:
+        """
+        There is no point in redoing moves.
+        """
+        return "break"
