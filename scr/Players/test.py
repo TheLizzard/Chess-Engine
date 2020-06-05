@@ -29,8 +29,7 @@ class Test(Player):
         else:
             window = widgets.Question()
             window.ask_for_ip()
-            window.wait()
-            ip = window.result
+            ip = window.wait()
             window.destroy()
 
         self.build_connection(ip, self.colour)
@@ -76,7 +75,7 @@ class Test(Player):
             else:
                 if self.debug:
                     self.logger.log("connection.recv.largepacket", event.data)
-        self.tk_object.after(100, self._update)
+        self.master.after(100, self._update)
 
     def check_alive(self):
         if time.time()-self.last_self_heartbeat > 3:
@@ -113,7 +112,10 @@ class Test(Player):
         move = chess.Move.from_uci(input("uci move: "))
         self.send_move(move)
 
-        #self.callback()
-
     def go(self):
         pass
+
+    def destroy(self):
+        self.connector.unbind()
+        self.connector.kill()
+        super().destroy()
