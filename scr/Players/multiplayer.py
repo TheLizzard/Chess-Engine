@@ -243,10 +243,3 @@ class Multiplayer(User):
         There is no point in redoing moves.
         """
         return "break"
-
-    def undo_move(self, move: chess.Move) -> str:
-        """
-        This is only called when the user clicks on "undo move" on the menu
-        """
-        self.send_undo_move()
-        return "break"
