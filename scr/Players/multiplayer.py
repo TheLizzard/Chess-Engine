@@ -14,6 +14,7 @@ import widgets
 class Multiplayer(User):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.running = True
         if self.debug:
             self.logger = widgets.Logger()
             self.logger.blacklist("heartbeat")
@@ -32,6 +33,24 @@ class Multiplayer(User):
         self.last_self_heartbeat = int(time.time())
         self.last_other_heartbeat = int(time.time())
         self._update()
+
+    def __del__(self) -> None:
+        if self.running:
+            self.destroy()
+
+    def destroy(self) -> str:
+        """
+        This destroys the connection, closes the port and unbinds the socket.
+        Note: Only the white player is allowed to close the socket. This
+        is because both white and black will try to close `connector` and
+        a lot of errors arise.
+        """
+        if not self.colour:
+            return "break"
+        self.running = False
+        self.connector.unbind()
+        self.connector.kill()
+        super().destroy()
 
     def push(self, move: chess.Move) -> None:
         """
@@ -83,6 +102,8 @@ class Multiplayer(User):
         event_queue = copy.deepcopy(self.event_queue)
         self.event_queue = []
         self.event_lock.release()
+        if not self.running:
+            return None
         self.check_alive()
         # widget.after must be before the for loops as some events might
         # take over the thread.
@@ -170,14 +191,6 @@ class Multiplayer(User):
             self.logger.log("connection.recv.large_packet", len(bits), bits)
         print(repr(bits))
 
-    def destroy(self) -> None:
-        """
-        This destroys the connection, closes the port and unbinds the socket.
-        """
-        self.connector.unbind()
-        self.connector.kill()
-        super().destroy()
-
     def special_move(self, move: chess.Move) -> None:
         """
         This deals with all of the special moves that are outlined in
@@ -203,7 +216,7 @@ class Multiplayer(User):
         """
         self.send_move(chess.Move(from_square=code, to_square=code))
 
-    def send_undo_move(self, _) -> None:
+    def send_undo_move(self, _=None) -> None:
         self.send_special_move(code=0)
 
     def undo(self) -> str:
@@ -229,4 +242,11 @@ class Multiplayer(User):
         """
         There is no point in redoing moves.
         """
+        return "break"
+
+    def undo_move(self, move: chess.Move) -> str:
+        """
+        This is only called when the user clicks on "undo move" on the menu
+        """
+        self.send_undo_move()
         return "break"
