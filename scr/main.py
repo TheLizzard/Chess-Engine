@@ -211,6 +211,8 @@ class App:
         elif event == "play_vs_computer":
             # Add user as `colour` and computer as `not colour`
             colour = self.ask_if_user_white()
+            if colour is None:
+                return None
             self.board.add_user_as_player(colour)
             self.board.add_computer_as_player(not colour)
             self.reset(False)
@@ -224,6 +226,8 @@ class App:
         elif event == "play_vs_ai":
             # Add user as `colour` and AI as `not colour`
             colour = self.ask_if_user_white()
+            if colour is None:
+                return None
             self.board.add_user_as_player(colour)
             self.board.add_ai_as_player(not colour)
             self.reset(False)
@@ -316,6 +320,4 @@ class App:
 
 
 a = App()
-while True:
-    a.root.update()
-    time.sleep(0.1)
+a.root.mainloop()
