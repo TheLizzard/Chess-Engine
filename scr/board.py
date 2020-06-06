@@ -199,6 +199,7 @@ class GUIBoard:
         """
         This adds an user as the player.
         """
+        self.kill_player(colour)
         player = User(self.board, self.master, colour, self.pieces,
                       self.update, self.done_move, self.request_undo_move,
                       self.request_redo_move)
@@ -209,6 +210,7 @@ class GUIBoard:
         This adds a computer as the player. The computer is played by
         Stockfish.
         """
+        self.kill_player(colour)
         player = Computer(self.board, self.master, colour, self.pieces,
                           self.update, self.done_move, self.request_undo_move,
                           self.request_redo_move)
@@ -232,10 +234,14 @@ class GUIBoard:
         ip_text = "Your IP is: "+get_ip()
         colour = self.ask_user(ip_text+"\nDo you want to be the server?",
                                ("yes", "no"), (True, False))
+        if colour is None:
+            return None
+        self.kill_player(colour)
+        self.kill_player(not colour)
         player = Multiplayer(self.board, self.master, colour, self.pieces,
                              self.update, self.done_move,
                              self.request_undo_move, self.request_redo_move,
-                             debug=True)
+                             debug=False)
         self.add_player(colour, player)
         # This is only for testing purposess.
         """
@@ -245,15 +251,20 @@ class GUIBoard:
         """
         self.add_player(not colour, player)
 
-    def add_player(self, colour: bool, player) -> None:
+    def kill_player(self, colour: bool) -> None:
         """
-        This adds the player to `self.players`. If there is already a
-        player taking the board we need to delete it.
+        If there is already a player taking the board we need to delete it.
+        Fix for Issue #10 and partial fix for Issue #13
         """
         if self.players[not colour] is not None:
             self.players[not colour].destroy()
             old_player = self.players[not colour]
             del old_player
+
+    def add_player(self, colour: bool, player) -> None:
+        """
+        This adds the player to `self.players`.
+        """
         player.start() # We need to start the player.
         self.players[not colour] = player
 
@@ -365,17 +376,10 @@ class GUIBoard:
 
     def ask_user(self, question: str, answers: tuple, mapping: tuple=None):
         """
-        Asks the user a question in a new tkinter window and returns
-        the result as the answer if mapping isn't defined.
-        If mapping is defined than that element of the tuple will be returned
-        Example use:
-            board.ask_user("This is the question", ("Answer 1", "Answer 2"),
-                           (1, 2))
-            # If the user clicks on "Answer 1" than `1` will be returned
-            # If the user clicks on "Answer 2" than `2` will be returned
+        Asks the user a question in a new tkinter window using the
+        `widgets.py` library
         """
         window = widgets.Question()
         window.ask_user_multichoice(question, answers, mapping)
         result = window.wait()
-        window.destroy()
         return result
