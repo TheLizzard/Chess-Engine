@@ -53,6 +53,9 @@ class CopyableWindow:
         self.root.update()
 
 
+"""
+This is a simple window with a tkinter entry widget that has a copy button.
+"""
 class CopyableEntryWindow(CopyableWindow):
     def __init__(self):
         super().__init__()
@@ -69,6 +72,9 @@ class CopyableEntryWindow(CopyableWindow):
         return self.widget.get()
 
 
+"""
+This is a simple window with a tkinter text widget that has a copy button.
+"""
 class CopyableTextWindow(CopyableWindow):
     def __init__(self):
         super().__init__()
@@ -85,6 +91,10 @@ class CopyableTextWindow(CopyableWindow):
         return self.text.get("0.0", "end")
 
 
+"""
+This is an auto hidding scrollbar that needs a tkinter text widget to work.
+It supports all 3 geometry managers (pack, place, grid).
+"""
 class AutoScrollbar(tk.Scrollbar):
     def __init__(self, master, text_widget: tk.Text, **kwargs):
         super().__init__(master, **kwargs)
@@ -154,6 +164,10 @@ class HelpWindow(TextWindow):
         return data
 
 
+"""
+A simple tkinter window proxy where I can bind the update function.
+Currently there is no way to unbind.
+"""
 class Tk(tk.Tk):
     def __init__(self, *args, **kwargs):
         self.binds = []
@@ -214,22 +228,41 @@ class CustomText(tk.Text):
         self.mark_set("insert", "end")
 
 
+"""
+Asks the user a question and returns
+the result as the answer if mapping isn't defined.
+If mapping is defined than that element of the tuple will be returned
+Example use:
+    board.ask_user("This is the question", ("Answer 1", "Answer 2"),
+                   (1, 2))
+    # If the user clicks on "Answer 1" than `1` will be returned
+    # If the user clicks on "Answer 2" than `2` will be returned
+"""
 class Question:
     def __init__(self):
         self.result = None
+        self.running = True
         self.root = Tk()
+        self.root.protocol("WM_DELETE_WINDOW", self.on_closing)
         self.root.resizable(False, False)
 
-    def destroy(self) -> None:
+    def on_closing(self):
+        self.root.quit()
         self.root.destroy()
+        self.running = False
+
+    def destroy(self) -> None:
+        if self.running:
+            self.root.quit()
+            self.root.destroy()
+            self.running = False
 
     def get(self):
         return self.result
 
     def wait(self):
-        while self.result is None:
-            time.sleep(0.01)
-            self.root.update()
+        if self.running:
+            self.root.mainloop()
         return self.result
 
     def add_custom(self, cls, *args, **kwargs) -> None:
@@ -239,6 +272,15 @@ class Question:
         """
         widget = cls(self.root, *args, **kwargs)
         widget.grid(column=1, columnspan=10, sticky="news")
+
+    def set_result(self, result) -> None:
+        """
+        This sets the result variable and ends the `wait` method
+        """
+        self.result = result
+        self.running = False
+        self.root.quit()
+        self.root.destroy()
 
     def ask_for_ip(self) -> None:
         font = ("Lucida Console", 18)
@@ -259,7 +301,7 @@ class Question:
 
     def _ask_for_ip(self) -> None:
         if self.check_ip():
-            self.result = self.entry.get("0.0", "end").replace("\n", "")
+            self.set_result(self.entry.get("0.0", "end").replace("\n", ""))
 
     def check_ip(self, event: tk.Event=None) -> bool:
         text = self.entry.get("0.0", "end").replace("\n", "")
@@ -301,7 +343,7 @@ class Question:
             self.buttons.append(button)
 
     def _ask_user_multichoice(self, event) -> None:
-        self.result = event
+        self.set_result(event)
 
     def ask_user_entry(self, question) -> None:
         commmand = self._ask_user_entry
@@ -315,7 +357,7 @@ class Question:
         self.button.grid(row=2, column=2, sticky="news")
 
     def _ask_user_entry(self, event=None) -> None:
-        self.result = self.entry.get()
+        self.set_result(self.entry.get())
 
 
 class ScrolledListboxes(tk.Frame):
@@ -373,16 +415,20 @@ class Logger:
     def __init__(self):
         self.old_data = []
         self.new_data = []
-        self.running = True
         self.paused = False
+        self.running = True
         self.blacklisted = []
         self.user_wants_to_see = None
         thread = threading.Thread(target=self.start_up)
         thread.deamon = True
         thread.start()
 
+    def __del__(self) -> None:
+        self.close()
+
     def start_up(self) -> None:
         self.root = tk.Tk()
+        self.root.protocol("WM_DELETE_WINDOW", self.close)
         self.root.title("Logger")
         self.root.resizable(False, False)
         self.root.bind("<Control-r>", self.add_blacklist)
@@ -403,6 +449,12 @@ class Logger:
         self.entry.bind_modified(self.modified)
 
         self.mainloop()
+
+    def close(self) -> None:
+        self.paused = True
+        self.running = False
+        self.root.quit()
+        self.root.destroy()
 
     def add_blacklist(self, _) -> None:
         paused = self.paused
@@ -520,7 +572,3 @@ def askopen() -> None:
 
 def asksave() -> None:
     return None
-
-
-if __name__ == "__main__":
-    pass
