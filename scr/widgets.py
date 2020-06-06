@@ -114,7 +114,7 @@ class AutoScrollbar(tk.Scrollbar):
                 elif self.geometry_manager == "place":
                     self.place(**self.geometry_manager_kwargs)
                 self.hidden = False
-        super().set(lo, hi)
+        super().set(low, high)
 
     def pack(self, **kwargs) -> None:
         super().pack(**kwargs)
@@ -198,7 +198,7 @@ class CustomText(tk.Text):
                 return "break"
 
     def bind_modified(self, function) -> None:
-        if function not in binds:
+        if function not in self.binds:
             self.binds.append(function)
 
     def unbind_modified(self, function) -> None:
