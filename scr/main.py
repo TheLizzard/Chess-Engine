@@ -181,10 +181,10 @@ class App:
 
     def edit(self, event):
         if event == "undo_move":
-            self.board.request_undo_move()
+            self.root.event_generate("<Control-z>")
 
         elif event == "redo_move":
-            self.board.request_redo_move()
+            self.root.event_generate("<Control-Shift-Z>")
 
         elif event == "change_position":
             print("edit.change_position")
@@ -254,8 +254,8 @@ class App:
         if event == "game_settings":
             print("settings.game_settings")
 
-        elif event == "suggested_moves_settings":
-            print("settings.suggested_moves_settings")
+        elif event == "board_settings":
+            print("settings.board_settings")
 
     def update(self):
         if self.done_set_up and self.analysing and (self.analyses is not None):
