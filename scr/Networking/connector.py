@@ -23,6 +23,9 @@ class Reciever:
         thread.deamon = True
         thread.start()
 
+    def __del__(self) -> None:
+        self.kill()
+
     def start(self):
         while self.running:
             if self.alowed_to_recv:
@@ -41,6 +44,7 @@ class Reciever:
 
     def kill(self):
         self.running = False
+        self.alowed_to_recv = False
 
     def generate_event(self, data):
         event = Event(data)
@@ -50,6 +54,8 @@ class Reciever:
 class Connector:
     def __init__(self, ip=None, port=None, server=False):
         self.connected = False
+        self.our_sock_running = False
+        self.thier_sock_running = False
         self.ip = ip
         self.port = port
         self.our_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -59,6 +65,7 @@ class Connector:
                 raise ValueError("If server, you need to specify the port.")
             self.our_sock.bind(("localhost", port))
             self.our_sock.listen(1)
+            self.our_sock_running = True
             thread = threading.Thread(target=self.wait_for_connection)
             thread.deamon = True
             thread.start()
@@ -67,9 +74,14 @@ class Connector:
         else:
             self.our_sock.connect((ip, port))
             self.their_sock = self.our_sock
+            self.thier_sock_running = True
             self.recver = Reciever(self.their_sock, self.recieve)
             self.recver.go()
             self.connected = True
+
+    def __del__(self) -> None:
+        if self.connected or self.our_sock_running or self.thier_sock_running:
+            self.kill()
 
     def bind(self, function):
         self.receive_callback = function
@@ -88,20 +100,39 @@ class Connector:
         self.their_sock.send(data)
 
     def wait_for_connection(self):
-        self.their_sock, self.their_address = self.our_sock.accept()
-        self.recver = Reciever(self.their_sock, self.recieve)
-        self.recver.go()
-        self.connected = True
+        try:
+            self.their_sock, self.their_address = self.our_sock.accept()
+            self.thier_sock_running = True
+            self.recver = Reciever(self.their_sock, self.recieve)
+            self.recver.go()
+            self.connected = True
+        except OSError as error:
+            pass # Dirty solution.
+            # If the user open multiplayer and swtiches to PvP (for example)
+            # the socket will close. Therefore `self.our_sock.accept()` will
+            # raise an OSError
 
     def kill(self):
-        if self.connected:
+        if self.connected: # Kill the recver
             self.recver.stop()
             self.recver.kill()
-            try:
-                self.our_sock.close()
-                self.their_sock.close()
-            except:
-                pass
+            self.recver.destroy()
+            self.connected = False
+
+        if self.our_sock_running:
+            self.our_sock.shutdown(socket.SHUT_RDWR) #Fully close the socket
+            self.our_sock.close()
+            del self.our_sock
+            self.our_sock_running = False
+
+        if self.thier_sock_running:
+            self.their_sock.shutdown(socket.SHUT_RDWR) #Fully close the socket
+            self.their_sock.close()
+            del self.their_sock
+            self.thier_sock_running = False
+
+        self.alowed_to_recv = False
+        self.unbind()
 
 
 def get_ip():
