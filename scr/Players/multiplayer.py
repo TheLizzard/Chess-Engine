@@ -203,6 +203,9 @@ class Multiplayer(User):
         """
         self.send_move(chess.Move(from_square=code, to_square=code))
 
+    def send_undo_move(self, _) -> None:
+        self.send_special_move(code=0)
+
     def undo(self) -> str:
         """
         This is called when the other player want to undo and we
