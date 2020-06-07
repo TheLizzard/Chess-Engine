@@ -185,6 +185,20 @@ DEFAULT_SETTINGS = """
 #      --------- ---------------------------- -----------------
 #
 
+# This is a file that contains all of the settings
+# There 6 types allowed:
+#      --------- ---------------------------- -----------------
+#     | Type    | Example value 1            | Example value 2 |
+#      --------- ---------------------------- -----------------
+#     | boolean | True                       | False           |
+#     | string  | "Hello world"              | "this is a str" |
+#     | integer | 1                          | 5               |
+#     | None    | None                       | None            |
+#     | float   | 1.02                       | 3.14159         |
+#     | tuple   | ("values", 1, True, False) | (0.0, None)     |
+#      --------- ---------------------------- -----------------
+#
+
 Menu:
     "tearoff" = False
     "File" = ("Open", "Save", "Save as", "-----", "Exit")
@@ -205,8 +219,8 @@ GameBoard:
     "light_squares" = "white"
     "chess_pieces_set_number" = 2
     "scale_for_pieces" = 1.4
-    "last_move_colour_white" = "#DDDDDD"
-    "last_move_colour_black" = "#555555"
+    "last_move_colour_white" = "#BBBBBB"
+    "last_move_colour_black" = "#666666"
 
 GameBoard.User: # Same for multiplayer as well
     "font" = ("", 9)
