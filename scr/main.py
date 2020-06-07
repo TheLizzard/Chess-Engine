@@ -1,18 +1,19 @@
-from settings import Settings
-from board import GUIBoard
-import widgets
-from analyse import Analyse
-
 from functools import partial
 import tkinter as tk
 import threading
 import time
+
+from settings import Settings
+from analyse import Analyse
+from board import GUIBoard
+import widgets
 
 SETTINGS = Settings()
 
 
 class App:
     def __init__(self):
+        self.filetypes = (("Chess games", "*.pgn"), ("All files", "*.*"))
         self.file_open = None
         self.analysing = False
         self.analyses = None
@@ -28,8 +29,7 @@ class App:
         """
         Sets up the tkinter part of the program and GUIBoard.
         """
-        self.root = widgets.Tk()
-        self.root.bind_update(self.update)
+        self.root = tk.Tk()
         self.root.resizable(False, False)
         self.root.title("Chess.py")
         self.root.config(bg=SETTINGS.root.background)
@@ -44,6 +44,7 @@ class App:
         self.set_up_eval()
         self.set_up_suggestedmoves()
         self.set_up_movehistory()
+        self.bind_keys()
 
     def set_up_menu(self):
         tearoff = SETTINGS.menu.tearoff
@@ -158,26 +159,54 @@ class App:
 
     def file(self, event):
         if event == "open":
-            print("file.open")
-            """
-            filename = widgets.askopen()
-            if filename is not None:
-                with open(filename, "r") as file:
-                    data = file.read()
-                self.file_open = filename
-            """
+            self.open()
 
         elif event == "save":
-            print("file.save")
+            self.save()
 
         elif event == "save_as":
-            print("file.save_as")
+            self.save_as()
 
         elif event == "exit":
             self.root.destroy()
 
         else:
             print("? ", event)
+
+    def bind_keys(self):
+        self.root.bind("<Control-s>", self.save)
+        self.root.bind("<Control-o>", self.open)
+        self.root.bind("<Control-Shift-S>", self.save_as)
+
+    def open(self, _=None) -> None:
+        self.open_from_file()
+
+    def open_from_file(self) -> None:
+        filename = widgets.askopen(filetypes=self.filetypes)
+        if filename is not None:
+            with open(filename, "r") as file:
+                data = file.read()
+            if self.board.set_pgn(data) == "break":
+                return "break" # If the players rejected the open
+            self.file_open = filename
+            self.clear_pgn()
+            self.restart_analysing()
+
+    def save_as(self, _=None) -> None:
+        filename = widgets.asksave(filetypes=self.filetypes)
+        if filename is not None:
+            self.file_open = filename
+            self.save_to_file()
+
+    def save(self, _=None) -> None:
+        if self.file_open is None:
+            self.save_as()
+        else:
+            self.save_to_file()
+
+    def save_to_file(self) -> None:
+        with open(self.file_open, "w") as file:
+            file.write(self.board.pgn())
 
     def edit(self, event):
         if event == "undo_move":
@@ -194,7 +223,7 @@ class App:
 
     def view(self, event):
         if event == "current_fen":
-            w = widgets.CopyableTextWindow()
+            w = widgets.CopyableEntryWindow(width=40)
             w.set(self.board.fen())
 
         elif event == "game_pgn":
@@ -206,7 +235,10 @@ class App:
             # This is only active when `self.allowed_analyses` is True
             if self.allowed_analyses:
                 # Start analysing the position
-                self.start_analysing()
+                if analysing:
+                    self.stop_analysing()
+                else:
+                    self.start_analysing()
 
         elif event == "play_vs_computer":
             # Add user as `colour` and computer as `not colour`
@@ -247,12 +279,11 @@ class App:
 
     def reset(self, allowed_analyses: bool) -> None:
         """
-        This resets the board, clears the pgn and sets allowed_analyses
+        This resets the board, clears the pgn and sets `allowed_analyses`
         """
         self.allowed_analyses = allowed_analyses
         self.stop_analysing()
         self.clear_pgn()
-        self.board.reset()
 
     def change_settings(self, event):
         if event == "game_settings":
@@ -265,6 +296,7 @@ class App:
         if self.done_set_up and self.analysing and (self.analyses is not None):
             score = self.analyses.score
             moves = self.analyses.moves
+            self.root.after(500, self.update)
 
             if (score is None) or (moves is None):
                 return None
@@ -294,9 +326,7 @@ class App:
 
     def moved(self):
         self.update_pgn()
-        if self.analysing:
-            self.analyses.kill()
-            self.start_analysing()
+        self.restart_analysing()
 
     def find_diff_pgn(self, pgn1, pgn2):
         if pgn1 == "\n":
@@ -306,17 +336,24 @@ class App:
         return pgn2[len(pgn1)-len(pgn2):][:-1], None
 
     def start_analysing(self):
-        if self.allowed_analyses:
+        if (self.allowed_analyses) and (not self.analysing):
             self.analysing = True
             self.analyses = Analyse(self.board.board)
             self.analyses.start()
             self.eval_frame.grid()
+            self.update()
 
     def stop_analysing(self):
-        self.analysing = False
-        if self.analyses is not None:
-            self.analyses.kill()
-        self.eval_frame.grid_remove()
+        if self.analysing:
+            self.analysing = False
+            if self.analyses is not None:
+                self.analyses.kill()
+            self.eval_frame.grid_remove()
+
+    def restart_analysing(self) -> None:
+        if self.analysing:
+            self.stop_analysing()
+            self.start_analysing()
 
 
 a = App()
