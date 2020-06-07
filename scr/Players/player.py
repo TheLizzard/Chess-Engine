@@ -70,16 +70,23 @@ class Player:
         """
         pass
 
-    def undo_move(self, move: chess.Move):
+    def undo_move(self, move: chess.Move) -> str:
         """
         This is called when the other player wants to undo a move. If
         `"break"` is returned the undo process will stop.
         """
         return None
 
-    def redo_move(self, move: chess.Move):
+    def redo_move(self, move: chess.Move) -> str:
         """
-        This is called when the other player wants to redo a move. If
+        This is called when a player wants to redo a move. If
         `"break"` is returned the redo process will stop.
+        """
+        return None
+
+    def open_game(self, pgn: str) -> str:
+        """
+        This is called when the user desides to open a game. To
+        disallow this action return `"break"`
         """
         return None
