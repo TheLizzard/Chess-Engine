@@ -56,8 +56,14 @@ class Analyse:
 
         with engine.analysis(self.board) as analysis:
             for info in analysis:
-                self.score = info.get("score")
-                self.moves = info.get("pv")
+
+                new_score = info.get("score")
+                if new_score is not None:
+                    self.score = new_score
+
+                new_moves = info.get("pv")
+                if new_moves is not None:
+                    self.moves = new_moves
 
                 if not self.running:
                     break
