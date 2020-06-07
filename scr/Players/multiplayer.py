@@ -243,3 +243,6 @@ class Multiplayer(User):
         There is no point in redoing moves.
         """
         return "break"
+
+    def open_game(self, pgn: str) -> str:
+        return "break"
