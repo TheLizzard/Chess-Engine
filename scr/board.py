@@ -1,3 +1,5 @@
+from io import StringIO
+from chess import pgn
 import tkinter as tk
 import chess
 import time
@@ -192,6 +194,20 @@ class GUIBoard:
             output += str(i+1)+". "+move_pair.rstrip()+"\n"
         return output
 
+    def set_pgn(self, pgn: str) -> None:
+        """
+        Sets up the board accourding to the pgn if allowed by both current
+        players.
+        """
+        for player in self.players:
+            if player.open_game(pgn) == "break":
+                return "break"
+        self.reset()
+        game = chess.pgn.read_game(StringIO(pgn))
+        for move in game.mainline_moves():
+            self.board.push(move)
+        self.update()
+
     # This is the part where the players are accually created and added to
     # the board using the board player protocol
 
@@ -344,8 +360,8 @@ class GUIBoard:
         for player in self.players:
             result = player.undo_move(move)
             if result == "break":
+                # If "break" of the current players rejected the undo
                 return "break"
-        # If None of the current players rejected the undo
         self.board.pop()
         self.undo_stack.append(move)
         self.update()
@@ -361,8 +377,8 @@ class GUIBoard:
         for player in self.players:
             result = player.redo_move(move)
             if result == "break":
+                # If "break" of the current players rejected the redo
                 return "break"
-        # If None of the current players rejected the redo
         self.undo_stack.pop()
         self.board.push(move)
         self.update()
