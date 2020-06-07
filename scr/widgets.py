@@ -1,4 +1,5 @@
 #https://stackoverflow.com/questions/40617515/python-tkinter-text-modified-callback
+from tkinter.filedialog import askopenfilename, asksaveasfilename
 from functools import partial
 from tkinter import ttk
 import tkinter as tk
@@ -7,6 +8,10 @@ import time
 import re
 
 
+"""
+This is a simple tk window with a tk text. It doesn't have the top bar.
+It also has an "Ok" button that closes the text box
+"""
 class TextWindow:
     def __init__(self):
         self.root = tk.Tk()
@@ -57,9 +62,9 @@ class CopyableWindow:
 This is a simple window with a tkinter entry widget that has a copy button.
 """
 class CopyableEntryWindow(CopyableWindow):
-    def __init__(self):
+    def __init__(self, **kwargs):
         super().__init__()
-        self.text = tk.Entry(self.root)
+        self.text = tk.Entry(self.root, **kwargs)
         super().add_widget(self.text)
 
     def set(self, string: str) -> None:
@@ -76,9 +81,9 @@ class CopyableEntryWindow(CopyableWindow):
 This is a simple window with a tkinter text widget that has a copy button.
 """
 class CopyableTextWindow(CopyableWindow):
-    def __init__(self):
+    def __init__(self, **kwargs):
         super().__init__()
-        self.text = tk.Text(self.root)
+        self.text = tk.Text(self.root, **kwargs)
         super().add_widget(self.text)
 
     def set(self, string: str) -> None:
@@ -162,24 +167,6 @@ class HelpWindow(TextWindow):
         with open("Help.txt", "r") as file:
             data = file.read()
         return data
-
-
-"""
-A simple tkinter window proxy where I can bind the update function.
-Currently there is no way to unbind.
-"""
-class Tk(tk.Tk):
-    def __init__(self, *args, **kwargs):
-        self.binds = []
-        super().__init__(*args, **kwargs)
-
-    def bind_update(self, func) -> None:
-        self.binds.append(func)
-
-    def update(self, *args, **kwargs) -> None:
-        for func in self.binds:
-            func()
-        super().update(*args, **kwargs)
 
 
 class CustomText(tk.Text):
@@ -567,8 +554,10 @@ def info(text: str) -> None:
     thread.deamon = True
     thread.start()
 
-def askopen() -> None:
-    return None
+def askopen(filetypes: tuple, title: str="Select file") -> str:
+    filename =  askopenfilename(title=title, filetypes=filetypes)
+    return filename
 
-def asksave() -> None:
-    return None
+def asksave(filetypes: tuple, title: str="Select file") -> str:
+    filename =  asksaveasfilename(title=title, filetypes=filetypes)
+    return filename
