@@ -104,7 +104,6 @@ class User(Player):
         self.delete_user_created_object()
         self.stop_user_created_object()
         # can't unbind tkinter events so this must be destroyed
-        print("please del me. I can't unbind")
         super().destroy()
 
     def mouse(self, event: tk.Event) -> None:
