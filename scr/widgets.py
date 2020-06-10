@@ -15,8 +15,8 @@ It also has an "Ok" button that closes the text box
 class TextWindow:
     def __init__(self):
         self.root = tk.Tk()
-        self.root.wm_attributes("-type", "splash")
-        self.text = tk.Text(self.root)
+        #self.root.wm_attributes("-type", "splash")
+        self.text = tk.Text(self.root, font=("", 10))
         self.sbar = tk.Scrollbar(self.root, command=self.text.yview)
         self.button = tk.Button(self.root, text="Ok", command=self.root.destroy)
         self.text.config(yscrollcommand=self.sbar.set)
@@ -42,7 +42,7 @@ class TextWindow:
 class CopyableWindow:
     def __init__(self):
         self.root = tk.Tk()
-        self.root.wm_attributes("-type", "splash")
+        #self.root.wm_attributes("-type", "splash")
         self.button_c = tk.Button(self.root, text="Copy", command=self.copy)
         self.button = tk.Button(self.root, text="Ok", command=self.root.destroy)
         self.button_c.grid(row=1, column=2, sticky="news")
@@ -161,12 +161,52 @@ class LicenceWindow(TextWindow):
 class HelpWindow(TextWindow):
     def __init__(self):
         super().__init__()
-        self.insert("end", self.get_text())
+        text = self.get_text()
+        self.insert("end", text)
+        self.config_tags()
+        self.style_text(text)
+        while self.text.get("end-1l", "end").replace(" ", "") == "\n":
+            self.text.delete("end-1l", "end")
+
+    def style_text(self, text: str) -> None:
+        ITALIC_REGEX = "![^\n]*!"
+        BOLD_REGEX = "#[^\n]*#"
+        KEYBOARD_COMBINATION_REGEX = "`[^\n]*`"
+        self.add_tag("italic", ITALIC_REGEX)
+        self.add_tag("bold", BOLD_REGEX)
+        self.add_tag("grey", KEYBOARD_COMBINATION_REGEX)
+
+    def add_tag(self, tag_name: str, regex: str):
+        pos = "1.0"
+        while True:
+            count_var = tk.StringVar()
+            pos = self.text.search(regex, pos, stopindex="end",
+                                   count=count_var, regexp=True)
+            if pos == "":
+                break
+            size = count_var.get()
+            end = "%s + %sc" % (pos, size)
+            end = self.text.index(end)
+            self.text.tag_add(tag_name, pos, end)
+            self.text.delete(end+"-1c", end)
+            self.text.delete(pos, pos+"+1c")
+            pos = end+"-2c"
+
+    def config_tags(self) -> None:
+        self.text.tag_config("bold", font=("", 12, "bold"))
+        self.text.tag_config("grey", background="#EEEEEE")
+        self.text.tag_config("italic", font=("", 10, "italic", "underline"))
 
     def get_text(self) -> str:
         with open("Help.txt", "r") as file:
             data = file.read()
-        return data
+        output = ""
+        for line in data.split("\n"):
+            if line.replace(" ", "") == "":
+                output += "\n"
+            elif line[:2] != "//":
+                output += line+"\n"
+        return output
 
 
 class CustomText(tk.Text):
