@@ -1,1 +1,46 @@
-???
+// To make text bold use #text#
+// To make text italic and underlined use !text!
+// To make text gey coloured use `text`
+// To make a comment use // at the start of the line
+#How to move a piece in a game?#
+      Either:
+            Click on the piece and click on the new square or
+            Drag the piece to the new square.
+
+
+#How do I make a temporary arrow?#
+      Right click and drag your mouse.
+      !Note: if you want to remove an arrow, either create a new arrow over it or left click your mouse anywhere on the screen!
+
+
+#How do I play vs another person on the same computer?#
+      Click on "Game" on the menu then click on "Play vs Human".
+
+
+#How do I play vs another person on a different computer?#
+      Click on "Game" on the menu then click on "Play Multiplayer"
+      !Note: if you want to play as black, you need to type in the other player's IP address.!
+
+
+#How do I change the settings?#
+      Click on "Settings" on the menu then click on:
+            "Board Settings" or
+            "Computer Settings" or
+            "User Settings" or
+            "Evaluation Settings".
+      !Note: you need to restart the program for the changes to take effect!
+
+
+#How do I undo and redo moves?#
+      To undo a move press '`Control+z`'
+      To redo a move press '`Control+Shift+Z`'
+
+
+#How do I save/open a game?#
+      To save the game press '`Control+s`'
+      To open the game press '`Control+o`'
+
+
+#I got an error.#
+      Please report all errors to github.com/TheLizzard/Chess-Engine/issues.
+      !Note: if you don't tell me the problem I can't fix it.!
