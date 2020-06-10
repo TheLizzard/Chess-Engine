@@ -229,7 +229,7 @@ class Question:
     def __init__(self):
         self.result = None
         self.running = True
-        self.root = Tk()
+        self.root = tk.Tk()
         self.root.protocol("WM_DELETE_WINDOW", self.on_closing)
         self.root.resizable(False, False)
 
@@ -555,9 +555,9 @@ def info(text: str) -> None:
     thread.start()
 
 def askopen(filetypes: tuple, title: str="Select file") -> str:
-    filename =  askopenfilename(title=title, filetypes=filetypes)
+    filename = askopenfilename(title=title, filetypes=filetypes)
     return filename
 
-def asksave(filetypes: tuple, title: str="Select file") -> str:
-    filename =  asksaveasfilename(title=title, filetypes=filetypes)
+def asksave(filetypes: tuple, title: str="Save file") -> str:
+    filename = asksaveasfilename(title=title, filetypes=filetypes)
     return filename
