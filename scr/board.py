@@ -248,7 +248,7 @@ class GUIBoard:
         # This shows the user's IP and asks if the user wants to play as
         # black or white
         ip_text = "Your IP is: "+get_ip()
-        colour = self.ask_user(ip_text+"\nDo you want to be the server?",
+        colour = self.ask_user(ip_text+"\nDo you want to play as white?",
                                ("yes", "no"), (True, False))
         if colour is None:
             return None
