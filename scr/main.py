@@ -235,7 +235,7 @@ class App:
             # This is only active when `self.allowed_analyses` is True
             if self.allowed_analyses:
                 # Start analysing the position
-                if analysing:
+                if self.analysing:
                     self.stop_analysing()
                 else:
                     self.start_analysing()
