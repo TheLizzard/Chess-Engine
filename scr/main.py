@@ -183,7 +183,7 @@ class App:
 
     def open_from_file(self) -> None:
         filename = widgets.askopen(filetypes=self.filetypes)
-        if filename is not None:
+        if (filename != ()) and (filename != ""):
             with open(filename, "r") as file:
                 data = file.read()
             if self.board.set_pgn(data) == "break":
@@ -194,7 +194,7 @@ class App:
 
     def save_as(self, _=None) -> None:
         filename = widgets.asksave(filetypes=self.filetypes)
-        if filename is not None:
+        if (filename != ()) and (filename != ""):
             self.file_open = filename
             self.save_to_file()
 
