@@ -1,13 +1,15 @@
 # Chess-Engine
-This is a simple GUI chess engine.
+This is a simple GUI chess engine for Linux based systems (not Windows).
+
+
+## Supported Operating systems
+Currently only 1 operating system is supported: Ubuntu. The program should run on any Linux system but I can't test it.
+#### Note: The program doesn't run on Windows at all (I am trying to fix that).
 
 
 ## Dependencies
 Currently there is only 1 dependancy (python-chess).
-
 On `Linux` do: `pip3 install python-chess`
-
-On `Windows` do: `python -m pip install python-chess`
 
 
 ## How to run:
