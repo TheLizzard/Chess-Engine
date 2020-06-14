@@ -48,20 +48,6 @@ class Player:
         """
         self.stop()
 
-    def undo_move(self, move: chess.Move) -> str:
-        """
-        Called when the user wants to undo a move.
-        If "break" is returned the undo will be blocked
-        """
-        pass
-
-    def redo_move(self, move: chess.Move) -> str:
-        """
-        Called when the user wants to redo a move.
-        If "break" is returned the redo will be blocked
-        """
-        pass
-
     def go(self) -> None:
         """
         Called every time the GUIBoard needs the player to move
