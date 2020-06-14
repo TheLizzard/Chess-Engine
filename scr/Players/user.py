@@ -30,7 +30,6 @@ class User(Player):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.piece_selected = None
-        self.alowed_to_play = False
         self.left_mouse_down = False
         self.right_mouse_down = False
         self.available_move_dots = []
