@@ -30,8 +30,8 @@ class Multiplayer(User):
         self.build_connection(ip, self.colour)
         self.event_lock = Lock()
         self.event_queue = []
-        self.last_self_heartbeat = int(time.time())
-        self.last_other_heartbeat = int(time.time())
+        self.last_self_heartbeat = time.time()
+        self.last_other_heartbeat = time.time()
         self._update()
 
     def __del__(self) -> None:
