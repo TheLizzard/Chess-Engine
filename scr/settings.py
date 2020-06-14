@@ -223,7 +223,6 @@ GameBoard:
     "last_move_colour_black" = "#666666"
 
 GameBoard.User: # Same for multiplayer as well
-    "font" = ("", 9)
     "arrow_colour" = "light green"
     "arrow_width" = 5
     "ring_colour" = "light green"
