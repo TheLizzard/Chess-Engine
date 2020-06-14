@@ -42,14 +42,7 @@ class Setting:
 
 class Settings:
     def __init__(self, file:str="settings.ini"):
-        if os.path.exists(file):
-            with open(file, "r") as file:
-                data = file.read()
-            settings = self.parse(data)
-        else:
-            print("Couldn't read the settings file so using the default ones.")
-            settings = self.parse(DEFAULT_SETTINGS)
-        self.set_settings(settings)
+        self.update()
 
     def __getitem__(self, key):
         if key in self.__dict__.keys():
@@ -79,7 +72,18 @@ class Settings:
         with open(file, "w") as file:
             file.write(DEFAULT_SETTINGS)
 
-    def update(self):pass
+    def update(self, file:str="settings.ini") -> None:
+        """
+        Reads the settings from the file if it exists.
+        """
+        if os.path.exists(file):
+            with open(file, "r") as file:
+                data = file.read()
+            settings = self.parse(data)
+        else:
+            print("Couldn't read the settings file so using the default ones.")
+            settings = self.parse(DEFAULT_SETTINGS)
+        self.set_settings(settings)
 
 
 def parse(data: str) -> dict:
@@ -185,20 +189,6 @@ DEFAULT_SETTINGS = """
 #      --------- ---------------------------- -----------------
 #
 
-# This is a file that contains all of the settings
-# There 6 types allowed:
-#      --------- ---------------------------- -----------------
-#     | Type    | Example value 1            | Example value 2 |
-#      --------- ---------------------------- -----------------
-#     | boolean | True                       | False           |
-#     | string  | "Hello world"              | "this is a str" |
-#     | integer | 1                          | 5               |
-#     | None    | None                       | None            |
-#     | float   | 1.02                       | 3.14159         |
-#     | tuple   | ("values", 1, True, False) | (0.0, None)     |
-#      --------- ---------------------------- -----------------
-#
-
 Menu:
     "tearoff" = False
     "File" = ("Open", "Save", "Save as", "-----", "Exit")
@@ -219,10 +209,11 @@ GameBoard:
     "light_squares" = "white"
     "chess_pieces_set_number" = 2
     "scale_for_pieces" = 1.4
-    "last_move_colour_white" = "#BBBBBB"
-    "last_move_colour_black" = "#666666"
+    "last_move_colour_white" = "#DDDDDD"
+    "last_move_colour_black" = "#555555"
 
 GameBoard.User: # Same for multiplayer as well
+    "font" = ("", 9)
     "arrow_colour" = "light green"
     "arrow_width" = 5
     "ring_colour" = "light green"
