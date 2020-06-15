@@ -29,12 +29,10 @@ class Reciever:
     def start(self):
         while self.running:
             if self.alowed_to_recv:
-                try:
-                    data = self.sock.recv(1024)
-                    self.generate_event(Bits.from_bytes(data))
-                except Exception as error:
-                    print(error)
-                    raise error
+                data = self.sock.recv(1024)
+                if data == "":
+                    self.running = False
+                self.generate_event(Bits.from_bytes(data))
 
     def go(self):
         self.alowed_to_recv = True
@@ -45,6 +43,9 @@ class Reciever:
     def kill(self):
         self.running = False
         self.alowed_to_recv = False
+
+    def destroy(self):
+        self.kill()
 
     def generate_event(self, data):
         event = Event(data)
@@ -63,7 +64,7 @@ class Connector:
         if server:
             if port is None:
                 raise ValueError("If server, you need to specify the port.")
-            self.our_sock.bind(("localhost", port))
+            self.our_sock.bind(("", port))
             self.our_sock.listen(1)
             self.our_sock_running = True
             thread = threading.Thread(target=self.wait_for_connection)
@@ -96,7 +97,6 @@ class Connector:
     def send_data(self, data):
         if not self.connected:
             return None
-            raise ValueError("Socket not connected.")
         self.their_sock.send(data)
 
     def wait_for_connection(self):
