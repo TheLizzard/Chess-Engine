@@ -24,7 +24,9 @@ class Multiplayer(User):
         if self.colour:
             ip = None
         else:
-            window = widgets.Question()
+            root = self.master.winfo_toplevel()
+            x, y = root.winfo_x(), root.winfo_y()
+            window = widgets.Question(x, y)
             window.ask_for_ip()
             ip = window.wait()
             window.destroy()
@@ -43,12 +45,9 @@ class Multiplayer(User):
     def destroy(self) -> str:
         """
         This destroys the connection, closes the port and unbinds the socket.
-        Note: Only the white player is allowed to close the socket. This
-        is because both white and black will try to close `connector` and
-        a lot of errors arise.
+        Note: GUIBoard calls destory to both its players which are the
+        same instance. Therefore, this will be called twice.
         """
-        if not self.colour:
-            return "break"
         self.running = False
         self.connector.unbind()
         self.connector.kill()
@@ -112,17 +111,19 @@ class Multiplayer(User):
         self.master.after(50, self._update)
         for event in event_queue:
             bits = event.data
-            if len(bits) == 0:
+            length = len(bits)//8 # in bytes
+            if length == 0:
                 # Socket telling us that the connection is broken.
                 if self.debug:
                     self.logger.log("connection.broken")
-                    # Now we have to destroy this so we don't try to
-                    # send any more moves.
-                    self.destroy()
-            elif len(bits) == 8:
+                print("The other player left the game")
+                # Now we have to destroy this so we don't try to
+                # send any more data.
+                self.destroy()
+            elif length == 1:
                 # We recved a heartbeat from the other player
                 self.recieved_heartbeat(bits)
-            elif len(bits) == 16:
+            elif length == 2:
                 # We recved a move from the other player
                 self.recieved_move(event)
             else:
@@ -137,6 +138,8 @@ class Multiplayer(User):
         if time.time()-self.last_self_heartbeat > 0.5:
             self.send_heartbeat()
             self.last_self_heartbeat = time.time()
+        if time.time()-self.last_other_heartbeat > 5:
+            print("Other has really bad connection")
 
     def recieved_heartbeat(self, bits) -> None:
         """
@@ -204,7 +207,10 @@ class Multiplayer(User):
             self.undo()
         elif code == 1:
             # we requested undo and they rejected
-            widgets.info("The other player declined your undo request.")
+            root = self.master.winfo_toplevel()
+            # Make the new window appear over the main one
+            x, y = root.winfo_x(), root.winfo_y()
+            widgets.info("The other player declined your undo request.", x, y)
         elif code == 2:
             # we requested undo and they accepted
             self.request_undo()
