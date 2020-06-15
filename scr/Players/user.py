@@ -272,6 +272,8 @@ class User(Player):
         if new_position == old_position:
             if self.moved_selected_piece:
                 self.unselect()
+            else:
+                return None
         else:
             uci = (old_position + new_position).to_str()
             if self.legal_promoting(uci, new_position):
