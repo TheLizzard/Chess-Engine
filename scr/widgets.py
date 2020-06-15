@@ -24,6 +24,8 @@ class TextWindow:
         self.sbar.grid(row=1, column=2, sticky="news")
         self.button.grid(row=2, column=1, columnspan=2, sticky="news")
         self.disable()
+        self.button.focus()
+        self.button.bind("<Return>", lambda e:self.root.destroy())
 
     def disable(self) -> None:
         self.text.config(state="disabled")
@@ -47,6 +49,8 @@ class CopyableWindow:
         self.button = tk.Button(self.root, text="Ok", command=self.root.destroy)
         self.button_c.grid(row=1, column=2, sticky="news")
         self.button.grid(row=2, column=1, columnspan=2, sticky="news")
+        self.button.focus()
+        self.button.bind("<Return>", lambda e:self.root.destroy())
 
     def add_widget(self, widget) -> None:
         self.widget = widget
@@ -179,7 +183,7 @@ class HelpWindow(TextWindow):
     def add_tag(self, tag_name: str, regex: str):
         pos = "1.0"
         while True:
-            count_var = tk.StringVar()
+            count_var = tk.StringVar(self.root)
             pos = self.text.search(regex, pos, stopindex="end",
                                    count=count_var, regexp=True)
             if pos == "":
@@ -324,6 +328,7 @@ class Question:
                                 **kwargs)
         self.entry.grid(row=2, column=1)
         self.entry.bind_modified(self.check_ip)
+        self.entry.focus()
 
         self.button = tk.Button(self.root, text="Done",
                                 command=self._ask_for_ip, **kwargs)
@@ -380,6 +385,7 @@ class Question:
         self.root.bind("<Return>", commmand)
         self.label = tk.Label(self.root, text=question)
         self.entry = tk.Entry(self.root)
+        self.entry.focus()
         self.button = tk.Button(self.root, text="Done", command=commmand)
 
         self.label.grid(row=1, column=1, columnspan=2, sticky="news")
@@ -464,6 +470,7 @@ class Logger:
         self.root.bind("<Control-r>", self.add_blacklist)
         self.b_frame = tk.Frame(self.root)
         self.entry = CustomText(self.root, height=1, width=34)
+        self.entry.focus()
         self.button = tk.Button(self.b_frame, text="Clear", command=self.clear)
         self.pbutton = tk.Button(self.b_frame, text="◼", command=self.pause)
         self.listbox = ScrolledListboxes(self.root, width=23)
@@ -582,18 +589,22 @@ class Logger:
         self.running = False
 
 
-def _info(text: str) -> None:
+def _info(text: str, x: int, y :int) -> None:
     root = tk.Tk()
     root.resizable(False, False)
     root.title("Info")
+    root.geometry("+%d+%d" % (x, y))
     label = tk.Label(root, text=text)
     button = tk.Button(root, text="Ok", command=root.destroy)
+    button.bind("<Return>", lambda e:root.destroy())
+    button.focus()
     label.grid(row=1, column=1, sticky="news")
     button.grid(row=2, column=1, sticky="news")
     root.mainloop()
 
-def info(text: str) -> None:
-    thread = threading.Thread(target=_info, args=(text, ))
+def info(text: str, x:int=None, y:int=None) -> None:
+    # The x and the y coordinates that new new window will take
+    thread = threading.Thread(target=_info, args=(text, x, y))
     thread.deamon = True
     thread.start()
 
