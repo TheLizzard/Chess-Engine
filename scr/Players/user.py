@@ -30,6 +30,7 @@ class User(Player):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.size = BOARD_SETTINGS.size_of_squares
+        self.reset_vars()
         self.bind_mouse()
         self.bind_keys()
 
