@@ -273,10 +273,11 @@ Example use:
     # If the user clicks on "Answer 2" than `2` will be returned
 """
 class Question:
-    def __init__(self):
+    def __init__(self, x, y):
         self.result = None
         self.running = True
         self.root = tk.Tk()
+        self.root.geometry("+%d+%d" % (x, y))
         self.root.protocol("WM_DELETE_WINDOW", self.on_closing)
         self.root.resizable(False, False)
 
