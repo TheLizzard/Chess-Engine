@@ -11,6 +11,8 @@ from Networking.connector import Connector, Event
 import widgets
 
 
+PORT = 65360
+
 class Multiplayer(User):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -64,10 +66,10 @@ class Multiplayer(User):
         This tries to build a connection. When successful
         `connector.connected` will be `True`
         """
-        self.connector = Connector(ip=ip, port=65360, server=colour)
+        self.connector = Connector(ip=ip, port=PORT, server=colour)
         self.connector.bind(self.receiver)
         if self.debug:
-            self.logger.log("connection.build", ip, 65360, sep="  ")
+            self.logger.log("connection.build", ip, PORT, sep="  ")
 
     def send_move(self, move: chess.Move) -> None:
         """
