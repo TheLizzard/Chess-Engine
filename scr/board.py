@@ -395,7 +395,8 @@ class GUIBoard:
         Asks the user a question in a new tkinter window using the
         `widgets.py` library
         """
-        window = widgets.Question()
+        x, y = self.root.winfo_x(), self.root.winfo_y()
+        window = widgets.Question(x, y)
         window.ask_user_multichoice(question, answers, mapping)
         result = window.wait()
         return result
