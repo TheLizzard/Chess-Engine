@@ -230,8 +230,11 @@ class CustomText(tk.Text):
             result = self.generate_event(cmd)
             if result == "break":
                 return "break"
-
-        return self.tk.call(cmd)
+        try:
+            result = self.tk.call(cmd)
+        except:
+            result = None
+        return result
 
     def generate_event(self, cmd: tuple) -> str:
         for bind in self.binds:
