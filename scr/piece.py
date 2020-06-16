@@ -47,8 +47,9 @@ class Piece:
             x, y = self.position
         else:
             x, y = position
-        x_pix = (x-0.5)*self.sqr_size
-        y_pix = (8.5-y)*self.sqr_size
+        size = self.sqr_size
+        x_pix = (x-0.5)*size
+        y_pix = (8.5-y)*size
         pos = (x_pix, y_pix)
         self.tkimage = ImageTk.PhotoImage(self.image)
         self.tkcanvasnum = self.master.create_image(pos, image=self.tkimage)
