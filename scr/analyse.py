@@ -33,7 +33,7 @@ os_bits = str(settings.get_os_bits()) # Get the bit version of the OS
 # Get the file extension that the OS supports
 os_extension = settings.get_os_extension()
 # Combine everything to get the location
-STOCKFISH_LACATION = STOCKFISH_FOLDER+os_bits+os_extension
+STOCKFISH_LOCATION = STOCKFISH_FOLDER+os_bits+os_extension
 del settings, os_bits, os_extension, STOCKFISH_FOLDER # clean up
 
 
@@ -62,7 +62,7 @@ class Analyse:
         thread for the mainloop.
         This loop runs until the `running` attribute is False.
         """
-        engine = chess.engine.SimpleEngine.popen_uci(STOCKFISH_LACATION)
+        engine = chess.engine.SimpleEngine.popen_uci(STOCKFISH_LOCATION)
 
         with engine.analysis(self.board) as analysis:
             for info in analysis:
