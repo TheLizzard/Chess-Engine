@@ -224,8 +224,8 @@ GameBoard:
     "light_squares" = "white"
     "chess_pieces_set_number" = 2
     "scale_for_pieces" = 1.4
-    "last_move_colour_white" = "#DDDDDD"
-    "last_move_colour_black" = "#555555"
+    "last_move_colour_white" = "#BBBBBB"
+    "last_move_colour_black" = "#666666"
 
 GameBoard.User: # Same for multiplayer as well
     "arrow_colour" = "light green"
@@ -249,7 +249,7 @@ Evaluation:
     "colour" = "white"
     "background" = "grey"
     "font" = ("Lucida Console", 20)
-    "stockfish" = "Stockfish/stockfish_10_x64"
+    "stockfish" = "Stockfish/stockfish_11_x"
 
 SuggestedMoves:
     "colour" = "white"
