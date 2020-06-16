@@ -1,5 +1,5 @@
 # Chess-Engine
-This is a simple GUI chess engine for Linux based systems (not Windows).
+This is a simple GUI chess engine for Linux and Windows.
 
 
 ## Supported Operating systems
