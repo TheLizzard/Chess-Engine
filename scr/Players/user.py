@@ -122,64 +122,73 @@ class User(Player):
         name = event.type._name_
         x = event.x
         y = event.y
+        pos = (x, y)
 
         if (not (0 < x < self.size*8)) or (not (0 < y < self.size*8)):
             self.unselect()
             self.update()
             self.stop_user_created_object()
-            return None
-
-        if event.num == 1:
-            if name == "ButtonPress":
-                self.delete_user_created_object()
-                self.right_mouse_down = True
-                self.left_mouse_down = False
-                self.moved_selected_piece = False
-                position = Position.from_coords((x, y))
-                if self.piece_selected is not None:
-                    self.move_selected((event.x, event.y))
-                    self.unselect()
-                else:
-                    self.select(position)
-            elif name == "ButtonRelease":
-                self.right_mouse_down = False
-                if self.piece_selected is not None:
-                    self.move_selected((event.x, event.y))
+        elif event.num == 1:
+            self.mouse_left(name, pos)
         elif event.num == 3:
-            if self.right_mouse_down:
-                pass
-            elif name == "ButtonPress":
-                self.left_mouse_down = True
-                position = Position.from_coords((x, y))
-                self.user_created_arrow_start = position
-                self.user_helper_making = self.create_ring(position)
-            elif name == "ButtonRelease":
-                if not self.left_mouse_down:
-                    return None
-                self.left_mouse_down = False
-                start = self.user_created_arrow_start
-                self.user_created_arrow_start = None
-                end = Position.from_coords((x, y))
-                self.create_user_helping_object(start, end)
+            self.mouse_right(name, pos)
         elif name == "Motion":
             if self.user_helper_making is not None:
                 self.stop_user_created_object()
             if event.state & 256: # Button 1
-                if (self.piece_selected is not None) and self.right_mouse_down:
-                    self.piece_selected.place((x, y))
-                    position = Position.from_coords((x, y))
-                    if position != self.piece_selected.position:
-                        self.moved_selected_piece = True
-            elif event.state & 1024: # Button 3
-                if self.left_mouse_down and (not self.right_mouse_down):
-                    start = self.user_created_arrow_start
-                    end = Position.from_coords((x, y))
-                    if start == end:
-                        self.user_helper_making = self.create_ring(start)
-                    else:
-                        self.user_helper_making = self.create_arrow(start, end)
+                self.mouse_left("Motion", pos)
+            if event.state & 1024: # Button 1
+                self.mouse_right("Motion", pos)
 
-    def create_user_helping_object(self, start: Position, end: Position) -> None:
+    def mouse_left(self, name, pos):
+        if name == "ButtonPress":
+            self.delete_user_created_object()
+            self.right_mouse_down = True
+            self.left_mouse_down = False
+            self.moved_selected_piece = False
+            position = Position.from_coords(pos)
+            if self.piece_selected is not None:
+                self.move_selected(pos)
+                self.unselect()
+            else:
+                self.select(position)
+        elif name == "ButtonRelease":
+            self.right_mouse_down = False
+            if self.piece_selected is not None:
+                self.move_selected(pos)
+        elif name == "Motion":
+            if (self.piece_selected is not None) and self.right_mouse_down:
+                self.piece_selected.place(pos)
+                position = Position.from_coords(pos)
+                if position != self.piece_selected.position:
+                    self.moved_selected_piece = True
+
+    def mouse_right(self, name, pos):
+        if self.right_mouse_down:
+            pass
+        elif name == "ButtonPress":
+            self.left_mouse_down = True
+            position = Position.from_coords(pos)
+            self.user_created_arrow_start = position
+            self.user_helper_making = self.create_ring(position)
+        elif name == "ButtonRelease":
+            if not self.left_mouse_down:
+                return None
+            self.left_mouse_down = False
+            start = self.user_created_arrow_start
+            #self.user_created_arrow_start = None
+            end = Position.from_coords(pos)
+            self.create_user_helping_object(start, end)
+        elif name == "Motion":
+            if self.left_mouse_down and (not self.right_mouse_down):
+                start = self.user_created_arrow_start
+                end = Position.from_coords(pos)
+                if start == end:
+                    self.user_helper_making = self.create_ring(start)
+                else:
+                    self.user_helper_making = self.create_arrow(start, end)
+
+    def create_user_helping_object(self, start:Position, end:Position) -> None:
         """
         This creates a object that can help the user like:
             rings (can be created by clicking the right mouse button)
@@ -265,18 +274,18 @@ class User(Player):
         Moves the selected piece to the new_coords (the argument).
         It checks if the move is legal.
         """
-        new_position = Position.from_coords(new_coords)
-        old_position = self.piece_selected.position
+        new = Position.from_coords(new_coords)
+        old = self.piece_selected.position
 
-        if new_position == old_position:
+        if new == old:
             if self.moved_selected_piece:
                 self.unselect()
+                self.update()
             else:
                 self.piece_selected.show()
-                return None
         else:
-            uci = (old_position + new_position).to_str()
-            if self.legal_promoting(uci, new_position):
+            uci = (old + new).to_str()
+            if self.legal_promoting(old, new):
                 uci += self.askuser_pawn_promotion()
             move = chess.Move.from_uci(uci)
             if move in self.board.legal_moves:
@@ -284,7 +293,7 @@ class User(Player):
                 self.remove_available_moves()
                 self.push(move)
             self.unselect()
-        self.update()
+            self.update()
 
     def select(self, position: Position) -> None:
         """
@@ -332,11 +341,9 @@ class User(Player):
         r = radius
         return self.master.create_oval(x-r, y-r, x+r, y+r, **kwargs)
 
-    def legal_promoting(self, uci: str, new_position: Position) -> bool:
-        if self.piece_selected.name == "pawn":
-            if (new_position[1] == 8) or (new_position[1] == 1):
-                potential_move = chess.Move.from_uci(uci+"q")
-                return (potential_move in self.board.legal_moves)
+    def legal_promoting(self, old: Position, new: Position) -> bool:
+        if ((old.y == 7) and (new.y == 8)) or ((old.y == 2) and (new.y == 1)):
+            return self.piece_selected.name == "pawn"
         return False
 
     def askuser_pawn_promotion(self) -> str:
