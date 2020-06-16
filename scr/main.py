@@ -315,8 +315,8 @@ class App:
         self.movehistory_text.config(state="normal")
         old_pgn = self.movehistory_text.get("1.0", "end")[:-1]
         new_pgn = self.board.pgn()
-        diff, c = self.find_diff_pgn(old_pgn, new_pgn)
-        if c is not None:
+        diff, clear = self.find_diff_pgn(old_pgn, new_pgn)
+        if clear:
             self.clear_pgn()
         self.movehistory_text.insert("end", diff)
         self.movehistory_text.config(state="disabled")
@@ -332,8 +332,8 @@ class App:
         if pgn1 == "\n":
             pgn1 = ""
         if pgn1 not in pgn2:
-            return pgn2, "clear"
-        return pgn2[len(pgn1)-len(pgn2):][:-1], None
+            return pgn2, True
+        return pgn2[len(pgn1)-len(pgn2):][:-1], False
 
     def start_analysing(self):
         if (self.allowed_analyses) and (not self.analysing):
