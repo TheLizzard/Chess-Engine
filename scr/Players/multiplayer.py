@@ -233,7 +233,9 @@ class Multiplayer(User):
         can eather allow them or block them.
         """
         # Ask the user if they want to allow or block the undo request
-        window = widgets.Question()
+        root = self.master.winfo_toplevel()
+        x, y = root.winfo_x(), root.winfo_y()
+        window = widgets.Question(x, y)
         window.ask_user_multichoice("The other player requested a move back.",
                                     ("Accept", "Decline"), (True, False))
         allowed = window.wait()
