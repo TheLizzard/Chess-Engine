@@ -340,7 +340,9 @@ class User(Player):
 
     def askuser_pawn_promotion(self) -> str:
         self.stop()
-        window = widgets.Question()
+        root = self.master.winfo_toplevel()
+        x, y = root.winfo_x(), root.winfo_y()
+        window = widgets.Question(x, y)
         window.ask_user_multichoice("What do you want to promote to?",
                                     ("Queen", "Rook", "Bishop", "Knight"),
                                     mapping=("q", "r", "b", "k"))
