@@ -60,6 +60,8 @@ class Connector:
         self.ip = ip
         self.port = port
         self.our_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        # To stop this error: OSError: [Errno 98] Address already in use
+        self.our_sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self.receive_callback = None
         if server:
             if port is None:
