@@ -353,7 +353,7 @@ class User(Player):
         window = widgets.Question(x, y)
         window.ask_user_multichoice("What do you want to promote to?",
                                     ("Queen", "Rook", "Bishop", "Knight"),
-                                    mapping=("q", "r", "b", "k"))
+                                    mapping=(5, 4, 3, 2))
         chosen_promotion = window.wait()
         window.destroy()
         self.start()
