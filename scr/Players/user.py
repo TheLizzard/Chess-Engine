@@ -272,6 +272,7 @@ class User(Player):
             if self.moved_selected_piece:
                 self.unselect()
             else:
+                self.piece_selected.show()
                 return None
         else:
             uci = (old_position + new_position).to_str()
