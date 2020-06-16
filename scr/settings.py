@@ -1,3 +1,6 @@
+#https://stackoverflow.com/questions/1405913/how-do-i-determine-if-my-python-shell-is-executing-in-32bit-or-64bit-mode-on-os
+import platform
+import struct
 import copy
 import os
 import re
@@ -173,6 +176,18 @@ def parse_block(block: str) -> dict:
         return {name: result}
     raise ValueError("Can't parse this block: "+block)
 
+def get_os_bits() -> int:
+    return 8 * struct.calcsize("P")
+
+def get_os_extension() -> int:
+    os = platform.system()
+    if os.lower() == "windows":
+        return ".exe"
+    elif os.lower() == "linux":
+        return ""
+    else:
+        raise OSError("Can't recognise the OS type.")
+
 
 DEFAULT_SETTINGS = """
 # This is a file that contains all of the settings
@@ -213,7 +228,6 @@ GameBoard:
     "last_move_colour_black" = "#555555"
 
 GameBoard.User: # Same for multiplayer as well
-    "font" = ("", 9)
     "arrow_colour" = "light green"
     "arrow_width" = 5
     "ring_colour" = "light green"
