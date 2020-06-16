@@ -284,10 +284,10 @@ class User(Player):
             else:
                 self.piece_selected.show()
         else:
-            uci = (old + new).to_str()
+            promotion = None
             if self.legal_promoting(old, new):
-                uci += self.askuser_pawn_promotion()
-            move = chess.Move.from_uci(uci)
+                promotion = self.askuser_pawn_promotion()
+            move = chess.Move(int(old), int(new), promotion=promotion)
             if move in self.board.legal_moves:
                 self.delete_user_created_object()
                 self.remove_available_moves()
