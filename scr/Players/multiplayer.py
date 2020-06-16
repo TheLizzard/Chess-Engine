@@ -135,6 +135,8 @@ class Multiplayer(User):
         """
         Checks how long ago we send a heartbeat and sends one.
         """
+        if not self.connector.connected:
+            return None
         if time.time()-self.last_self_heartbeat > 0.5:
             self.send_heartbeat()
             self.last_self_heartbeat = time.time()
@@ -148,9 +150,6 @@ class Multiplayer(User):
         """
         if self.debug:
             self.logger.log("connection.recv.heartbeat")
-        diff = self.last_other_heartbeat-time.time()
-        if diff >= 5:
-            print("other has bad connection")
         self.last_other_heartbeat = time.time()
 
     def send_heartbeat(self) -> None:
@@ -215,7 +214,7 @@ class Multiplayer(User):
             # we requested undo and they accepted
             self.request_undo()
         else:
-            print("Illigal code: "+str(code))
+            print("Illigal code:", code)
 
     def send_special_move(self, code: int) -> None:
         """
