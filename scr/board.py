@@ -27,7 +27,7 @@ class GUIBoard:
                       "q": "queen",
                       "n": "knight",
                       "b": "bishop"}
-    def __init__(self, root: tk.Tk, kwargs: dict, move_callback=None):
+    def __init__(self, root: tk.Tk, kwargs: dict, move_callback):
         self.root = root
         self.kwargs = kwargs
         self.undo_stack = []
@@ -257,7 +257,7 @@ class GUIBoard:
         player = Multiplayer(self.board, self.master, colour, self.pieces,
                              self.update, self.done_move,
                              self.request_undo_move, self.request_redo_move,
-                             debug=False)
+                             debug=True)
         self.add_player(colour, player)
         # This is only for testing purposess.
         """
@@ -365,6 +365,7 @@ class GUIBoard:
         self.board.pop()
         self.undo_stack.append(move)
         self.update()
+        self.move_callback()
 
     def request_redo_move(self):
         """
@@ -382,6 +383,7 @@ class GUIBoard:
         self.undo_stack.pop()
         self.board.push(move)
         self.update()
+        self.move_callback()
 
     def start_player(self) -> None:
         """
