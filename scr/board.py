@@ -305,15 +305,9 @@ class GUIBoard:
         # for each one of the moves push the move and add the sans
         # representation of it to the output
         for move in moves:
-            output.append(self.move_to_san(move, board))
+            output.append(board.san(move))
             board.push(move)
         return output
-
-    def move_to_san(self, move: chess.Move, board: chess.Board):
-        """
-        Converts a `chess.Move` to a str of the sans representation of the move
-        """
-        return board.san(move)
 
     def update_last_moved(self) -> None:
         """
