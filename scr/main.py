@@ -44,17 +44,19 @@ class App:
         self.root.config(bg=SETTINGS.root.background)
         self.root.protocol("WM_DELETE_WINDOW", self.exit)
         self.set_up_menu()
-        self.root.config(menu=self.menubar)
 
-        self.widget_kwargs = SETTINGS.widgets
-        self.modified_widget_kwargs = self.widget_kwargs.dict()
-        self.justify = self.modified_widget_kwargs.pop("justify", None)
+        self.widget_kwargs = SETTINGS.widgets.dict()
         self.board = GUIBoard(root=self.root, move_callback=self.moved,
-                              kwargs=self.modified_widget_kwargs)
+                              kwargs=self.widget_kwargs)
         self.set_up_eval()
         self.set_up_suggestedmoves()
         self.set_up_movehistory()
         self.bind_keys()
+
+    def bind_keys(self):
+        self.root.bind("<Control-s>", self.save)
+        self.root.bind("<Control-o>", self.open)
+        self.root.bind("<Control-Shift-S>", self.save_as)
 
     def set_up_menu(self):
         tearoff = SETTINGS.menu.tearoff
@@ -69,11 +71,12 @@ class App:
             for button in _list:
                 if button.replace("-", "") == "":
                     self.submenu.add_separator()
-                    continue
-                button = button[0].upper()+button[1:]
-                event = (name+"."+button).lower().replace(" ", "_")
-                command = partial(self.menu, event)
-                self.submenu.add_command(label=button, command=command)
+                else:
+                    button = button[0].upper()+button[1:]
+                    event = (name+"."+button).lower().replace(" ", "_")
+                    command = partial(self.menu, event)
+                    self.submenu.add_command(label=button, command=command)
+        self.root.config(menu=self.menubar)
 
     def set_up_eval(self):
         settings = SETTINGS.evaluation
@@ -84,14 +87,13 @@ class App:
         font = settings.font
 
         self.eval_frame = tk.Frame(self.root, width=width, height=height,
-                                   bg=bg, **self.modified_widget_kwargs)
+                                   bg=bg, **self.widget_kwargs)
 
         self.eval_frame.grid(row=1, column=2)
         self.eval_frame.grid_propagate(False)
-        self.eval_frame.pack_propagate(False)
 
         self.eval_text = tk.Label(self.eval_frame, fg=fg, bg=bg, font=font,
-                                  **self.modified_widget_kwargs)
+                                  **self.widget_kwargs)
         self.eval_text.grid(row=1, column=1, sticky="news")
         self.eval_text.config(text="2.2")
 
@@ -102,8 +104,8 @@ class App:
         font = settings.font
 
         self.suggestedmoves_text = tk.Label(self.eval_frame, fg=fg, font=font,
-                                            bg=bg, justify=self.justify,
-                                            **self.modified_widget_kwargs)
+                                            bg=bg,
+                                            **self.widget_kwargs)
         self.suggestedmoves_text.grid(row=2, column=1, sticky="news")
         self.suggestedmoves_text.config(text="No moves to suggest")
 
@@ -117,10 +119,9 @@ class App:
         font = settings.font
         self.movehistory_frame = tk.Frame(self.root, width=width,
                                           height=height, bg=bg,
-                                          **self.modified_widget_kwargs)
+                                          **self.widget_kwargs)
         self.movehistory_frame.grid(row=3, column=2, sticky="news")
 
-        self.movehistory_frame.grid_propagate(False)
         self.movehistory_frame.pack_propagate(False)
         self.movehistory_frame.columnconfigure(0, weight=10)
 
@@ -131,7 +132,7 @@ class App:
                                         width=width, font=font, fg=fg, bg=bg,
                                         insertbackground=cursor_colour,
                                         state="disabled",
-                                        **self.modified_widget_kwargs)
+                                        **self.widget_kwargs)
 
         self.movehistory_text.pack(side="left", expand=True, fill="y")
 
@@ -182,11 +183,6 @@ class App:
 
         else:
             print("? ", event)
-
-    def bind_keys(self):
-        self.root.bind("<Control-s>", self.save)
-        self.root.bind("<Control-o>", self.open)
-        self.root.bind("<Control-Shift-S>", self.save_as)
 
     def open(self, _=None) -> None:
         self.open_from_file()
@@ -292,6 +288,7 @@ class App:
         This resets the board, clears the pgn and sets `allowed_analyses`
         """
         self.allowed_analyses = allowed_analyses
+        self.board.reset()
         self.stop_analysing()
         self.clear_pgn()
 
