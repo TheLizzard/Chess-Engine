@@ -29,24 +29,17 @@ USER_SETTINGS = SETTINGS["gameboard.user"]
 class User(Player):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.size = BOARD_SETTINGS.size_of_squares
-        self.reset_vars()
-        self.bind_mouse()
-        self.bind_keys()
-
-    def reset_vars(self):
-        """
-        This resets all of the variables. It is a fix for Issue #21
-        https://github.com/TheLizzard/Chess-Engine/issues/21
-        """
         self.piece_selected = None
         self.left_mouse_down = False
-        self.right_mouse_down = False
         self.available_move_dots = []
+        self.right_mouse_down = False
         self.user_created_helpers = {}
         self.user_helper_making = None
         self.moved_selected_piece = False
         self.user_created_arrow_start = None
+        self.size = BOARD_SETTINGS.size_of_squares
+        self.bind_mouse()
+        self.bind_keys()
 
     def position_to_piece(self, position: Position) -> Piece:
         for piece in self.pieces:
@@ -57,7 +50,7 @@ class User(Player):
         """
         Calls callback with the move as by the board, player protocol
         """
-        self.reset_vars() # reset the variables (fix for Issue #21)
+        self.left_mouse_down = False
         self.callback(move)
 
     def bind_mouse(self) -> None:
