@@ -18,13 +18,9 @@ class Piece:
         self.position = position
         self.sqr_size = SETTINGS.size_of_squares
         self.set = SETTINGS.chess_pieces_set_number
-        self.filename = self.get_filename(name=name, colour=colour,
-                                          set=self.set)
-        self.image = self.get_image(filename=self.filename)
+        filename = self.get_filename(name=name, colour=colour, set=self.set)
+        self.image = Image.open(filename)
         self.size = self.image.size
-
-    def get_image(self, filename: str) -> Image:
-        return Image.open(filename)
 
     def get_filename(self, name: str, colour: bool, set: int) -> str:
         if colour:
@@ -83,9 +79,9 @@ class Piece:
         self.resize(max_width)
 
     def _resize(self) -> None:
-        size = tuple(map(lambda x:int(x+0.5), self.size))
+        size = (int(self.size[0]+0.5), int(self.size[1]+0.5))
         self.image = self.image.resize(size, Image.NEAREST)
 
     def resize_scale(self, scale) -> None:
-        self.size = tuple(map(lambda x:x*scale, self.size))
+        self.size = (self.size[0]*scale, self.size[1]*scale)
         self._resize()
