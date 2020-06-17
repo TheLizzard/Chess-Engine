@@ -29,6 +29,7 @@ USER_SETTINGS = SETTINGS["gameboard.user"]
 class User(Player):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.size = BOARD_SETTINGS.size_of_squares
         self.piece_selected = None
         self.left_mouse_down = False
         self.available_move_dots = []
@@ -37,7 +38,6 @@ class User(Player):
         self.user_helper_making = None
         self.moved_selected_piece = False
         self.user_created_arrow_start = None
-        self.size = BOARD_SETTINGS.size_of_squares
         self.bind_mouse()
         self.bind_keys()
 
@@ -359,9 +359,3 @@ class User(Player):
     def redo_move(self, move: chess.Move) -> str:
         self.remove_available_moves()
         self.stop_user_created_object()
-
-    def create_piece(self, **kwargs) -> Piece:
-        kwargs.update({"master": self.master})
-        piece = Piece(**kwargs)
-        piece.resize_scale(scale=BOARD_SETTINGS.scale_for_pieces)
-        return piece
