@@ -26,13 +26,12 @@ class App:
         self.start_analysing()
 
     def exit(self):
+        self.board.kill_player(self.board.players[0])
+        self.board.kill_player(self.board.players[1])
         self.stop_analysing()
         self.root.quit()
         self.root.destroy()
-        board = self.board
-        board.kill_player(board.players[0])
-        board.kill_player(board.players[1])
-        del board
+        del self.board
         del self
 
     def set_up_tk(self):
