@@ -17,8 +17,8 @@ class Piece:
         self.tkcanvasnum = None
         self.position = position
         self.sqr_size = SETTINGS.size_of_squares
-        self.set = SETTINGS.chess_pieces_set_number
-        filename = self.get_filename(name=name, colour=colour, set=self.set)
+        filename = self.get_filename(name, colour,
+                                     SETTINGS.chess_pieces_set_number)
         self.image = Image.open(filename)
         self.size = self.image.size
 
@@ -38,15 +38,9 @@ class Piece:
         self.tkimage = ImageTk.PhotoImage(self.image)
         self.tkcanvasnum = self.master.create_image(coords, image=self.tkimage)
 
-    def show(self, position: tuple=None) -> None:
-        if position is None:
-            x, y = self.position
-        else:
-            x, y = position
-        size = self.sqr_size
-        x_pix = (x-0.5)*size
-        y_pix = (8.5-y)*size
-        pos = (x_pix, y_pix)
+    def show(self) -> None:
+        x, y = self.position
+        pos = ((x-0.5)*self.sqr_size, (8.5-y)*self.sqr_size)
         self.tkimage = ImageTk.PhotoImage(self.image)
         self.tkcanvasnum = self.master.create_image(pos, image=self.tkimage)
 
