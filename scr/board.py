@@ -145,7 +145,7 @@ class GUIBoard:
 
     def position_to_piece(self, position: Position, create=False) -> Piece:
         """
-        This returns the piece from a given square by eather:
+        This returns the piece from a given square by either:
             creating a new piece (if create is True) or
             find the piece in `self.pieces` (if create is False)
         """
