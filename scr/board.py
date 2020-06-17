@@ -121,19 +121,11 @@ class GUIBoard:
             for i in range(64):
                 position = Position.from_int(i)
                 # Check what piece must be there and create it
-                piece = self.position_to_piece(position, create=True)
+                piece = self.position_to_piece(position)
                 if piece is not None:
                     self.pieces.append(piece) # Add it to self.pieces
                     piece.show() # Show it to the screen
         self.root.update()
-
-    def create_piece(self, **kwargs) -> Piece:
-        """
-        Creates a new piece and resizes it
-        """
-        new_piece = Piece(master=self.master, **kwargs)
-        new_piece.resize_scale(scale=BOARD_SETTINGS.scale_for_pieces)
-        return new_piece
 
     def delete_sprites(self) -> None:
         """
@@ -143,28 +135,17 @@ class GUIBoard:
             pieces.destroy()
         self.pieces.clear() # Can't use `self.pieces = []`
 
-    def position_to_piece(self, position: Position, create=False) -> Piece:
+    def position_to_piece(self, position: Position) -> Piece:
         """
-        This returns the piece from a given square by either:
-            creating a new piece (if create is True) or
-            find the piece in `self.pieces` (if create is False)
+        Creates a new piece at the position given if needed
+        else returns None
         """
-        if create:
-            # Find the correct piece type and colour
-            piece = self.board.piece_at(position.to_int())
-            if piece is None:
-                return None
+        piece = self.board.piece_at(position.to_int())
+        if piece is not None:
             name = self.LETTER_TO_NAME[piece.symbol().lower()]
-            # Create the new piece
-            piece = self.create_piece(name=name, colour=piece.color,
-                                      position=position)
+            piece = Piece(name, position, piece.color, self.master)
+            piece.resize_scale(scale=BOARD_SETTINGS.scale_for_pieces)
             return piece
-        else:
-            # Find the piece with the matching position and return it
-            # This may return None if the piece is not found
-            for piece in self.pieces:
-                if piece.position == position:
-                    return piece
 
     def fen(self) -> str:
         """
