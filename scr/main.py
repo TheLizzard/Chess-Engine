@@ -25,6 +25,16 @@ class App:
         self.root.update()
         self.start_analysing()
 
+    def exit(self):
+        self.stop_analysing()
+        self.root.quit()
+        self.root.destroy()
+        board = self.board
+        board.kill_player(board.players[0])
+        board.kill_player(board.players[1])
+        del board
+        del self
+
     def set_up_tk(self):
         """
         Sets up the tkinter part of the program and GUIBoard.
@@ -33,6 +43,7 @@ class App:
         self.root.resizable(False, False)
         self.root.title("Chess.py")
         self.root.config(bg=SETTINGS.root.background)
+        self.root.protocol("WM_DELETE_WINDOW", self.exit)
         self.set_up_menu()
         self.root.config(menu=self.menubar)
 
@@ -294,19 +305,11 @@ class App:
 
     def update(self):
         if self.done_set_up and self.analysing and (self.analyses is not None):
-            score = self.analyses.score
-            moves = self.analyses.moves
             self.root.after(500, self.update)
-
-            if (score is None) or (moves is None):
-                return None
-
-            score = score.white()#.score(mate_score=10000)
-            score = str(score).replace("+", "")
-            self.eval_text.config(text=score)
-
             try:
-                moves = self.board.moves_to_san(moves)[:4]
+                score = self.analyses.score.white()#.score(mate_score=10000)
+                self.eval_text.config(text=str(score).replace("+", ""))
+                moves = self.board.moves_to_san(self.analyses.moves)[:4]
                 self.suggestedmoves_text.config(text=" ".join(moves))
             except:
                 pass
