@@ -39,6 +39,7 @@ class GUIBoard:
     def done_move(self, move: chess.Move) -> None:
         self.push(move)
         self.update()
+        self.update_last_moved()
         self.players[1-self.board.turn].go()
 
     def play(self) -> None:
@@ -116,16 +117,14 @@ class GUIBoard:
         if redraw:
             # Remove all of the pieces' sprites
             self.delete_sprites()
-            self.update_last_moved()
             # For each square on the board
-            for x in range(1, 9):
-                for y in range(1, 9):
-                    position = Position(x, y)
-                    # Check what piece must be there and create it
-                    piece = self.position_to_piece(position, create=True)
-                    if piece is not None:
-                        self.pieces.append(piece) # Add it to self.pieces
-                        piece.show() # Show it to the screen
+            for i in range(64):
+                position = Position.from_int(i)
+                # Check what piece must be there and create it
+                piece = self.position_to_piece(position, create=True)
+                if piece is not None:
+                    self.pieces.append(piece) # Add it to self.pieces
+                    piece.show() # Show it to the screen
         self.root.update()
 
     def create_piece(self, **kwargs) -> Piece:
@@ -141,8 +140,8 @@ class GUIBoard:
         """
         Delete all of the pieces' sprites
         """
-        for sprite in self.pieces:
-            sprite.destroy()
+        for pieces in self.pieces:
+            pieces.destroy()
         self.pieces.clear() # Can't use `self.pieces = []`
 
     def position_to_piece(self, position: Position, create=False) -> Piece:
@@ -364,6 +363,7 @@ class GUIBoard:
                 return "break"
         self.board.pop()
         self.undo_stack.append(move)
+        self.update_last_moved()
         self.update()
         self.move_callback()
 
@@ -382,6 +382,7 @@ class GUIBoard:
                 return "break"
         self.undo_stack.pop()
         self.board.push(move)
+        self.update_last_moved()
         self.update()
         self.move_callback()
 
