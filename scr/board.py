@@ -38,8 +38,8 @@ class GUIBoard:
 
     def done_move(self, move: chess.Move) -> None:
         self.push(move)
-        self.update()
         self.update_last_moved()
+        self.update()
         self.players[1-self.board.turn].go()
 
     def play(self) -> None:
