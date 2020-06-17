@@ -131,8 +131,7 @@ class GUIBoard:
         """
         Creates a new piece and resizes it
         """
-        kwargs.update({"master": self.master})
-        new_piece = Piece(**kwargs)
+        new_piece = Piece(master=self.master, **kwargs)
         new_piece.resize_scale(scale=BOARD_SETTINGS.scale_for_pieces)
         return new_piece
 
