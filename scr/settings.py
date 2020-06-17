@@ -216,7 +216,6 @@ Menu:
 Widgets:
     "borderwidth" = 0
     "highlightthickness" = 0
-    "justify" = "left"
 
 GameBoard:
     "size_of_squares" = 60
