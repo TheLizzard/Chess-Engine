@@ -68,7 +68,7 @@ class Piece:
             self.size = (width, height)
         self._resize()
 
-    def resize_max(self, max_height, max_width) -> None:
+    def resize_max(self, max_height: int, max_width: int) -> None:
         self.resize(max_height)
         self.resize(max_width)
 
@@ -76,6 +76,6 @@ class Piece:
         size = (int(self.size[0]+0.5), int(self.size[1]+0.5))
         self.image = self.image.resize(size, Image.NEAREST)
 
-    def resize_scale(self, scale) -> None:
+    def resize_scale(self, scale: float) -> None:
         self.size = (self.size[0]*scale, self.size[1]*scale)
         self._resize()
