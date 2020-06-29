@@ -45,7 +45,7 @@ class Position:
         if isinstance(other, self.__class__):
             return Move(self, other)
         else:
-            raise ValueError(repr(other)+"has to be an instance"\
+            raise ValueError(repr(other)+" has to be an instance"\
                              " of: "+self.__class__.__name__)
 
     def __mul__(self, other) -> Move:
@@ -58,7 +58,7 @@ class Position:
         return isinstance(other, self.__class__) and (self.x == other.x)\
                and (self.y == other.y)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"<Position object at {hex(id(self))} x={self.x} y={self.y}>"
 
     def __getitem__(self, key: int) -> int:
