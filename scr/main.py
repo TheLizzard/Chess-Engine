@@ -8,12 +8,12 @@ from analyse import Analyse
 from board import GUIBoard
 import widgets
 
+FILETYPES = (("Chess games", "*.pgn"), ("All files", "*.*"))
 SETTINGS = Settings()
 
 
 class App:
     def __init__(self):
-        self.filetypes = (("Chess games", "*.pgn"), ("All files", "*.*"))
         self.file_open = None
         self.analysing = False
         self.analyses = None
@@ -25,7 +25,7 @@ class App:
         self.root.update()
         self.start_analysing()
 
-    def exit(self):
+    def exit(self) -> None:
         self.board.kill_player(self.board.players[0])
         self.board.kill_player(self.board.players[1])
         self.stop_analysing()
@@ -34,7 +34,7 @@ class App:
         del self.board
         del self
 
-    def set_up_tk(self):
+    def set_up_tk(self) -> None:
         """
         Sets up the tkinter part of the program and GUIBoard.
         """
@@ -53,12 +53,12 @@ class App:
         self.set_up_movehistory()
         self.bind_keys()
 
-    def bind_keys(self):
+    def bind_keys(self) -> None:
         self.root.bind("<Control-s>", self.save)
         self.root.bind("<Control-o>", self.open)
         self.root.bind("<Control-Shift-S>", self.save_as)
 
-    def set_up_menu(self):
+    def set_up_menu(self) -> None:
         tearoff = SETTINGS.menu.tearoff
         self.menubar = tk.Menu(self.root, tearoff=tearoff)
 
@@ -78,7 +78,7 @@ class App:
                     self.submenu.add_command(label=button, command=command)
         self.root.config(menu=self.menubar)
 
-    def set_up_eval(self):
+    def set_up_eval(self) -> None:
         settings = SETTINGS.evaluation
         width = settings.width
         height = settings.height
@@ -97,7 +97,7 @@ class App:
         self.eval_text.grid(row=1, column=1, sticky="news")
         self.eval_text.config(text="2.2")
 
-    def set_up_suggestedmoves(self):
+    def set_up_suggestedmoves(self) -> None:
         settings = SETTINGS.suggestedmoves
         fg = settings.colour
         bg = settings.background
@@ -109,7 +109,7 @@ class App:
         self.suggestedmoves_text.grid(row=2, column=1, sticky="news")
         self.suggestedmoves_text.config(text="No moves to suggest")
 
-    def set_up_movehistory(self):
+    def set_up_movehistory(self) -> None:
         settings = SETTINGS.movehistory
         width = settings.width
         height = settings.height
@@ -142,7 +142,7 @@ class App:
         self.movehistory_text["yscrollcommand"] = sbar.set
         sbar.pack(side="right", expand=True, fill="y")
 
-    def menu(self, event):
+    def menu(self, event: str) -> None:
         event = event.split(".")
         if event[0] == "file":
             self.file(event[1])
@@ -168,7 +168,7 @@ class App:
         else:
             print("? ", event)
 
-    def file(self, event):
+    def file(self, event: str) -> None:
         if event == "open":
             self.open()
 
@@ -188,7 +188,7 @@ class App:
         self.open_from_file()
 
     def open_from_file(self) -> None:
-        filename = widgets.askopen(filetypes=self.filetypes)
+        filename = widgets.askopen(filetypes=FILETYPES)
         if (filename != ()) and (filename != ""):
             with open(filename, "r") as file:
                 data = file.read()
@@ -199,7 +199,7 @@ class App:
             self.restart_analysing()
 
     def save_as(self, _=None) -> None:
-        filename = widgets.asksave(filetypes=self.filetypes)
+        filename = widgets.asksave(filetypes=FILETYPES)
         if (filename != ()) and (filename != ""):
             self.file_open = filename
             self.save_to_file()
@@ -214,7 +214,7 @@ class App:
         with open(self.file_open, "w") as file:
             file.write(self.board.pgn())
 
-    def edit(self, event):
+    def edit(self, event: str) -> None:
         if event == "undo_move":
             self.root.event_generate("<Control-z>")
 
@@ -227,7 +227,7 @@ class App:
         else:
             print("? ", event)
 
-    def view(self, event):
+    def view(self, event: str) -> None:
         if event == "current_fen":
             w = widgets.CopyableEntryWindow(width=40)
             w.set(self.board.fen())
@@ -236,7 +236,7 @@ class App:
             w = widgets.CopyableTextWindow()
             w.set(self.board.pgn())
 
-    def start_game(self, event):
+    def start_game(self, event: str) -> None:
         if event == "evaluate":
             # This is only active when `self.allowed_analyses` is True
             if self.allowed_analyses:
@@ -292,14 +292,14 @@ class App:
         self.stop_analysing()
         self.clear_pgn()
 
-    def change_settings(self, event):
+    def change_settings(self, event: str) -> None:
         if event == "game_settings":
             print("settings.game_settings")
 
         elif event == "board_settings":
             print("settings.board_settings")
 
-    def update(self):
+    def update(self) -> None:
         if self.done_set_up and self.analysing and (self.analyses is not None):
             self.root.after(500, self.update)
             try:
@@ -310,7 +310,7 @@ class App:
             except:
                 pass
 
-    def update_pgn(self):
+    def update_pgn(self) -> None:
         self.movehistory_text.config(state="normal")
         old_pgn = self.movehistory_text.get("1.0", "end")[:-1]
         new_pgn = self.board.pgn()
@@ -320,29 +320,29 @@ class App:
         self.movehistory_text.insert("end", diff)
         self.movehistory_text.config(state="disabled")
 
-    def clear_pgn(self):
+    def clear_pgn(self) -> None:
         self.movehistory_text.delete("0.0", "end")
 
-    def moved(self):
+    def moved(self) -> None:
         self.update_pgn()
         self.restart_analysing()
 
-    def find_diff_pgn(self, pgn1, pgn2):
+    def find_diff_pgn(self, pgn1: str, pgn2: str):
         if pgn1 == "\n":
             pgn1 = ""
         if pgn1 not in pgn2:
             return pgn2, True
         return pgn2[len(pgn1)-len(pgn2):][:-1], False
 
-    def start_analysing(self):
-        if (self.allowed_analyses) and (not self.analysing):
+    def start_analysing(self) -> None:
+        if self.allowed_analyses and (not self.analysing):
             self.analysing = True
             self.analyses = Analyse(self.board.board)
             self.analyses.start()
             self.eval_frame.grid()
             self.update()
 
-    def stop_analysing(self):
+    def stop_analysing(self) -> None:
         if self.analysing:
             self.analysing = False
             if self.analyses is not None:
@@ -350,7 +350,7 @@ class App:
             self.eval_frame.grid_remove()
 
     def restart_analysing(self) -> None:
-        if self.analysing:
+        if self.analysing and self.allowed_analyses:
             self.stop_analysing()
             self.start_analysing()
 
