@@ -73,7 +73,7 @@ class User(Player):
         self.master.bind("<Control-z>", self.send_undo_move)
         self.master.bind("<Control-Shift-Z>", self.send_redo_move)
 
-    def get_focus(self, _):
+    def get_focus(self, _) -> None:
         """
         This gets keyboard focus on the tkinter canvas so that key bindings
         would work. Taken from StackOverflow
@@ -133,7 +133,7 @@ class User(Player):
             if event.state & 1024: # Button 1
                 self.mouse_right("Motion", pos)
 
-    def mouse_left(self, name, pos):
+    def mouse_left(self, name: str, pos: tuple) -> None:
         if name == "ButtonPress":
             self.delete_user_created_object()
             self.right_mouse_down = True
@@ -156,7 +156,7 @@ class User(Player):
                 if position != self.piece_selected.position:
                     self.moved_selected_piece = True
 
-    def mouse_right(self, name, pos):
+    def mouse_right(self, name: str, pos: tuple) -> None:
         if self.right_mouse_down:
             pass
         elif name == "ButtonPress":
@@ -229,7 +229,7 @@ class User(Player):
         if self.user_helper_making is not None:
             self.master.delete(self.user_helper_making)
 
-    def create_ring(self, position: Position) -> None:
+    def create_ring(self, position: Position) -> int:
         """
         Draws a temporaty ring to help the user.
         """
@@ -242,7 +242,7 @@ class User(Player):
         return self._create_circle_arc(*coords, style="arc", r=radius, end=629,
                                        outline=colour, width=width, start=270)
 
-    def create_arrow(self, position1: Position, position2: Position) -> None:
+    def create_arrow(self, position1: Position, position2: Position) -> int:
         """
         Draws a temporaty arrow to help the user.
         """
@@ -329,7 +329,7 @@ class User(Player):
         dot = self.draw_dot(position, radius, outline=colour, fill=colour)
         self.available_move_dots.append(dot)
 
-    def draw_dot(self, position, radius, **kwargs):
+    def draw_dot(self, position, radius: int, **kwargs) -> int:
         x, y = position.to_coords()
         r = radius
         return self.master.create_oval(x-r, y-r, x+r, y+r, **kwargs)
