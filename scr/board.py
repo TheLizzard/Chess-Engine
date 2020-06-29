@@ -341,7 +341,7 @@ class GUIBoard:
         self.update()
         self.move_callback()
 
-    def request_redo_move(self):
+    def request_redo_move(self) -> str:
         """
         This is called when a player requests a redo of a move.
         This is in the board player protocol.
