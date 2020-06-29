@@ -17,52 +17,52 @@ class Setting:
                 value = Setting(**value)
             self.__dict__.update({key: value})
 
-    def __str__(self):
+    def __str__(self) -> str:
         return str(self.__dict__)
 
-    def __getitem__(self, key):
+    def __getitem__(self, key: str):
         if key in self.__dict__.keys():
             return self.__dict__[key]
         else:
             raise IndexError("Couldn't find the index: "+str(key)+" in" \
                              " this class.")
 
-    def pop(self, *args, **kwargs):
-        return self.__dict__.pop(*args, **kwargs)
+    def pop(self, idx=None):
+        return self.__dict__.pop(idx)
 
-    def items(self, *args, **kwargs):
-        return self.__dict__.items(*args, **kwargs)
+    def items(self):
+        return self.__dict__.items()
 
-    def update(self, *args, **kwargs):
-        return self.__dict__.update(*args, **kwargs)
+    def update(self, dictionary: dict) -> None:
+        self.__dict__.update(dictionary)
 
     def deepcopy(self):
         return copy.deepcopy(self)
 
-    def dict(self):
+    def dict(self) -> dict:
         return self.__dict__
 
 
 class Settings:
-    def __init__(self, file:str="settings.ini"):
+    def __init__(self, file="settings.ini"):
         self.update()
 
-    def __getitem__(self, key):
+    def __getitem__(self, key: str) -> Setting:
         if key in self.__dict__.keys():
             return self.__dict__[key]
         else:
             raise IndexError("Couldn't find the index: "+str(key)+" in" \
                              " this class.")
 
-    def parse(self, data):
+    def parse(self, data: str) -> dict:
         return parse(data)
 
-    def set_settings(self, settings):
+    def set_settings(self, settings: dict) -> None:
         settings = self.lower_case_key(settings)
         for key, value in settings.items():
             self.__dict__.update({key: Setting(**value)})
 
-    def lower_case_key(self, setting):
+    def lower_case_key(self, setting: dict) -> dict:
         if isinstance(setting, dict):
             output = {}
             for key, value in setting.items():
@@ -71,11 +71,14 @@ class Settings:
         else:
             return setting
 
-    def reset(self, file="settings.ini"):
+    def reset(self, file="settings.ini") -> None:
+        """
+        Resets to the default settings.
+        """
         with open(file, "w") as file:
             file.write(DEFAULT_SETTINGS)
 
-    def update(self, file:str="settings.ini") -> None:
+    def update(self, file="settings.ini") -> None:
         """
         Reads the settings from the file if it exists.
         """
