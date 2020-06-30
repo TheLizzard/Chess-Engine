@@ -335,9 +335,8 @@ class User(Player):
         return self.master.create_oval(x-r, y-r, x+r, y+r, **kwargs)
 
     def legal_promoting(self, old: Position, new: Position) -> bool:
-        if ((old.y == 7) and (new.y == 8)) or ((old.y == 2) and (new.y == 1)):
-            return self.piece_selected.name == "pawn"
-        return False
+        potential_move = chess.Move(int(old), int(new), promotion=5)	
+        return (potential_move in self.board.legal_moves)
 
     def askuser_pawn_promotion(self) -> str:
         self.stop()
