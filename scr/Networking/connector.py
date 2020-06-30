@@ -6,15 +6,15 @@ from Networking.bits import Bits
 
 
 class Event:
-    def __init__(self, data):
+    def __init__(self, data: Bits):
         self.data = data
 
-    def __len__(self):
+    def __len__(self) -> int:
         return -(-len(self.data)//8)
 
 
 class Reciever:
-    def __init__(self, sock, callback):
+    def __init__(self, sock: socket.socket, callback):
         self.running = True
         self.alowed_to_recv = False
         self.callback = callback
@@ -26,7 +26,7 @@ class Reciever:
     def __del__(self) -> None:
         self.kill()
 
-    def start(self):
+    def start(self) -> None:
         while self.running:
             if self.alowed_to_recv:
                 data = self.sock.recv(1024)
@@ -34,20 +34,20 @@ class Reciever:
                     self.running = False
                 self.generate_event(Bits.from_bytes(data))
 
-    def go(self):
+    def go(self) -> None:
         self.alowed_to_recv = True
 
-    def stop(self):
+    def stop(self) -> None:
         self.alowed_to_recv = False
 
-    def kill(self):
+    def kill(self) -> None:
         self.running = False
         self.alowed_to_recv = False
 
-    def destroy(self):
+    def destroy(self) -> None:
         self.kill()
 
-    def generate_event(self, data):
+    def generate_event(self, data: Bits) -> None:
         event = Event(data)
         self.callback(event)
 
@@ -86,22 +86,22 @@ class Connector:
         if self.connected or self.our_sock_running or self.thier_sock_running:
             self.kill()
 
-    def bind(self, function):
+    def bind(self, function) -> None:
         self.receive_callback = function
 
-    def unbind(self):
+    def unbind(self) -> None:
         self.receive_callback = None
 
-    def recieve(self, event):
+    def recieve(self, event: Event) -> None:
         if self.receive_callback is not None:
             self.receive_callback(event)
 
-    def send_data(self, data):
+    def send_data(self, data: bytes) -> None:
         if not self.connected:
             return None
         self.their_sock.send(data)
 
-    def wait_for_connection(self):
+    def wait_for_connection(self) -> None:
         try:
             self.their_sock, self.their_address = self.our_sock.accept()
             self.thier_sock_running = True
@@ -114,7 +114,7 @@ class Connector:
             # the socket will close. Therefore `self.our_sock.accept()` will
             # raise an OSError
 
-    def kill(self):
+    def kill(self) -> None:
         if self.connected: # Kill the recver
             self.recver.stop()
             self.recver.kill()
@@ -137,7 +137,7 @@ class Connector:
         self.unbind()
 
 
-def get_ip():
+def get_ip() -> str:
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     sock.connect(("8.8.8.8", 80))
     ip = sock.getsockname()[0]
