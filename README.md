@@ -13,7 +13,7 @@ There are 2 dependancies:
   * On `Linux` do: `pip3 install python-chess`
 * PIL/Pillow:
   * On `Windows` do: `python -m pip install pillow`
-  * On `Linux` do: `pip3 install pillow; sudo apt-get install python-pil.imagetk`
+  * On `Linux` do: `pip3 install pillow; sudo apt-get install python3-pil python3-pil.imagetk`
 
 
 ## How to run:
