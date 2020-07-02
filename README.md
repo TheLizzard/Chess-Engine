@@ -3,13 +3,17 @@ This is a simple GUI chess engine for Linux and Windows.
 
 
 ## Supported Operating systems
-All Linux and Windows distributions are supported.
+Window and all Linux distributions are supported.
 
 
 ## Dependencies
-Currently there is only 1 dependancy (python-chess).
-On `Windows` do: `python -m pip install python-chess`
-On `Linux` do: `pip3 install python-chess`
+There are 2 dependancies:
+* python-chess:
+  * On `Windows` do: `python -m pip install python-chess`
+  * On `Linux` do: `pip3 install python-chess`
+* PIL/Pillow:
+  * On `Windows` do: `python -m pip install pillow`
+  * On `Linux` do: `pip3 install pillow; sudo apt-get install python-pil.imagetk`
 
 
 ## How to run:
