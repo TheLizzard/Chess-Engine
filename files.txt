@@ -1,0 +1,38 @@
+#       File                 Last Updated
+Help.txt                        1.1.1960
+Licence.txt                     1.1.1960
+analyse.py                      1.1.1960
+board.py                        1.1.1960
+main.py                         1.1.1960
+piece.py                        1.1.1960
+position.py                     1.1.1960
+settings.ini                    1.1.1960
+settings.py                     1.1.1960
+widgets.py                      1.1.1960
+
+Networking/bits.py              1.1.1960
+Networking/compression.py       1.1.1960
+Networking/connector.py         1.1.1960
+
+Players/computer.py             1.1.1960
+Players/multiplayer.py          1.1.1960
+Players/player.py               1.1.1960
+Players/test.py                 1.1.1960
+Players/user.py                 1.1.1960
+
+Sprites/set.2/bishop.black.png  1.1.1960
+Sprites/set.2/bishop.white.png  1.1.1960
+Sprites/set.2/king.black.png    1.1.1960
+Sprites/set.2/king.white.png    1.1.1960
+Sprites/set.2/knight.black.png  1.1.1960
+Sprites/set.2/knight.white.png  1.1.1960
+Sprites/set.2/pawn.black.png    1.1.1960
+Sprites/set.2/pawn.white.png    1.1.1960
+Sprites/set.2/queen.black.png   1.1.1960
+Sprites/set.2/queen.white.png   1.1.1960
+Sprites/set.2/rook.black.png    1.1.1960
+Sprites/set.2/rook.white.png    1.1.1960
+
+Stockfish/stockfish_11_x32.exe  1.1.1960
+Stockfish/stockfish_11_x64      1.1.1960
+Stockfish/stockfish_11_x64.exe  1.1.1960
