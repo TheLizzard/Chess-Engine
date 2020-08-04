@@ -1,6 +1,7 @@
 from PIL import Image, ImageTk
 import tkinter as tk
 
+from SuperClass import SuperClass
 from settings import Settings
 from position import Position
 
@@ -8,7 +9,7 @@ SETTINGS = Settings().gameboard
 SPRITES_LOCATION = "Sprites/"
 
 
-class Piece:
+class Piece(SuperClass):
     def __init__(self, name: str, position: Position, colour: bool,
                  master: tk.Canvas):
         self.name = name
@@ -24,11 +25,9 @@ class Piece:
 
     def get_filename(self, name: str, colour: bool, set: int) -> str:
         if colour:
-            colour = "white"
+            return SPRITES_LOCATION+"set."+str(set)+"/"+name+".white.png"
         else:
-            colour = "black"
-        filename = SPRITES_LOCATION+"set."+str(set)+"/"+name+"."+colour+".png"
-        return filename
+            return SPRITES_LOCATION+"set."+str(set)+"/"+name+".black.png"
 
     def place(self, coords: tuple) -> None:
         """
@@ -67,10 +66,6 @@ class Piece:
         else:
             self.size = (width, height)
         self._resize()
-
-    def resize_max(self, max_height: int, max_width: int) -> None:
-        self.resize(max_height)
-        self.resize(max_width)
 
     def _resize(self) -> None:
         size = (int(self.size[0]+0.5), int(self.size[1]+0.5))
