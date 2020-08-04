@@ -2,28 +2,37 @@ import requests
 import re
 
 
-LOCATION = "https://raw.githubusercontent.com/TheLizzard/Chess-Engine/master/"
+BASE = "https://raw.githubusercontent.com/TheLizzard/Chess-Engine/master/"
+LOCATION = BASE+"scr/"
 
 
 def update() -> bool:
-    files_to_update = check_for_update() # get the files need to be updated
+    # get the files need to be updated
+    files_to_update, record = check_for_update()
     for file in files_to_update:
         update_file(file)
-    return (len(files_to_update) > 0)
+    if len(files_to_update) > 0:
+        update_record(record)
+        return True
+    return False
 
 def check_for_update() -> tuple:
     with open("files.txt", "r") as file:
         current = file.read()
-    response = requests.get(LOCATION+"files.txt").text
+    response = requests.get(BASE+"files.txt").text
 
     new = parse_files(response)
     current = parse_files(current)
 
-    return difference_dicts(current, new)
+    return difference_dicts(current, new), response
 
-def update_file(file: str):
-    with open(file, "w") as file:
-        file.write(requests.get(LOCATION+file).text)
+def update_file(file_name: str):
+    with open(file_name, "wb") as file:
+        file.write(requests.get(LOCATION+file_name).content)
+
+def update_record(record: str) -> None:
+    with open("files.txt", "w") as file:
+        file.write(record)
 
 
 def parse_files(text: str) -> dict:
@@ -37,7 +46,6 @@ def difference_dicts(old, new) -> tuple:
     output = []
     old_keys = old.keys()
     for key, new_value in new.items():
-        if key in old_keys:
-            if not (new_value == old[key]):
-                output.append(key)
+        if (key not in old_keys) or (new_value != old[key]):
+            output.append(key)
     return tuple(output) # need to add a way to remove unused files
