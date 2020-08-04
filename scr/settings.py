@@ -1,4 +1,5 @@
 #https://stackoverflow.com/questions/1405913/how-do-i-determine-if-my-python-shell-is-executing-in-32bit-or-64bit-mode-on-os
+from SuperClass import SuperClass
 import platform
 import struct
 import copy
@@ -10,7 +11,7 @@ LINE_REGEX = "\"(.*?)\" *= *(.+)"
 TUPLE_REGEX = "\((([\w. \"]+),* *)+\)"
 
 
-class Setting:
+class Setting(SuperClass):
     def __init__(self, **kwargs):
         for key, value in kwargs.items():
             if isinstance(value, dict):
@@ -43,7 +44,7 @@ class Setting:
         return self.__dict__
 
 
-class Settings:
+class Settings(SuperClass):
     def __init__(self, file="settings.ini"):
         self.update()
 
@@ -60,7 +61,9 @@ class Settings:
     def set_settings(self, settings: dict) -> None:
         settings = self.lower_case_key(settings)
         for key, value in settings.items():
-            self.__dict__.update({key: Setting(**value)})
+            if isinstance(value, dict):
+                value = Setting(**value)
+            self.__dict__.update({key: value})
 
     def lower_case_key(self, setting: dict) -> dict:
         if isinstance(setting, dict):
@@ -206,6 +209,11 @@ DEFAULT_SETTINGS = """
 #     | tuple   | ("values", 1, True, False) | (0.0, None)     |
 #      --------- ---------------------------- -----------------
 #
+
+
+"report_errors" = True
+"update" = True
+
 
 Menu:
     "tearoff" = False
