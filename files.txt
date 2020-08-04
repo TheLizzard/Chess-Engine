@@ -9,7 +9,6 @@ position.py                     4.8.2020
 settings.ini                    4.8.2020
 settings.py                     4.8.2020
 widgets.py                      4.8.2020
-files.txt                       4.8.2020
 
 Networking/bits.py              4.8.2020
 Networking/compression.py       4.8.2020
