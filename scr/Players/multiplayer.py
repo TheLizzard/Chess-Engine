@@ -3,6 +3,7 @@ import copy
 import chess
 from threading import Lock
 
+from SuperClass import SuperClass
 from .user import User
 from Networking.bits import Bits
 from Networking.compression import compress_move, decompress_move
@@ -13,7 +14,7 @@ import widgets
 
 PORT = 65360
 
-class Multiplayer(User):
+class Multiplayer(User, SuperClass):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.running = True
