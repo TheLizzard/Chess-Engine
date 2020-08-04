@@ -13,10 +13,11 @@ This is a simple tk window with a tk text. It doesn't have the top bar.
 It also has an "Ok" button that closes the text box
 """
 class TextWindow:
-    def __init__(self):
+    def __init__(self, **kwargs):
         self.root = tk.Tk()
+        self.root.resizable(False, False)
         #self.root.wm_attributes("-type", "splash")
-        self.text = tk.Text(self.root, font=("", 10))
+        self.text = tk.Text(self.root, **kwargs, font=("Courier New", 10))
         self.sbar = tk.Scrollbar(self.root, command=self.text.yview)
         self.button = tk.Button(self.root, text="Ok", command=self.root.destroy)
         self.text.config(yscrollcommand=self.sbar.set)
@@ -53,8 +54,7 @@ class CopyableWindow:
         self.button.bind("<Return>", lambda e:self.root.destroy())
 
     def add_widget(self, widget) -> None:
-        self.widget = widget
-        self.widget.grid(row=1, column=1, sticky="news")
+        widget.grid(row=1, column=1, sticky="news")
 
     def copy(self) -> None:
         self.root.clipboard_clear()
@@ -153,7 +153,7 @@ class AutoScrollbar(tk.Scrollbar):
 
 class LicenceWindow(TextWindow):
     def __init__(self):
-        super().__init__()
+        super().__init__(height=35, width=75)
         self.insert("end", self.get_text())
 
     def get_text(self) -> str:
@@ -161,10 +161,9 @@ class LicenceWindow(TextWindow):
             data = file.read()
         return data
 
-
 class HelpWindow(TextWindow):
     def __init__(self):
-        super().__init__()
+        super().__init__(wrap="word")
         text = self.get_text()
         self.insert("end", text)
         self.config_tags()
@@ -273,7 +272,7 @@ Example use:
     # If the user clicks on "Answer 2" than `2` will be returned
 """
 class Question:
-    def __init__(self, x, y):
+    def __init__(self, x: int, y: int):
         self.result = None
         self.running = True
         self.root = tk.Tk()
@@ -441,7 +440,7 @@ class ScrolledListboxes(tk.Frame):
     def clear(self) -> None:
         self.delete("0", "end")
 
-    def yview(self, yview=None):
+    def yview(self, yview=None) -> None:
         if yview is None:
             return self.lb1.yview()
         self.lb1.yview(yview)
@@ -603,7 +602,7 @@ def _info(text: str, x: int, y :int) -> None:
     button.grid(row=2, column=1, sticky="news")
     root.mainloop()
 
-def info(text: str, x:int=None, y:int=None) -> None:
+def info(text: str, x: int=None, y: int=None) -> None:
     # The x and the y coordinates that new new window will take
     thread = threading.Thread(target=_info, args=(text, x, y))
     thread.deamon = True
