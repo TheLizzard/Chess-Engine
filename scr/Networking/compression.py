@@ -27,7 +27,7 @@ Special moves and meanings:
  ------ ------ -----------------------------------------
 | Move | Code | Meaning                                 |
  ------ ------ -----------------------------------------
-| A1A1 |   0  | Undo last move                          |
+| A1A1 |   0  | Request to undo last move               |
 | A2A2 |   1  | Recved undo request and not allowing it |
 | A3A3 |   2  | Recved undo request and allowing it     |
  ------ ------ -----------------------------------------
