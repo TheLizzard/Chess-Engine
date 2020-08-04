@@ -16,6 +16,7 @@ Use:
 """
 
 
+from SuperClass import SuperClass
 import chess.engine
 import threading
 
@@ -33,11 +34,11 @@ os_bits = str(settings.get_os_bits()) # Get the bit version of the OS
 # Get the file extension that the OS supports
 os_extension = settings.get_os_extension()
 # Combine everything to get the location
-STOCKFISH_LOCATION = STOCKFISH_FOLDER+os_bits+os_extension
+STOCKFISH_LACATION = STOCKFISH_FOLDER+os_bits+os_extension
 del settings, os_bits, os_extension, STOCKFISH_FOLDER # clean up
 
 
-class Analyse:
+class Analyse(SuperClass):
     def __init__(self, board: chess.Board):
         self.board = board
         self.running = True
@@ -62,7 +63,7 @@ class Analyse:
         thread for the mainloop.
         This loop runs until the `running` attribute is False.
         """
-        engine = chess.engine.SimpleEngine.popen_uci(STOCKFISH_LOCATION)
+        engine = chess.engine.SimpleEngine.popen_uci(STOCKFISH_LACATION)
 
         with engine.analysis(self.board) as analysis:
             for info in analysis:
