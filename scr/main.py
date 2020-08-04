@@ -1,18 +1,30 @@
 from functools import partial
 import tkinter as tk
 import threading
-import time
+import sys
 
+from SuperClass import SuperClass
 from settings import Settings
 from analyse import Analyse
 from board import GUIBoard
+import Networking.reporter as reporter
+import Networking.updater as updater
 import widgets
 
 FILETYPES = (("Chess games", "*.pgn"), ("All files", "*.*"))
 SETTINGS = Settings()
+REPORT_ERRORS = SETTINGS.report_errors
 
 
-class App:
+if SETTINGS.update:
+    updated = updater.update()
+    if updated:
+        print("Just updated the program with a newer version.")
+        input("Press enter to close the program")
+        exit()
+
+
+class App(SuperClass):
     def __init__(self):
         self.file_open = None
         self.analysing = False
@@ -355,5 +367,29 @@ class App:
             self.start_analysing()
 
 
-a = App()
-a.root.mainloop()
+try:
+    a = App()
+    a.root.mainloop()
+except Exception as error:
+    sys.stderr.write("An error occured.")
+    if REPORT_ERRORS:
+        sys.stderr.write(" We are going to report it.\n")
+
+        import pickle
+        error_details = pickle.dumps(error)
+
+        import traceback
+        traceback_details = pickle.dumps(traceback.format_exc())
+
+        full_error = {"error": error_details,
+                      "traceback": traceback_details}
+
+        try:
+            app_details = a.pickle()
+            full_error.update({"app": app_details})
+        except NameError:
+            pass
+
+        reporter.report(full_error)
+    else:
+        sys.stderr.write(" We aren't going to report it.\n")
