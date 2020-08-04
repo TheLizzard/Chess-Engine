@@ -1,3 +1,4 @@
+# not udp as some packets will be lost
 import re
 import socket
 import threading
