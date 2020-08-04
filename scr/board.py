@@ -1,4 +1,3 @@
-#test
 from io import StringIO
 from chess import pgn
 import tkinter as tk
