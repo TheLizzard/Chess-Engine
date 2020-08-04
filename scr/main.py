@@ -3,13 +3,8 @@ import tkinter as tk
 import threading
 import sys
 
-from SuperClass import SuperClass
 from settings import Settings
-from analyse import Analyse
-from board import GUIBoard
-import Networking.reporter as reporter
 import Networking.updater as updater
-import widgets
 
 FILETYPES = (("Chess games", "*.pgn"), ("All files", "*.*"))
 SETTINGS = Settings()
@@ -22,6 +17,13 @@ if SETTINGS.update:
         print("Just updated the program with a newer version.")
         input("Press enter to close the program")
         exit()
+
+
+from SuperClass import SuperClass
+from analyse import Analyse
+from board import GUIBoard
+import Networking.reporter as reporter
+import widgets
 
 
 class App(SuperClass):
