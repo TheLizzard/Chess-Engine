@@ -13,6 +13,7 @@ import tkinter as tk
 import chess
 import time
 
+from SuperClass import SuperClass
 from .player import Player
 
 import widgets
@@ -26,7 +27,7 @@ BOARD_SETTINGS = SETTINGS.gameboard
 USER_SETTINGS = SETTINGS["gameboard.user"]
 
 
-class User(Player):
+class User(Player, SuperClass):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.size = BOARD_SETTINGS.size_of_squares
@@ -111,69 +112,68 @@ class User(Player):
         """
         if (not self.alowed_to_play) or (self.colour != self.board.turn):
             return None
-        # name can be one of: (ButtonPress, ButtonRelease, Motion)
-        name = event.type._name_
-        x = event.x
-        y = event.y
-        pos = (x, y)
+        # event.type._name_ can be one of: (ButtonPress, ButtonRelease, Motion)
+        pos = (event.x, event.y)
 
-        if (not (0 < x < self.size*8)) or (not (0 < y < self.size*8)):
+        if (not (0 < pos[0] < self.size*8)) or (not (0 < pos[1] < self.size*8)):
             self.unselect()
-            self.update()
             self.stop_user_created_object()
+            self.update()
         elif event.num == 1:
-            self.mouse_left(name, pos)
+            self.mouse_left(event.type._name_, pos)
         elif event.num == 3:
-            self.mouse_right(name, pos)
-        elif name == "Motion":
+            self.mouse_right(event.type._name_, pos)
+        elif event.type._name_ == "Motion":
             if self.user_helper_making is not None:
                 self.stop_user_created_object()
             if event.state & 256: # Button 1
                 self.mouse_left("Motion", pos)
-            if event.state & 1024: # Button 1
+            elif event.state & 1024: # Button 3
                 self.mouse_right("Motion", pos)
 
     def mouse_left(self, name: str, pos: tuple) -> None:
         if name == "ButtonPress":
             self.delete_user_created_object()
-            self.right_mouse_down = True
-            self.left_mouse_down = False
+            self.left_mouse_down = True
+            self.right_mouse_down = False
             self.moved_selected_piece = False
-            position = Position.from_coords(pos)
             if self.piece_selected is not None:
+                piece = self.piece_selected
                 self.move_selected(pos)
                 self.unselect()
+                position = Position.from_coords(pos)
+                new_piece = self.position_to_piece(position)
+                if (new_piece is not None) and (piece != new_piece):
+                    self.select(position)
             else:
+                position = Position.from_coords(pos)
                 self.select(position)
         elif name == "ButtonRelease":
-            self.right_mouse_down = False
+            self.left_mouse_down = False
             if self.piece_selected is not None:
                 self.move_selected(pos)
         elif name == "Motion":
-            if (self.piece_selected is not None) and self.right_mouse_down:
+            if (self.piece_selected is not None) and self.left_mouse_down:
                 self.piece_selected.place(pos)
                 position = Position.from_coords(pos)
                 if position != self.piece_selected.position:
                     self.moved_selected_piece = True
 
     def mouse_right(self, name: str, pos: tuple) -> None:
-        if self.right_mouse_down:
+        if self.left_mouse_down:
             pass
         elif name == "ButtonPress":
-            self.left_mouse_down = True
+            self.right_mouse_down = True
             position = Position.from_coords(pos)
             self.user_created_arrow_start = position
             self.user_helper_making = self.create_ring(position)
         elif name == "ButtonRelease":
-            if not self.left_mouse_down:
-                return None
-            self.left_mouse_down = False
+            self.right_mouse_down = False
             start = self.user_created_arrow_start
-            #self.user_created_arrow_start = None
             end = Position.from_coords(pos)
             self.create_user_helping_object(start, end)
         elif name == "Motion":
-            if self.left_mouse_down and (not self.right_mouse_down):
+            if self.right_mouse_down:
                 start = self.user_created_arrow_start
                 end = Position.from_coords(pos)
                 if start == end:
