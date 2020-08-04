@@ -8,19 +8,19 @@ import re
 from Players.user import User
 from Players.computer import Computer
 from Players.multiplayer import Multiplayer
-from Players.test import Test
 
-from piece import Piece
-from position import Position
 from Networking.connector import get_ip
+from SuperClass import SuperClass
 from settings import Settings
+from position import Position
+from piece import Piece
 import widgets
 
 SETTINGS = Settings()
 BOARD_SETTINGS = SETTINGS.gameboard
 
 
-class GUIBoard:
+class GUIBoard(SuperClass):
     LETTER_TO_NAME = {"p": "pawn",
                       "r": "rook",
                       "k": "king",
@@ -238,12 +238,6 @@ class GUIBoard:
                              self.request_undo_move, self.request_redo_move,
                              debug=True)
         self.add_player(colour, player)
-        # This is only for testing purposess.
-        """
-        player = Test(self.board, self.master, not colour, self.pieces,
-                      self.update, self.done_move, self.request_undo_move,
-                      self.request_redo_move, debug=True)
-        """
         self.add_player(not colour, player)
 
     def kill_player(self, colour: bool) -> None:
@@ -276,15 +270,14 @@ class GUIBoard:
         """
         It changes a list of `chess.Move`s to a list of str containg
         the sans representation of the moves.
-        Note: be careful as the moves are board dependant!
-        With a different board you might get a lot of errors. Call this
-        inside a `try` `except` block.
+        This is dependant on the current board you might get errors. Call
+        this inside a `try` `except` block.
         """
         # create a deepcopy of the board so that we don't effect the real one
         board = self.board.copy()
         output = []
-        # for each one of the moves push the move and add the sans
-        # representation of it to the output
+        # for each one of the moves add the sans representation of it
+        # to the output and push the move
         for move in moves:
             output.append(board.san(move))
             board.push(move)
