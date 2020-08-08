@@ -12,10 +12,13 @@ REPORT_ERRORS = SETTINGS.report_errors
 
 
 if SETTINGS.update:
-    updated = updater.update()
-    if updated:
+    print("Checking for updates.")
+    updates_needed = len(updater.check_for_update()) > 0
+    if updates_needed:
+        print("Starting update")
+        updated = updater.update()
         print("Just updated the program with a newer version.")
-        input("Press enter to close the program")
+        import main
         exit()
 
 
