@@ -3,7 +3,7 @@ Help.txt                        0
 Licence.txt                     0
 analyse.py                      0
 board.py                        0
-main.py                         0
+main.py                         1
 piece.py                        0
 position.py                     0
 settings.ini                    0
@@ -15,7 +15,7 @@ Networking/bits.py              0
 Networking/compression.py       0
 Networking/connector.py         0
 Networking/reporter.py          0
-Networking/updater.py           0
+Networking/updater.py           1
 
 Players/computer.py             0
 Players/multiplayer.py          0
