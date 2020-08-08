@@ -11,7 +11,7 @@ def update() -> bool:
     files_to_update = check_for_update()
     length = len(files_to_update)
     for i, file in enumerate(files_to_update):
-        print("updating file: "+file+"\t\t file "+str(i)+"/"+length)
+        print("updating file: "+file+"\t\t file "+str(i)+"/"+str(length))
         update_file(file)
     if len(files_to_update) > 0:
         print("updating the record")
