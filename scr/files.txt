@@ -1,0 +1,41 @@
+# File name                Version Number
+
+Help.txt                        0
+Licence.txt                     0
+analyse.py                      0
+board.py                        0
+main.py                         0
+piece.py                        0
+position.py                     0
+settings.ini                    0
+settings.py                     0
+widgets.py                      0
+
+Networking/bits.py              0
+Networking/compression.py       0
+Networking/connector.py         0
+Networking/reporter.py          0
+Networking/updater.py           0
+
+Players/computer.py             0
+Players/multiplayer.py          0
+Players/player.py               0
+Players/test.py                 0
+Players/user.py                 0
+
+Sprites/set.2/bishop.black.png  0
+Sprites/set.2/bishop.white.png  0
+Sprites/set.2/king.black.png    0
+Sprites/set.2/king.white.png    0
+Sprites/set.2/knight.black.png  0
+Sprites/set.2/knight.white.png  0
+Sprites/set.2/pawn.black.png    0
+Sprites/set.2/pawn.white.png    0
+Sprites/set.2/queen.black.png   0
+Sprites/set.2/queen.white.png   0
+Sprites/set.2/rook.black.png    0
+Sprites/set.2/rook.white.png    0
+
+Stockfish/stockfish_11_x32.exe  0
+Stockfish/stockfish_11_x64      0
+Stockfish/stockfish_11_x64.exe  0
