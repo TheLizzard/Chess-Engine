@@ -7,13 +7,15 @@ BASE = "https://raw.githubusercontent.com/TheLizzard/Chess-Engine/master/scr/"
 
 def update() -> bool:
     # get the files need to be updated
+    # We need to add a progress bar for the user to see
     files_to_update = check_for_update()
-    for file in files_to_update:
+    length = len(files_to_update)
+    for i, file in enumerate(files_to_update):
+        print("updating file: "+file+"\t\t file "+str(i)+"/"+length)
         update_file(file)
     if len(files_to_update) > 0:
+        print("updating the record")
         update_file("files.txt")
-        return True
-    return False
 
 def check_for_update() -> tuple:
     with open("files.txt", "r") as file:
