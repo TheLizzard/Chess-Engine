@@ -2,17 +2,16 @@ import requests
 import re
 
 
-BASE = "https://raw.githubusercontent.com/TheLizzard/Chess-Engine/master/"
-LOCATION = BASE+"scr/"
+BASE = "https://raw.githubusercontent.com/TheLizzard/Chess-Engine/master/scr/"
 
 
 def update() -> bool:
     # get the files need to be updated
-    files_to_update, record = check_for_update()
+    files_to_update = check_for_update()
     for file in files_to_update:
         update_file(file)
     if len(files_to_update) > 0:
-        update_record(record)
+        update_file("files.txt")
         return True
     return False
 
@@ -24,22 +23,17 @@ def check_for_update() -> tuple:
     new = parse_files(response)
     current = parse_files(current)
 
-    return difference_dicts(current, new), response
+    return difference_dicts(current, new)
 
 def update_file(file_name: str):
     with open(file_name, "wb") as file:
-        file.write(requests.get(LOCATION+file_name).content)
-
-def update_record(record: str) -> None:
-    with open("files.txt", "w") as file:
-        file.write(record)
+        file.write(requests.get(BASE+file_name).content)
 
 
 def parse_files(text: str) -> dict:
     text += "\n" # add a blank line for the re.findall step
-    text = text.replace("\n\n", "\n") # remove blank lines
-    text = re.sub("#[^\n]+\n", "", text) # remove comments
-    result = re.findall("([^\n ]+?) +([^\n ]+?)\n", text) # find the file|date
+    text = re.sub(" *#[^\n]+\n", "\n", text) # remove comments
+    result = re.findall("([^\n ]+?) +([\d.]+?)\n", text)  # find the file|date
     return dict(result) # make it into a dictionary
 
 def difference_dicts(old, new) -> tuple:
