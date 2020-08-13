@@ -11,10 +11,10 @@ There are 2 dependancies:
   * On `Linux` do: `pip3 install pillow; sudo apt-get install python3-pil python3-pil.imagetk`
 
 ## How to download:
-Download the file `downloader.py` and run it using `python 3`. It will download all of the nessasary files with their updates
+Download the <a href=https://github.com/TheLizzard/Chess-Engine-Downloader>downloader</a> and run `downloader.py` using `python 3`. It will download all of the nessasary files with their updates.
 
 ## How to run:
-Run using `python 3` run `scr/main.py`.
+Using `python 3` run `scr/main.py`.
 
 ## Errors:
 If you get this error: `PermissionError: [Errno 13] Permission denied: 'Stockfish/stockfish_11_x64'` than you need to set the Execute bit on Sockfish to be 1. To do that follow these instuctions: https://askubuntu.com/a/485001/1002358.
