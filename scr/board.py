@@ -10,10 +10,10 @@ from Players.computer import Computer
 from Players.multiplayer import Multiplayer
 
 from Networking.connector import get_ip
-from SuperClass import SuperClass
-from settings import Settings
-from position import Position
-from piece import Piece
+from Constants.SuperClass import SuperClass
+from Constants.settings import Settings
+from Constants.position import Position
+from Constants.piece import Piece
 import widgets
 
 SETTINGS = Settings()
