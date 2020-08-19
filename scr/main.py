@@ -3,7 +3,7 @@ import tkinter as tk
 import threading
 import sys
 
-from settings import Settings
+from Constants.settings import Settings
 import Networking.updater as updater
 
 FILETYPES = (("Chess games", "*.pgn"), ("All files", "*.*"))
@@ -16,14 +16,15 @@ if SETTINGS.update:
     updates_needed = len(updater.check_for_update()) > 0
     if updates_needed:
         print("Starting update")
+        exit()
         updated = updater.update()
         print("Just updated the program with a newer version.")
         import main
         exit()
 
 
-from SuperClass import SuperClass
-from analyse import Analyse
+from Constants.SuperClass import SuperClass
+from Constants.analyse import Analyse
 from board import GUIBoard
 import Networking.reporter as reporter
 import widgets
