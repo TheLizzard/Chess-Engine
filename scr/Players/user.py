@@ -13,13 +13,13 @@ import tkinter as tk
 import chess
 import time
 
-from SuperClass import SuperClass
+from Constants.SuperClass import SuperClass
 from .player import Player
 
 import widgets
-from piece import Piece
-from position import Position
-from settings import Settings
+from Constants.piece import Piece
+from Constants.position import Position
+from Constants.settings import Settings
 
 
 SETTINGS = Settings()
