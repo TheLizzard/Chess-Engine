@@ -3,7 +3,7 @@ import copy
 import chess
 from threading import Lock
 
-from SuperClass import SuperClass
+from Constants.SuperClass import SuperClass
 from .user import User
 from Networking.bits import Bits
 from Networking.compression import compress_move, decompress_move
