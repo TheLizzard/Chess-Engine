@@ -16,7 +16,6 @@ if SETTINGS.update:
     updates_needed = len(updater.check_for_update()) > 0
     if updates_needed:
         print("Starting update")
-        exit()
         updated = updater.update()
         print("Just updated the program with a newer version.")
         import main
