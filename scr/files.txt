@@ -1,15 +1,16 @@
 # File name                  Version Number
-Help.txt                        0
-Licence.txt                     0
-analyse.py                      0
 board.py                        0
 main.py                         1
-piece.py                        0
-position.py                     0
 settings.ini                    0
-settings.py                     0
-SuperClass.py                   0
 widgets.py                      0
+
+Constants/Help.txt              1
+Constants/Licence.txt           1
+Constants/analyse.py            1
+Constants/piece.py              1
+Constants/position.py           1
+Constants/settings.py           1
+Constants/SuperClass.py         1
 
 Networking/bits.py              0
 Networking/compression.py       0
