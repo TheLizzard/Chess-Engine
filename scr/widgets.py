@@ -157,7 +157,7 @@ class LicenceWindow(TextWindow):
         self.insert("end", self.get_text())
 
     def get_text(self) -> str:
-        with open("Licence.txt", "r") as file:
+        with open("Constants/Licence.txt", "r") as file:
             data = file.read()
         return data
 
@@ -201,7 +201,7 @@ class HelpWindow(TextWindow):
         self.text.tag_config("italic", font=("", 10, "italic", "underline"))
 
     def get_text(self) -> str:
-        with open("Help.txt", "r") as file:
+        with open("Constants/Help.txt", "r") as file:
             data = file.read()
         output = ""
         for line in data.split("\n"):
