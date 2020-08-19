@@ -16,7 +16,7 @@ Networking/bits.py              1
 Networking/compression.py       1
 Networking/connector.py         1
 Networking/reporter.py          1
-Networking/updater.py           2
+Networking/updater.py           3
 
 Players/computer.py             1
 Players/multiplayer.py          1
