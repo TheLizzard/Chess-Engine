@@ -38,7 +38,7 @@ Special moves and meanings:
 import chess
 import re
 
-from position import Position
+from Constants.position import Position
 from .bits import Bits
 
 
