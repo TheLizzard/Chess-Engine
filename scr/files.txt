@@ -1,8 +1,8 @@
 # File name                  Version Number
-board.py                        0
-main.py                         1
-settings.ini                    0
-widgets.py                      0
+board.py                        1
+main.py                         2
+settings.ini                    1
+widgets.py                      1
 
 Constants/Help.txt              1
 Constants/Licence.txt           1
@@ -12,17 +12,17 @@ Constants/position.py           1
 Constants/settings.py           1
 Constants/SuperClass.py         1
 
-Networking/bits.py              0
-Networking/compression.py       0
-Networking/connector.py         0
-Networking/reporter.py          0
-Networking/updater.py           1
+Networking/bits.py              1
+Networking/compression.py       1
+Networking/connector.py         1
+Networking/reporter.py          1
+Networking/updater.py           2
 
-Players/computer.py             0
-Players/multiplayer.py          0
-Players/player.py               0
-Players/test.py                 0
-Players/user.py                 0
+Players/computer.py             1
+Players/multiplayer.py          1
+Players/player.py               1
+Players/test.py                 1
+Players/user.py                 1
 
 Sprites/set.2/bishop.black.png  0
 Sprites/set.2/bishop.white.png  0
