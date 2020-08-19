@@ -1,5 +1,6 @@
 import requests
 import re
+import os
 
 
 BASE = "https://raw.githubusercontent.com/TheLizzard/Chess-Engine/master/scr/"
@@ -28,6 +29,8 @@ def check_for_update() -> tuple:
     return difference_dicts(current, new)
 
 def update_file(file_name: str):
+    if os.path.dirname(file_name) != "":
+        os.makedirs(os.path.dirname(file_name), exist_ok=True)
     with open(file_name, "wb") as file:
         file.write(requests.get(BASE+file_name).content)
 
