@@ -15,7 +15,7 @@ Get the correct Stockfish file that the OS can use. Fix for Issue #20.
     stockfish_11_x32.exe  # For Windows 32 bit
     stockfish_11_x64.exe  # For Windows 64 bit
 """
-import settings
+import Constants.settings as settings
 # Get the folder of all of the Sockfishes
 s = settings.Settings()
 DEPTH = s["gameboard.computer"].depth
