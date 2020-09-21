@@ -1,7 +1,7 @@
 # File name                  Version Number
 board.py                        1
-main.py                         2
-settings.ini                    1
+main.py                         3
+settings.ini                    2
 widgets.py                      1
 
 Constants/Help.txt              1
