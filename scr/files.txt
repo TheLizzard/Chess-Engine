@@ -3,6 +3,7 @@ board.py                        1
 main.py                         3
 settings.ini                    2
 widgets.py                      1
+reset_app.py                    0
 
 Constants/Help.txt              1
 Constants/Licence.txt           1
