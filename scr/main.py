@@ -112,18 +112,26 @@ class App(SuperClass):
         self.eval_text = tk.Label(self.eval_frame, fg=fg, bg=bg, font=font,
                                   **self.widget_kwargs)
         self.eval_text.grid(row=1, column=1, sticky="news")
-        self.eval_text.config(text="2.2")
+        self.eval_text.config(text="{x:-∞≤x≤∞}")
 
     def set_up_suggestedmoves(self) -> None:
         settings = SETTINGS.suggestedmoves
+        width = settings.width
+        height = settings.height
         fg = settings.colour
         bg = settings.background
         font = settings.font
 
-        self.suggestedmoves_text = tk.Label(self.eval_frame, fg=fg, font=font,
-                                            bg=bg,
+        self.suggested_frame = tk.Frame(self.root, width=width, height=height,
+                                   bg=bg, **self.widget_kwargs)
+
+        self.suggested_frame.grid(row=2, column=2)
+        self.suggested_frame.grid_propagate(False)
+
+        self.suggestedmoves_text = tk.Label(self.suggested_frame, fg=fg,
+                                            font=font, bg=bg,
                                             **self.widget_kwargs)
-        self.suggestedmoves_text.grid(row=2, column=1, sticky="news")
+        self.suggestedmoves_text.grid(row=1, column=1, sticky="news")
         self.suggestedmoves_text.config(text="No moves to suggest")
 
     def set_up_movehistory(self) -> None:
@@ -398,3 +406,4 @@ except Exception as error:
         reporter.report(full_error)
     else:
         sys.stderr.write(" We aren't going to report it.\n")
+    raise
