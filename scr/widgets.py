@@ -1,5 +1,6 @@
 #https://stackoverflow.com/questions/40617515/python-tkinter-text-modified-callback
 from tkinter.filedialog import askopenfilename, asksaveasfilename
+import Constants.settings as settings
 from functools import partial
 from tkinter import ttk
 import tkinter as tk
@@ -61,6 +62,9 @@ class CopyableWindow:
         self.root.clipboard_append(self.get())
         self.root.update()
 
+    def get(self):
+        return None
+
 
 """
 This is a simple window with a tkinter entry widget that has a copy button.
@@ -68,8 +72,8 @@ This is a simple window with a tkinter entry widget that has a copy button.
 class CopyableEntryWindow(CopyableWindow):
     def __init__(self, **kwargs):
         super().__init__()
-        self.text = tk.Entry(self.root, **kwargs)
-        super().add_widget(self.text)
+        self.widget = tk.Entry(self.root, **kwargs)
+        super().add_widget(self.widget)
 
     def set(self, string: str) -> None:
         self.widget.insert(0, string)
@@ -587,6 +591,96 @@ class Logger:
 
     def kill(self) -> None:
         self.running = False
+
+
+class ChangeSettings:
+    def __init__(self, x, y):
+        self.root = tk.Tk()
+        self.entries = []
+        all_settings = settings.Settings()
+        all_settings.pop("menu")
+        all_settings.pop("widgets")
+        #all_settings.pop("movehistory")
+        all_settings["movehistory"].pop("auto_hide_scrollbar")
+        all_settings["movehistory"].pop("line_width")
+        all_settings["movehistory"].pop("line_height")
+        all_settings["movehistory"].pop("cursor_colour")
+        #all_settings.pop("root")
+        self.add_entries(self.root, all_settings, self.entries)
+        self.button = tk.Button(self.root, text="Done", command=self.done)
+        self.button.grid(row=999, column=1, columnspan=3, sticky="news")
+
+    def add_entries(self, master, settings_subtree, list_widgets):
+        for name in reversed(settings_subtree.__dict__.keys()):
+            value = settings_subtree[name]
+            if type(value) == settings.Setting:
+                frame = tk.Frame(master, relief="sunken", borderwidth=5)
+                frame.grid(row=len(list_widgets)+1, column=1, columnspan=3,
+                           sticky="news")
+                label = tk.Label(frame, text=self.case_str(name), font="bold")
+                label.grid(row=1, column=1, columnspan=3)
+                new_list = [name]
+                list_widgets.append(new_list)
+                self.add_entries(frame, value, new_list)
+            else:
+                label = tk.Label(master, text=name)
+                dtype_name = type(value).__name__
+                dtype = tk.Label(master, text=dtype_name)
+                entry = tk.Entry(master)
+                entry.insert(0, str(value).replace("'", "\""))
+                label.grid(row=len(list_widgets)+1, column=1, sticky="nws")
+                dtype.grid(row=len(list_widgets)+1, column=2, sticky="nws")
+                entry.grid(row=len(list_widgets)+1, column=3, sticky="news")
+                list_widgets.append((name, dtype_name, entry))
+
+    def case_str(self, string):
+        output = ""
+        _list = string.split(".")
+        for i, item in enumerate(_list):
+            if item != "":
+                output += item[0].upper()+item[1:].lower()
+                if i+1 != len(_list):
+                    output += "."
+        return output
+
+    def done(self):
+        new_settings = settings.Settings(None)
+        if self.set(new_settings) != "error":
+            new_settings.save()
+            self.root.destroy()
+
+    def set(self, setting_subtree):
+        for element in self.entries:
+            if isinstance(element, tuple):
+                name = element[0]
+                dtype = element[1]
+                data = element[2].get()
+                if self.check_match_type(data, dtype):
+                    element[2]["bg"] = "white"
+                else:
+                    element[2]["bg"] = "red"
+                    return "error"
+                setting_subtree[name] = settings.parse_value(data)
+            else:
+                items = {}
+                base_name = element[0]
+                for name, dtype, entry in element[1:]:
+                    data = entry.get()
+                    if self.check_match_type(data, dtype):
+                        entry["bg"] = "white"
+                    else:
+                        entry["bg"] = "red"
+                        return "error"
+                    items.update({name: settings.parse_value(data)})
+                setting_subtree[base_name] = settings.Setting(**items)
+
+    def check_match_type(self, data, dtype):
+        try:
+            data = settings.parse_value(data)
+        except:
+            return False
+        return type(data).__name__ == dtype
+
 
 
 def _info(text: str, x: int, y :int) -> None:
