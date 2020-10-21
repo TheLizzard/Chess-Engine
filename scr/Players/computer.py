@@ -43,3 +43,6 @@ class Computer(Player):
         with SimpleEngine.popen_uci(STOCKFISH_LOCATION) as engine:
             result = engine.play(self.board, self.limit)
         self.callback(result.move)
+
+    def set_fen(self, fen: str) -> str:
+        return "break"
