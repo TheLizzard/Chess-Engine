@@ -1,8 +1,8 @@
 # File name                  Version Number
 board.py                        2
-main.py                         4
-settings.ini                    3
-widgets.py                      2
+main.py                         5
+settings.ini                    4
+widgets.py                      3
 reset_app.py                    1
 
 Constants/Help.txt              2
@@ -10,7 +10,7 @@ Constants/Licence.txt           1
 Constants/analyse.py            1
 Constants/piece.py              1
 Constants/position.py           1
-Constants/settings.py           2
+Constants/settings.py           3
 Constants/SuperClass.py         1
 
 Networking/bits.py              1
