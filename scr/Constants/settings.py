@@ -100,8 +100,7 @@ class Settings(SuperClass):
         self.set_settings(settings)
 
     def save(self):
-        contents = ""
-        contents = self.get_all(contents, self)
+        contents = self.get_all("", self)
         with open("settings.ini", "a") as file:
             file.write(contents)
 
@@ -109,8 +108,10 @@ class Settings(SuperClass):
         for key in reversed(settings_subtree.__dict__.keys()):
             value = settings_subtree[key]
             if type(value) == Setting:
-                contents += key.title()+":\n"
+                contents += key.lower()+":\n"
                 contents = self.get_all(contents, value, indent+1)
+                if key == "gameboard.user":
+                    breakpoint()
             else:
                 if not isinstance(value, str):
                     value = str(value)
@@ -126,7 +127,11 @@ def parse(data: str) -> dict:
     if result is not None:
         for block in result:
             block = block.group()
-            output.update(parse_block(block))
+            for key, value in parse_block(block).items():
+                if key in output.keys():
+                    output[key].update(value)
+                    value = output[key]
+                output.update({key: value})
             data = data.replace(block, "", 1)
 
     for line in data.split("\n"):
@@ -239,10 +244,10 @@ DEFAULT_SETTINGS = """
 
 
 "report_errors" = True
-"update" = False
+"update" = True
 
 
-Menu:
+menu:
     "tearoff" = False
     "File" = ("Open", "Save", "Save as", "-----", "Exit")
     "Edit" = ("Undo Move", "Redo Move", "-----", "Change Position")
@@ -251,11 +256,11 @@ Menu:
     "Settings" = ("All Settings")
     "Help" = ("Licence", "Help")
 
-Widgets:
+widgets:
     "borderwidth" = 0
     "highlightthickness" = 0
 
-Game Board:
+gameboard:
     "size_of_squares" = 60
     "dark_squares" = "grey"
     "light_squares" = "white"
@@ -264,7 +269,7 @@ Game Board:
     "last_move_colour_white" = "#BBBBBB"
     "last_move_colour_black" = "#666666"
 
-Game Board.User: # Same for multiplayer as well
+gameboard.user: # Same for multiplayer as well
     "arrow_colour" = "light green"
     "arrow_width" = 5
     "ring_colour" = "light green"
@@ -272,15 +277,15 @@ Game Board.User: # Same for multiplayer as well
     "ring_radius" = 27
     "available_moves_dots_colour" = "black"
 
-Game Board.Computer:
+gameboard.computer:
     "depth" = None
     # In seconds
     "time" = 2
 
-Root:
+root:
     "background" = "grey"
 
-Evaluation:
+evaluation:
     "width" = 160
     "height" = 30
     "colour" = "white"
@@ -288,14 +293,14 @@ Evaluation:
     "font" = ("Lucida Console", 20)
     "stockfish" = "Stockfish/stockfish_11_x"
 
-Suggested Moves:
+suggested_moves:
     "width" = 160
     "height" = 30
     "colour" = "white"
     "background" = "grey"
     "font" = ("Lucida Console", 10)
 
-Move History:
+move_history:
     "width" = 160
     "height" = 380
     "line_width" = 19
@@ -305,6 +310,7 @@ Move History:
     "background" = "grey"
     "cursor_colour" = "white"
     "font" = ("Lucida Console", 10)
+
 """
 
 
