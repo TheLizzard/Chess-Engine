@@ -115,7 +115,7 @@ class App(SuperClass):
         self.eval_text.config(text="{x:-∞≤x≤∞}")
 
     def set_up_suggestedmoves(self) -> None:
-        settings = SETTINGS.suggestedmoves
+        settings = SETTINGS.suggested_moves
         width = settings.width
         height = settings.height
         fg = settings.colour
@@ -135,7 +135,7 @@ class App(SuperClass):
         self.suggestedmoves_text.config(text="No moves to suggest")
 
     def set_up_movehistory(self) -> None:
-        settings = SETTINGS.movehistory
+        settings = SETTINGS.move_history
         width = settings.width
         height = settings.height
         fg = settings.colour
@@ -330,7 +330,7 @@ class App(SuperClass):
             x, y = self.root.winfo_x(), self.root.winfo_y()
             settings_setter = widgets.ChangeSettings(x, y)
             msg = "Restart the program for the changes to take effect"
-            widget.info(msg, x, y)
+            widgets.info(msg, x, y)
         else:
             print("settings."+event)
 
