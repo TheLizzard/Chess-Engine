@@ -76,3 +76,10 @@ class Player:
         disallow this action return `"break"`
         """
         return None
+
+    def set_fen(self, fen: str) -> str:
+        """
+        This is called when the user desides to chaneg the position. To
+        disallow this action return `"break"`
+        """
+        return None
