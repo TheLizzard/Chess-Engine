@@ -1,9 +1,9 @@
 from PIL import Image, ImageTk
 import tkinter as tk
 
-from Constants.SuperClass import SuperClass
-from Constants.settings import Settings
-from Constants.position import Position
+from .SuperClass import SuperClass
+from .settings import Settings
+from .position import Position
 
 SETTINGS = Settings().gameboard
 SPRITES_LOCATION = "Sprites/"
