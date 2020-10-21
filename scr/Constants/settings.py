@@ -110,8 +110,6 @@ class Settings(SuperClass):
             if type(value) == Setting:
                 contents += key.lower()+":\n"
                 contents = self.get_all(contents, value, indent+1)
-                if key == "gameboard.user":
-                    breakpoint()
             else:
                 if not isinstance(value, str):
                     value = str(value)
