@@ -1,16 +1,16 @@
 # File name                  Version Number
-board.py                        1
-main.py                         3
-settings.ini                    2
-widgets.py                      1
+board.py                        2
+main.py                         4
+settings.ini                    3
+widgets.py                      2
 reset_app.py                    1
 
-Constants/Help.txt              1
+Constants/Help.txt              2
 Constants/Licence.txt           1
 Constants/analyse.py            1
 Constants/piece.py              1
 Constants/position.py           1
-Constants/settings.py           1
+Constants/settings.py           2
 Constants/SuperClass.py         1
 
 Networking/bits.py              1
@@ -19,10 +19,9 @@ Networking/connector.py         1
 Networking/reporter.py          1
 Networking/updater.py           3
 
-Players/computer.py             1
-Players/multiplayer.py          1
-Players/player.py               1
-Players/test.py                 1
+Players/computer.py             2
+Players/multiplayer.py          2
+Players/player.py               2
 Players/user.py                 1
 
 Sprites/set.2/bishop.black.png  0
