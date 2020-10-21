@@ -1,5 +1,5 @@
 #https://stackoverflow.com/questions/1405913/how-do-i-determine-if-my-python-shell-is-executing-in-32bit-or-64bit-mode-on-os
-from Constants.SuperClass import SuperClass
+from .SuperClass import SuperClass
 import platform
 import struct
 import copy
@@ -22,17 +22,19 @@ class Setting(SuperClass):
         return str(self.__dict__)
 
     def __getitem__(self, key: str):
-        if key in self.__dict__.keys():
-            return self.__dict__[key]
-        else:
-            raise IndexError("Couldn't find the index: "+str(key)+" in" \
-                             " this class.")
+        return self.__dict__[key]
+
+    def __setitem__(self, key, value):
+        self.__dict__[key] = value
 
     def pop(self, idx=None):
         return self.__dict__.pop(idx)
 
     def items(self):
         return self.__dict__.items()
+
+    def set(self, key, value):
+        self[key] = value
 
     def update(self, dictionary: dict) -> None:
         self.__dict__.update(dictionary)
@@ -46,14 +48,17 @@ class Setting(SuperClass):
 
 class Settings(SuperClass):
     def __init__(self, file="settings.ini"):
-        self.update()
+        if file is not None:
+            self.update(file)
 
-    def __getitem__(self, key: str) -> Setting:
-        if key in self.__dict__.keys():
-            return self.__dict__[key]
-        else:
-            raise IndexError("Couldn't find the index: "+str(key)+" in" \
-                             " this class.")
+    def pop(self, *args):
+        return self.__dict__.pop(*args)
+
+    def __getitem__(self, key: str):
+        return self.__dict__[key]
+
+    def __setitem__(self, key, value):
+        self.__dict__[key] = value
 
     def parse(self, data: str) -> dict:
         return parse(data)
@@ -93,6 +98,25 @@ class Settings(SuperClass):
             print("Couldn't read the settings file so using the default ones.")
             settings = self.parse(DEFAULT_SETTINGS)
         self.set_settings(settings)
+
+    def save(self):
+        contents = ""
+        contents = self.get_all(contents, self)
+        with open("settings.ini", "a") as file:
+            file.write(contents)
+
+    def get_all(self, contents, settings_subtree, indent=0):
+        for key in reversed(settings_subtree.__dict__.keys()):
+            value = settings_subtree[key]
+            if type(value) == Setting:
+                contents += key.title()+":\n"
+                contents = self.get_all(contents, value, indent+1)
+            else:
+                if not isinstance(value, str):
+                    value = str(value)
+                contents += " "*4*indent+"\""+key+"\" = "
+                contents += value.replace("'", "\"")+"\n"
+        return contents
 
 
 def parse(data: str) -> dict:
@@ -145,6 +169,9 @@ def parse_value(value: str):
     if value[0] == value[-1] == "\"":  #check if the value is str
         return value[1:][:-1]
 
+    if value[0] == "(":raise
+    return "\""+value+"\""
+
     raise ValueError("The value is not a valid type: "+value)
 
 
@@ -179,7 +206,7 @@ def parse_block(block: str) -> dict:
         for line in block.split("\n"):
             parsed_line = parse_line(line)
             result.update(parsed_line)
-        return {name: result}
+        return {name.replace(" ", ""): result}
     raise ValueError("Can't parse this block: "+block)
 
 def get_os_bits() -> int:
@@ -212,7 +239,7 @@ DEFAULT_SETTINGS = """
 
 
 "report_errors" = True
-"update" = True
+"update" = False
 
 
 Menu:
@@ -221,14 +248,14 @@ Menu:
     "Edit" = ("Undo Move", "Redo Move", "-----", "Change Position")
     "View" = ("Current FEN", "Game PGN")
     "Game" = ("Evaluate", "-", "Play vs Computer", "Play vs Human", "Play vs AI", "Play Multiplayer")
-    "Settings" = ("Game Settings", "Board Settings")
+    "Settings" = ("All Settings")
     "Help" = ("Licence", "Help")
 
 Widgets:
     "borderwidth" = 0
     "highlightthickness" = 0
 
-GameBoard:
+Game Board:
     "size_of_squares" = 60
     "dark_squares" = "grey"
     "light_squares" = "white"
@@ -237,7 +264,7 @@ GameBoard:
     "last_move_colour_white" = "#BBBBBB"
     "last_move_colour_black" = "#666666"
 
-GameBoard.User: # Same for multiplayer as well
+Game Board.User: # Same for multiplayer as well
     "arrow_colour" = "light green"
     "arrow_width" = 5
     "ring_colour" = "light green"
@@ -245,7 +272,7 @@ GameBoard.User: # Same for multiplayer as well
     "ring_radius" = 27
     "available_moves_dots_colour" = "black"
 
-GameBoard.Computer:
+Game Board.Computer:
     "depth" = None
     # In seconds
     "time" = 2
@@ -255,18 +282,20 @@ Root:
 
 Evaluation:
     "width" = 160
-    "height" = 45
+    "height" = 30
     "colour" = "white"
     "background" = "grey"
     "font" = ("Lucida Console", 20)
     "stockfish" = "Stockfish/stockfish_11_x"
 
-SuggestedMoves:
+Suggested Moves:
+    "width" = 160
+    "height" = 30
     "colour" = "white"
     "background" = "grey"
     "font" = ("Lucida Console", 10)
 
-MoveHistory:
+Move History:
     "width" = 160
     "height" = 380
     "line_width" = 19
