@@ -3,6 +3,7 @@ from chess import pgn
 import tkinter as tk
 import chess
 import time
+import copy
 import re
 
 from Players.user import User
@@ -157,7 +158,9 @@ class GUIBoard(SuperClass):
         """
         Returns the PGN current board state in sans notation.
         """
-        board = chess.Board()
+        board = copy.deepcopy(self.board)
+        for i in range(len(self.board.move_stack)):
+            board.pop()
         pgn = board.variation_san(self.board.move_stack)
         pgn = self.clean_pgn(pgn)
         return pgn
@@ -173,7 +176,7 @@ class GUIBoard(SuperClass):
             output += str(i+1)+". "+move_pair.rstrip()+"\n"
         return output
 
-    def set_pgn(self, pgn: str) -> None:
+    def set_pgn(self, pgn: str) -> str:
         """
         Sets up the board accourding to the pgn if allowed by both current
         players.
@@ -186,6 +189,23 @@ class GUIBoard(SuperClass):
         for move in game.mainline_moves():
             self.board.push(move)
         self.update()
+
+    def set_fen(self, fen: str) -> str:
+        """
+        Sets up the board accourding to the fen if allowed by both current
+        players.
+        """
+        for player in self.players:
+            if player.set_fen(fen) == "break":
+                return "break"
+        tmp_board = self.board.copy()
+        tmp_board.set_fen(fen)
+        if tmp_board.status() == chess.STATUS_VALID:
+            self.board.set_fen(fen)
+            self.remove_last_sqrs()
+            self.update()
+        else:
+            return "error"
 
     # This is the part where the players are accually created and added to
     # the board using the board player protocol
@@ -215,7 +235,6 @@ class GUIBoard(SuperClass):
         """
         This adds an ai as the player.
         """
-        if type(colour) != bool:raise
         print("Not available")
 
     def start_multiplayer(self) -> None:
