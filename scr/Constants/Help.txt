@@ -41,6 +41,14 @@
       To open the game press '`Control+o`'
 
 
+#How do I change the settings?#
+      To change the settings:
+            Press `Settings` on the menu
+            Press `All Settings` on the submenu
+            Change the settings to your liking
+            Press `Done` to save.
+
+
 #I got an error.#
       Please report all errors to github.com/TheLizzard/Chess-Engine/issues.
       !Note: if you don't tell me the problem I can't fix it.!
