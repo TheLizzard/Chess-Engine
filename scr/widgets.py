@@ -601,10 +601,10 @@ class ChangeSettings:
         all_settings.pop("menu")
         all_settings.pop("widgets")
         #all_settings.pop("movehistory")
-        all_settings["movehistory"].pop("auto_hide_scrollbar")
-        all_settings["movehistory"].pop("line_width")
-        all_settings["movehistory"].pop("line_height")
-        all_settings["movehistory"].pop("cursor_colour")
+        all_settings["move_history"].pop("auto_hide_scrollbar")
+        all_settings["move_history"].pop("line_width")
+        all_settings["move_history"].pop("line_height")
+        all_settings["move_history"].pop("cursor_colour")
         #all_settings.pop("root")
         self.add_entries(self.root, all_settings, self.entries)
         self.button = tk.Button(self.root, text="Done", command=self.done)
@@ -617,7 +617,7 @@ class ChangeSettings:
                 frame = tk.Frame(master, relief="sunken", borderwidth=5)
                 frame.grid(row=len(list_widgets)+1, column=1, columnspan=3,
                            sticky="news")
-                label = tk.Label(frame, text=self.case_str(name), font="bold")
+                label = tk.Label(frame, text=name, font="bold")
                 label.grid(row=1, column=1, columnspan=3)
                 new_list = [name]
                 list_widgets.append(new_list)
@@ -632,16 +632,6 @@ class ChangeSettings:
                 dtype.grid(row=len(list_widgets)+1, column=2, sticky="nws")
                 entry.grid(row=len(list_widgets)+1, column=3, sticky="news")
                 list_widgets.append((name, dtype_name, entry))
-
-    def case_str(self, string):
-        output = ""
-        _list = string.split(".")
-        for i, item in enumerate(_list):
-            if item != "":
-                output += item[0].upper()+item[1:].lower()
-                if i+1 != len(_list):
-                    output += "."
-        return output
 
     def done(self):
         new_settings = settings.Settings(None)
