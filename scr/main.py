@@ -247,7 +247,15 @@ class App(SuperClass):
             self.root.event_generate("<Control-Shift-Z>")
 
         elif event == "change_position":
-            print("edit.change_position")
+            x, y = self.root.winfo_x(), self.root.winfo_y()
+            window = widgets.Question(x, y)
+            window.ask_user_entry("Write the FEN string")
+            new_fen = window.wait()
+            if new_fen is not None:
+                result = self.board.set_fen(new_fen)
+                if (result != "break") and (result != "error"):
+                    self.restart_analysing()
+                    self.update_pgn()
 
         else:
             print("? ", event)
@@ -318,11 +326,13 @@ class App(SuperClass):
         self.clear_pgn()
 
     def change_settings(self, event: str) -> None:
-        if event == "game_settings":
-            print("settings.game_settings")
-
-        elif event == "board_settings":
-            print("settings.board_settings")
+        if event == "all_settings":
+            x, y = self.root.winfo_x(), self.root.winfo_y()
+            settings_setter = widgets.ChangeSettings(x, y)
+            msg = "Restart the program for the changes to take effect"
+            widget.info(msg, x, y)
+        else:
+            print("settings."+event)
 
     def update(self) -> None:
         if self.done_set_up and self.analysing and (self.analyses is not None):
