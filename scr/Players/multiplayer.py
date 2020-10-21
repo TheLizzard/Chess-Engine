@@ -256,3 +256,6 @@ class Multiplayer(User, SuperClass):
 
     def open_game(self, pgn: str) -> str:
         return "break"
+
+    def set_fen(self, fen: str) -> str:
+        return "break"
