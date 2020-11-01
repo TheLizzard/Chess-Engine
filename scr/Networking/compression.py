@@ -138,7 +138,7 @@ def compress_fen(fen: str) -> Bits:
     while i < len(fen):
         if fen[i].isdigit():
             new = Bits.from_int(0, bits=1)
-            if fen[i+1].isdigit():
+            if (i+1 != len(fen)) and fen[i+1].isdigit():
                 number = new.concatenate(Bits.from_int(int(fen[i:i+2]), bits=6))
                 new_fen = new_fen.concatenate(number)
                 i += 1
