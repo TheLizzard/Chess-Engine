@@ -290,6 +290,7 @@ evaluation:
     "background" = "grey"
     "font" = ("Lucida Console", 20)
     "stockfish" = "Stockfish/stockfish_11_x"
+    "ai" = "ccarotmodule/ccarotmodule"
 
 suggested_moves:
     "width" = 160
@@ -308,7 +309,6 @@ move_history:
     "background" = "grey"
     "cursor_colour" = "white"
     "font" = ("Lucida Console", 10)
-
 """
 
 
