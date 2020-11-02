@@ -6,6 +6,7 @@ import time
 import copy
 import re
 
+from Players.ai import AI
 from Players.user import User
 from Players.computer import Computer
 from Players.multiplayer import Multiplayer
@@ -41,11 +42,11 @@ class GUIBoard(SuperClass):
         self.push(move)
         self.update_last_moved()
         self.update()
-        self.players[1-self.board.turn].go()
+        self.start_player()
 
     def play(self) -> None:
         if not self.board.is_game_over():
-            self.player[1-self.board.turn].go()
+            self.start_player()
             self.update()
 
     def set_up_board(self) -> None:
@@ -230,12 +231,18 @@ class GUIBoard(SuperClass):
                           self.update, self.done_move, self.request_undo_move,
                           self.request_redo_move)
         self.add_player(colour, player)
+        self.start_player()
 
     def add_ai_as_player(self, colour: bool) -> None:
         """
         This adds an ai as the player.
         """
-        print("Not available")
+        self.kill_player(colour)
+        player = AI(self.board, self.master, colour, self.pieces,
+                    self.update, self.done_move, self.request_undo_move,
+                    self.request_redo_move)
+        self.add_player(colour, player)
+        self.start_player()
 
     def start_multiplayer(self) -> None:
         """
@@ -377,7 +384,8 @@ class GUIBoard(SuperClass):
         Starts the player that is supposed to be playing on
         the board with now
         """
-        self.players[1-self.board.turn].go()
+        if self.players[not self.board.turn] is not None:
+            self.players[not self.board.turn].go()
 
     def ask_user(self, question: str, answers: tuple, mapping: tuple=None):
         """
