@@ -1,14 +1,16 @@
-import os
-import chess
-import chess.syzygy
-import chess.polyglot
-import subprocess
-from time import sleep
 from copy import deepcopy
+from time import sleep
+from math import log
+import subprocess
+import os
+
+import chess.polyglot
+import chess.syzygy
+import chess
 
 
-from .player import Player
 import Constants.settings as settings
+from .player import Player
 
 
 AI_FOLDER = settings.Settings().evaluation.ai.replace("/", "\\")
@@ -31,20 +33,31 @@ class AI(Player):
                 self.callback(move)
                 return None
             number_of_moves_played = len(self.board.move_stack)
-            quietness = 100
-            if number_of_moves_played < 40:
-                depth = 3
-            elif number_of_moves_played < 60:
-                depth = 4
-                quietness = 3
+
+            legal_moves = tuple(self.board.legal_moves)
+            board_other = deepcopy(self.board)
+            board_other.push(legal_moves[0])
+            self_branching_factor = len(legal_moves)
+            other_branching_factor = len(tuple(board_other.legal_moves))
+
+            branching_factor = (self_branching_factor+other_branching_factor)/2
+
+            if number_of_moves_played < 25:
+                nodes_to_be_searched = 75000
+                quietness = 1
+            elif number_of_moves_played < 35:
+                nodes_to_be_searched = 50000
+                quietness = 0.8
             else:
-                depth = 7
-                quietness = 4
+                nodes_to_be_searched = 100000
+                quietness = 0.6
+            depth = int(log(nodes_to_be_searched)/log(branching_factor)+0.5)
+            quietness = depth*quietness
 
             folder = os.getcwd()+"\\ccarotmodule\\"
             hashed_move = str(self._go(folder, self.board,
                                        str(depth), str(quietness)))
-            if len(hashed_move) != 5:
+            while len(hashed_move) < 5:
                 hashed_move = "0"+hashed_move
             _from = int(hashed_move[:2])
             to = int(hashed_move[2:4])
