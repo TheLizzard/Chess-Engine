@@ -284,29 +284,29 @@ class App(SuperClass):
             colour = self.ask_if_user_white()
             if colour is None:
                 return None
+            self.reset(False)
             self.board.add_user_as_player(colour)
             self.board.add_computer_as_player(not colour)
-            self.reset(False)
 
         elif event == "play_vs_human":
             # Add the 2 user players and reset the board
+            self.reset(True)
             self.board.add_user_as_player(True)
             self.board.add_user_as_player(False)
-            self.reset(True)
 
         elif event == "play_vs_ai":
             # Add user as `colour` and AI as `not colour`
             colour = self.ask_if_user_white()
             if colour is None:
                 return None
+            self.reset(False)
             self.board.add_user_as_player(colour)
             self.board.add_ai_as_player(not colour)
-            self.reset(False)
 
         elif event == "play_multiplayer":
             # Start multiplayer
-            self.board.start_multiplayer()
             self.reset(False)
+            self.board.start_multiplayer()
 
     def ask_if_user_white(self) -> bool:
         """
