@@ -106,11 +106,17 @@ class User(Player, SuperClass):
         self.stop_user_created_object()
         super().destroy()
 
+    def go(self):
+        self.master.after(100, self.unselect)
+
     def mouse(self, event: tk.Event) -> None:
         """
         This takes in all tkinter mouse events and reacts to them.
         """
         if (not self.alowed_to_play) or (self.colour != self.board.turn):
+            self.stop_user_created_object()
+            self.delete_user_created_object()
+            self.unselect()
             return None
         # event.type._name_ can be one of: (ButtonPress, ButtonRelease, Motion)
         pos = (event.x, event.y)
@@ -118,7 +124,8 @@ class User(Player, SuperClass):
         if (not (0 < pos[0] < self.size*8)) or (not (0 < pos[1] < self.size*8)):
             self.unselect()
             self.stop_user_created_object()
-            self.update()
+            if self.left_mouse_down and (not self.right_mouse_down):
+                self.update()
         elif event.num == 1:
             self.mouse_left(event.type._name_, pos)
         elif event.num == 3:
