@@ -1,42 +1,55 @@
 # File name                  Version Number
-board.py                        2
-main.py                         5
-settings.ini                    4
-widgets.py                      3
-reset_app.py                    1
+board.py                            3
+main.py                             6
+settings.ini                        5
+widgets.py                          4
+reset_app.py                        2
 
-Constants/Help.txt              2
-Constants/Licence.txt           1
-Constants/analyse.py            1
-Constants/piece.py              1
-Constants/position.py           1
-Constants/settings.py           3
-Constants/SuperClass.py         1
+Constants/Help.txt                  3
+Constants/Licence.txt               2
+Constants/analyse.py                2
+Constants/piece.py                  2
+Constants/position.py               2
+Constants/settings.py               4
+Constants/SuperClass.py             5
 
-Networking/bits.py              1
-Networking/compression.py       1
-Networking/connector.py         1
-Networking/reporter.py          1
-Networking/updater.py           3
+Networking/bits.py                  2
+Networking/compression.py           2
+Networking/connector.py             2
+Networking/reporter.py              2
+Networking/updater.py               4
 
-Players/computer.py             2
-Players/multiplayer.py          2
-Players/player.py               2
-Players/user.py                 1
+ccarotmodule/ccarotmodule32bit.exe  0
+ccarotmodule/Data/PAWN_EVAL.txt     0
+ccarotmodule/Data/KNIGHT_EVAL.txt   0
+ccarotmodule/Data/BISHOP_EVAL.txt   0
+ccarotmodule/Data/ROOK_EVAL.txt     0
+ccarotmodule/Data/QUEEN_EVAL.txt    0
 
-Sprites/set.2/bishop.black.png  0
-Sprites/set.2/bishop.white.png  0
-Sprites/set.2/king.black.png    0
-Sprites/set.2/king.white.png    0
-Sprites/set.2/knight.black.png  0
-Sprites/set.2/knight.white.png  0
-Sprites/set.2/pawn.black.png    0
-Sprites/set.2/pawn.white.png    0
-Sprites/set.2/queen.black.png   0
-Sprites/set.2/queen.white.png   0
-Sprites/set.2/rook.black.png    0
-Sprites/set.2/rook.white.png    0
+Tables/polyglot.bin                 0
+Tables/downloader.py                0
+Tables/syzygy/KBNvK.rtbw            0
+Tables/syzygy/KBNvK.rtbz            0
 
-Stockfish/stockfish_11_x32.exe  0
-Stockfish/stockfish_11_x64      0
-Stockfish/stockfish_11_x64.exe  0
+Players/ai.py                       0
+Players/computer.py                 3
+Players/multiplayer.py              3
+Players/player.py                   3
+Players/user.py                     2
+
+Sprites/set.2/bishop.black.png      0
+Sprites/set.2/bishop.white.png      0
+Sprites/set.2/king.black.png        0
+Sprites/set.2/king.white.png        0
+Sprites/set.2/knight.black.png      0
+Sprites/set.2/knight.white.png      0
+Sprites/set.2/pawn.black.png        0
+Sprites/set.2/pawn.white.png        0
+Sprites/set.2/queen.black.png       0
+Sprites/set.2/queen.white.png       0
+Sprites/set.2/rook.black.png        0
+Sprites/set.2/rook.white.png        0
+
+Stockfish/stockfish_11_x32.exe      0
+Stockfish/stockfish_11_x64          0
+Stockfish/stockfish_11_x64.exe      0
