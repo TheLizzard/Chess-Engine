@@ -21,19 +21,24 @@ def update() -> bool:
 def check_for_update() -> tuple:
     with open("files.txt", "r") as file:
         current = file.read()
-    response = requests.get(BASE+"files.txt").text
-
-    new = parse_files(response)
-    current = parse_files(current)
-
-    return difference_dicts(current, new)
+    try:
+        response = requests.get(BASE+"files.txt").text
+        new = parse_files(response)
+        current = parse_files(current)
+        return difference_dicts(current, new)
+    except:
+        pass
 
 def update_file(file_name: str):
     if os.path.dirname(file_name) != "":
         os.makedirs(os.path.dirname(file_name), exist_ok=True)
+    try:
+        data = requests.get(BASE+file_name)
+    except:
+        print("Couldn't update file: "+file_name)
+        return None
     with open(file_name, "wb") as file:
-        file.write(requests.get(BASE+file_name).content)
-
+        file.write(data.content)
 
 def parse_files(text: str) -> dict:
     text += "\n" # add a blank line for the re.findall step
