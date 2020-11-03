@@ -18,7 +18,7 @@ keep it as fast and clean as possible.
 
 import chess
 
-from .settings import Settings
+from Constants.settings import Settings
 
 
 SIZE = Settings().gameboard.size_of_squares
