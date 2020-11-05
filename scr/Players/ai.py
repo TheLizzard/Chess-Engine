@@ -117,5 +117,4 @@ class AI(Player):
         return "break"
 
     def set_fen(self, fen: str) -> str:
-        return None
         return "break"
