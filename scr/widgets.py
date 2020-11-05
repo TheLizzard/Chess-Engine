@@ -353,7 +353,7 @@ class Question:
             else:
                 pos = int(self.entry.index("insert").split(".")[1])
                 text = text[:pos]+new_char+text[pos:]
-        result = re.match("^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$", text)
+        result = re.match(r"^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$", text)
         if result is None:
             self.entry.config(bg="white")
             return False
