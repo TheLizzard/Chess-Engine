@@ -27,7 +27,7 @@ def check_for_update() -> tuple:
         current = parse_files(current)
         return difference_dicts(current, new)
     except:
-        pass
+        return tuple()
 
 def update_file(file_name: str):
     if os.path.dirname(file_name) != "":
