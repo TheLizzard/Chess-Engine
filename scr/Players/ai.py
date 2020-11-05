@@ -52,7 +52,7 @@ class AI(Player):
                 nodes_to_be_searched = 100000
                 quietness = 0.6
             depth = int(log(nodes_to_be_searched)/log(branching_factor)+0.5)
-            quietness = depth*quietness
+            quietness = int(depth*quietness+0.5)
 
             folder = os.getcwd()+"\\ccarotmodule\\"
             hashed_move = str(self._go(folder, self.board,
