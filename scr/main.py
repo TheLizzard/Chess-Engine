@@ -16,7 +16,7 @@ if SETTINGS.update:
     updates_needed = len(updater.check_for_update()) > 0
     if updates_needed:
         print("Starting update")
-        updated = updater.update()
+        updater.update()
         print("Just updated the program with a newer version.")
         import main
         exit()
@@ -40,7 +40,6 @@ class App(SuperClass):
         self.board.update()
         self.done_set_up = True
         self.root.update()
-        self.start_analysing()
 
     def exit(self) -> None:
         self.board.kill_player(self.board.players[0])
@@ -88,6 +87,13 @@ class App(SuperClass):
             for button in _list:
                 if button.replace("-", "") == "":
                     self.submenu.add_separator()
+                elif button.lower() == "evaluate":
+                    self.analyses_var = tk.BooleanVar()
+                    self.analyses_var.set(False)
+                    self.analyses_var.trace("w", self.toggle_analyses)
+                    self.submenu.add_checkbutton(label="Evaluate", onvalue=1,
+                                                 offvalue=0,
+                                                 variable=self.analyses_var)
                 else:
                     button = button[0].upper()+button[1:]
                     event = (name+"."+button).lower().replace(" ", "_")
@@ -387,6 +393,14 @@ class App(SuperClass):
     def restart_analysing(self) -> None:
         if self.analysing and self.allowed_analyses:
             self.stop_analysing()
+            self.start_analysing()
+
+    def toggle_analyses(self, *events) -> None:
+        if not self.allowed_analyses:
+            return None # User not allowed analyses
+        if self.analysing:
+            self.stop_analysing()
+        else:
             self.start_analysing()
 
 
