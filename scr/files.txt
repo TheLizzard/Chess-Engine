@@ -31,7 +31,7 @@ Tables/downloader.py                0
 Tables/syzygy/KBNvK.rtbw            0
 Tables/syzygy/KBNvK.rtbz            0
 
-Players/ai.py                       1
+Players/ai.py                       2
 Players/computer.py                 3
 Players/multiplayer.py              3
 Players/player.py                   3
