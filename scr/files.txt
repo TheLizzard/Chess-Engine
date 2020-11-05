@@ -2,7 +2,7 @@
 board.py                            3
 main.py                             6
 settings.ini                        5
-widgets.py                          4
+widgets.py                          5
 reset_app.py                        2
 
 Constants/Help.txt                  3
