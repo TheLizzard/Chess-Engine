@@ -17,7 +17,7 @@ Networking/bits.py                  2
 Networking/compression.py           2
 Networking/connector.py             2
 Networking/reporter.py              2
-Networking/updater.py               4
+Networking/updater.py               5
 
 ccarotmodule/ccarotmodule32bit.exe  0
 ccarotmodule/Data/PAWN_EVAL.txt     0
