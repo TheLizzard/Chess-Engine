@@ -1,6 +1,6 @@
 # File name                  Version Number
 board.py                            3
-main.py                             6
+main.py                             7
 settings.ini                        5
 widgets.py                          6
 reset_app.py                        2
@@ -31,7 +31,7 @@ Tables/downloader.py                0
 Tables/syzygy/KBNvK.rtbw            0
 Tables/syzygy/KBNvK.rtbz            0
 
-Players/ai.py                       0
+Players/ai.py                       1
 Players/computer.py                 3
 Players/multiplayer.py              3
 Players/player.py                   3
