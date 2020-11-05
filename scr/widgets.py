@@ -513,7 +513,7 @@ class Logger:
             self.blacklisted.append(item)
 
     def get_blacklist(self) -> str:
-        window = Question()
+        window = Question(0, 0)
         window.ask_user_entry("What do you want to blacklist?")
 
         kwargs = {"text": "Clear all blacklisted",
