@@ -2,7 +2,7 @@
 board.py                            3
 main.py                             8
 settings.ini                        7
-widgets.py                          8
+widgets.py                          9
 reset_app.py                        3
 
 Constants/Help.txt                  3
@@ -15,7 +15,7 @@ Constants/SuperClass.py             5
 
 Networking/bits.py                  2
 Networking/compression.py           2
-Networking/connector.py             2
+Networking/connector.py             3
 Networking/reporter.py              2
 Networking/updater.py               5
 
@@ -33,7 +33,7 @@ Tables/syzygy/KBNvK.rtbz            0
 
 Players/ai.py                       2
 Players/computer.py                 4
-Players/multiplayer.py              3
+Players/multiplayer.py              4
 Players/player.py                   3
 Players/user.py                     3
 
