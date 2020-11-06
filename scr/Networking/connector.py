@@ -30,10 +30,14 @@ class Reciever:
     def start(self) -> None:
         while self.running:
             if self.alowed_to_recv:
-                data = self.sock.recv(1024)
-                if data == "":
+                try:
+                    data = self.sock.recv(1024)
+                    if data == "":
+                        self.running = False
+                        return None
+                    self.generate_event(Bits.from_bytes(data))
+                except OSError as error:
                     self.running = False
-                self.generate_event(Bits.from_bytes(data))
 
     def go(self) -> None:
         self.alowed_to_recv = True
@@ -123,8 +127,11 @@ class Connector:
             self.connected = False
 
         if self.our_sock_running:
-            self.our_sock.shutdown(socket.SHUT_RDWR) #Fully close the socket
-            self.our_sock.close()
+            try:
+                self.our_sock.shutdown(socket.SHUT_RDWR) #Fully close the socket
+                self.our_sock.close()
+            except:
+                pass
             del self.our_sock
             self.our_sock_running = False
 
