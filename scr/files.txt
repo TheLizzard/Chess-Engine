@@ -4,6 +4,7 @@ main.py                             8
 settings.ini                        7
 widgets.py                          9
 reset_app.py                        3
+reset_settings.py                   0
 
 Constants/Help.txt                  3
 Constants/Licence.txt               2
