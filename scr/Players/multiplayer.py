@@ -53,6 +53,8 @@ class Multiplayer(User, SuperClass):
         self.running = False
         self.connector.unbind()
         self.connector.kill()
+        del self.connector
+        super().stop()
         super().destroy()
 
     def push(self, move: chess.Move) -> None:
@@ -98,11 +100,11 @@ class Multiplayer(User, SuperClass):
         A never ending loop of dealing with the event queue.
         Note: this loop stays in the main thread (the one tkinter needs)
         because it uses the tkinter `widget.after` method. This heavily
-        relies on that so if it is changed it can cause massive problems.
+        relies on the main window (tk.Tk) being updated.
         """
         self.event_lock.acquire()
-        # We need to first deep copy the list so that we avoid any problems
-        # accessing the data later.
+        # We need to first deep copy the list so that we avoid thread unsafe
+        # variables that might cause problems later.
         event_queue = copy.deepcopy(self.event_queue)
         self.event_queue = []
         self.event_lock.release()
