@@ -129,7 +129,10 @@ class Connector:
             self.our_sock_running = False
 
         if self.thier_sock_running:
-            self.their_sock.shutdown(socket.SHUT_RDWR) #Fully close the socket
+            try:
+                self.their_sock.shutdown(socket.SHUT_RDWR) #Fully close the socket
+            except:
+                pass
             self.their_sock.close()
             del self.their_sock
             self.thier_sock_running = False
