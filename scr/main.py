@@ -2,9 +2,9 @@ try:
     import chess
     import requests
     import PIL
+    del PIL, requests, chess
 except ImportError as error:
     print("You are missing some dependencies.")
-    user_input = ""
     user_input = input("Do you want to install them (y/n): ")
     if user_input.lower() == "y":
         import subprocess, sys
@@ -14,6 +14,7 @@ except ImportError as error:
         print("Didn't install dependencies.")
         input("Press any key to exit the program.")
         exit()
+    del user_input
 
 
 from functools import partial
