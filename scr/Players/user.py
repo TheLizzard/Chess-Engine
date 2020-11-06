@@ -24,7 +24,7 @@ from Constants.settings import Settings
 
 SETTINGS = Settings()
 BOARD_SETTINGS = SETTINGS.gameboard
-USER_SETTINGS = SETTINGS["gameboard.user"]
+USER_SETTINGS = SETTINGS["user"]
 
 
 class User(Player, SuperClass):
