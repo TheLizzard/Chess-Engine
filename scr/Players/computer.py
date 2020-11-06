@@ -18,8 +18,8 @@ Get the correct Stockfish file that the OS can use. Fix for Issue #20.
 import Constants.settings as settings
 # Get the folder of all of the Sockfishes
 s = settings.Settings()
-DEPTH = s["gameboard.computer"].depth
-TIME = s["gameboard.computer"].time
+DEPTH = s["computer"].depth
+TIME = s["computer"].time
 STOCKFISH_FOLDER = s.evaluation.stockfish
 os_bits = str(settings.get_os_bits()) # Get the bit version of the OS
 # Get the file extension that the OS supports
