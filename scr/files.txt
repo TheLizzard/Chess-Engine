@@ -15,7 +15,7 @@ Constants/SuperClass.py             5
 
 Networking/bits.py                  2
 Networking/compression.py           2
-Networking/connector.py             3
+Networking/connector.py             4
 Networking/reporter.py              2
 Networking/updater.py               5
 
