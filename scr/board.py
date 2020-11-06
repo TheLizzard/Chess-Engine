@@ -262,7 +262,7 @@ class GUIBoard(SuperClass):
         player = Multiplayer(self.board, self.master, colour, self.pieces,
                              self.update, self.done_move,
                              self.request_undo_move, self.request_redo_move,
-                             debug=True)
+                             debug=False)
         self.add_player(colour, player)
         self.add_player(not colour, player)
 
