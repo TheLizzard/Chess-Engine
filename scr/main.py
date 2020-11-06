@@ -8,10 +8,10 @@ import Networking.updater as updater
 
 FILETYPES = (("Chess games", "*.pgn"), ("All files", "*.*"))
 SETTINGS = Settings()
-REPORT_ERRORS = SETTINGS.report_errors
+REPORT_ERRORS = SETTINGS.startup.report_errors
 
 
-if SETTINGS.update:
+if SETTINGS.startup.update:
     print("Checking for updates.")
     updates_needed = len(updater.check_for_update()) > 0
     if updates_needed:
@@ -118,7 +118,7 @@ class App(SuperClass):
         self.eval_text = tk.Label(self.eval_frame, fg=fg, bg=bg, font=font,
                                   **self.widget_kwargs)
         self.eval_text.grid(row=1, column=1, sticky="news")
-        self.eval_text.config(text="{x:-∞≤x≤∞}")
+        self.eval_text.config(text="x=∈ℤ")
 
     def set_up_suggestedmoves(self) -> None:
         settings = SETTINGS.suggested_moves
@@ -335,8 +335,6 @@ class App(SuperClass):
         if event == "all_settings":
             x, y = self.root.winfo_x(), self.root.winfo_y()
             settings_setter = widgets.ChangeSettings(x, y)
-            msg = "Restart the program for the changes to take effect"
-            widgets.info(msg, x, y)
         else:
             print("settings."+event)
 
