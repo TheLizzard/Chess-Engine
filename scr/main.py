@@ -1,3 +1,21 @@
+try:
+    import chess
+    import requests
+    import PIL
+except ImportError as error:
+    print("You are missing some dependencies.")
+    user_input = ""
+    user_input = input("Do you want to install them (y/n): ")
+    if user_input.lower() == "y":
+        import subprocess, sys
+        for package in ("chess", "requests", "pillow"):
+            subprocess.check_call([sys.executable, "-m", "pip", "install", package])
+    else:
+        print("Didn't install dependencies.")
+        input("Press any key to exit the program.")
+        exit()
+
+
 from functools import partial
 import tkinter as tk
 import threading
@@ -177,43 +195,29 @@ class App(SuperClass):
         event = event.split(".")
         if event[0] == "file":
             self.file(event[1])
-
         elif event[0] == "edit":
             self.edit(event[1])
-
         elif event[0] == "view":
             self.view(event[1])
-
         elif event[0] == "game":
             self.start_game(event[1])
-
         elif event[0] == "settings":
             self.change_settings(event[1])
-
         elif event[0] == "help":
             if event[1] == "licence":
                 widgets.LicenceWindow()
             elif event[1] == "help":
                 widgets.HelpWindow()
 
-        else:
-            print("? ", event)
-
     def file(self, event: str) -> None:
         if event == "open":
             self.open()
-
         elif event == "save":
             self.save()
-
         elif event == "save_as":
             self.save_as()
-
         elif event == "exit":
             self.root.destroy()
-
-        else:
-            print("? ", event)
 
     def open(self, _=None) -> None:
         self.open_from_file()
@@ -248,10 +252,8 @@ class App(SuperClass):
     def edit(self, event: str) -> None:
         if event == "undo_move":
             self.root.event_generate("<Control-z>")
-
         elif event == "redo_move":
             self.root.event_generate("<Control-Shift-Z>")
-
         elif event == "change_position":
             x, y = self.root.winfo_x(), self.root.winfo_y()
             window = widgets.Question(x, y)
@@ -263,14 +265,10 @@ class App(SuperClass):
                     self.restart_analysing()
                     self.update_pgn()
 
-        else:
-            print("? ", event)
-
     def view(self, event: str) -> None:
         if event == "current_fen":
             w = widgets.CopyableEntryWindow(width=40)
             w.set(self.board.fen())
-
         elif event == "game_pgn":
             w = widgets.CopyableTextWindow()
             w.set(self.board.pgn())
@@ -335,8 +333,6 @@ class App(SuperClass):
         if event == "all_settings":
             x, y = self.root.winfo_x(), self.root.winfo_y()
             settings_setter = widgets.ChangeSettings(x, y)
-        else:
-            print("settings."+event)
 
     def update(self) -> None:
         if self.done_set_up and self.analysing and (self.analyses is not None):
