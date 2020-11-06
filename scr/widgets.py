@@ -680,16 +680,16 @@ class ChangeSettings:
         It also closes the window and displays a message saying:
             "Restart the program for the changes to take effect."
         """
-        x, y = self.root.winfo_x(), self.root.winfo_y()
         new_settings = settings_module.Settings(None)
         if self.set(new_settings) != "error":
             new_settings.save()
             self.close()
     
-    def close(self):
-            self.root.destroy()
-            msg = "Restart the program for the changes to take effect."
-            info(msg, x, y)
+    def close(self, coords=None):
+        coords = (self.root.winfo_x(), self.root.winfo_y())
+        self.root.destroy()
+        msg = "Restart the program for the changes to take effect."
+        info(msg, *coords)
 
     def set(self, settings: settings_module.Settings) -> str:
         """
@@ -772,7 +772,7 @@ class ChangeSettings:
 
 
 def _info(text: str, x: int, y :int) -> None:
-    root = tk.Toplevel()
+    root = tk.Tk()
     root.resizable(False, False)
     root.title("Info")
     root.geometry("+%d+%d" % (x, y))
