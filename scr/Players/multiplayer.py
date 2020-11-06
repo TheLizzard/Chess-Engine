@@ -17,6 +17,7 @@ PORT = 65360
 class Multiplayer(User, SuperClass):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.sent_undo_move_request = False
         self.running = True
         if self.debug:
             self.logger = widgets.Logger()
@@ -58,6 +59,7 @@ class Multiplayer(User, SuperClass):
         """
         Tell GUIBoard about the new move
         """
+        self.sent_undo_move_request = False
         self.send_move(move)
         self.callback(move)
 
@@ -225,7 +227,13 @@ class Multiplayer(User, SuperClass):
         self.send_move(chess.Move(from_square=code, to_square=code))
 
     def send_undo_move(self, _=None) -> None:
-        self.send_special_move(code=0)
+        if not self.sent_undo_move_request:
+            self.sent_undo_move_request = True
+            self.send_special_move(code=0)
+        else:
+            root = self.master.winfo_toplevel()
+            x, y = root.winfo_x(), root.winfo_y()
+            widgets.info("Can't send more than 1 undo request.", x, y)
 
     def undo(self) -> str:
         """
