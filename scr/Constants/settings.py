@@ -235,6 +235,7 @@ def get_os_extension() -> int:
 
 
 DEFAULT_SETTINGS = """
+
 # This is a file that contains all of the settings
 # There 6 types allowed:
 #      --------- ---------------------------- -----------------
@@ -285,7 +286,8 @@ user: # Same for multiplayer as well
     "available_moves_dots_colour" = "black"
 
 computer:
-    "depth" = None
+    # If the depth is large enough it will be ignored
+    "depth" = 99
     # In seconds
     "time" = 2
 
