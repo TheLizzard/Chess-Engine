@@ -1,8 +1,8 @@
 # File name                  Version Number
 board.py                            3
-main.py                             7
-settings.ini                        5
-widgets.py                          6
+main.py                             8
+settings.ini                        6
+widgets.py                          7
 reset_app.py                        2
 
 Constants/Help.txt                  3
@@ -10,7 +10,7 @@ Constants/Licence.txt               2
 Constants/analyse.py                2
 Constants/piece.py                  2
 Constants/position.py               2
-Constants/settings.py               4
+Constants/settings.py               5
 Constants/SuperClass.py             5
 
 Networking/bits.py                  2
@@ -32,10 +32,10 @@ Tables/syzygy/KBNvK.rtbw            0
 Tables/syzygy/KBNvK.rtbz            0
 
 Players/ai.py                       2
-Players/computer.py                 3
+Players/computer.py                 4
 Players/multiplayer.py              3
 Players/player.py                   3
-Players/user.py                     2
+Players/user.py                     3
 
 Sprites/set.2/bishop.black.png      0
 Sprites/set.2/bishop.white.png      0
