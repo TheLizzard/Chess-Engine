@@ -596,21 +596,43 @@ class Logger:
 
 class ChangeSettings:
     def __init__(self, x, y):
+        """
+        Creates a window that allowes the user to change the
+        settings.
+        """
         self.root = tk.Tk()
+        self.root.title("Settings changer")
         self.notebook = ttk.Notebook(self.root)
-        self.notebook.grid(row=1, column=1)
-        all_settings = settings_module.Settings()
-        all_settings.pop("menu")
-        all_settings.pop("widgets")
-        all_settings["move_history"].pop("auto_hide_scrollbar")
-        all_settings["move_history"].pop("line_width")
-        all_settings["move_history"].pop("line_height")
-        all_settings["move_history"].pop("cursor_colour")
-        self.add_entries(self.notebook, all_settings)
-        self.button = tk.Button(self.root, text="Done", bg="light grey", fg="black", command=self.done)
-        self.button.grid(row=2, column=1, sticky="news")
+        self.notebook.grid(row=2, column=1, columnspan=2)
+        self.all_settings = settings_module.Settings()
+        self.all_settings.pop("menu")
+        self.all_settings.pop("widgets")
+        self.all_settings["move_history"].pop("auto_hide_scrollbar")
+        self.all_settings["move_history"].pop("line_width")
+        self.all_settings["move_history"].pop("line_height")
+        self.all_settings["move_history"].pop("cursor_colour")
+        self.add_entries(self.notebook, self.all_settings)
+        self.button_save = tk.Button(self.root, text="Save",
+                                     bg="light grey", fg="black",
+                                     command=self.done)
+        self.button_reset = tk.Button(self.root, text="Reset Settings",
+                                      bg="light grey", fg="black",
+                                      command=self.reset_settings)
+        self.button_save.grid(row=1, column=1, sticky="news")
+        self.button_reset.grid(row=1, column=2, sticky="news")
+    
+    def reset_settings(self):
+        """
+        Resets all of the settings to their default values.
+        """
+        self.all_settings.reset()
+        self.close()
 
     def add_block(self, notebook, name, settings):
+        """
+        Adds a block of settings (as a tab) to the notebook
+        by iterating over all settings and adding them 1 by 1.
+        """
         row = 1
         frame = tk.Frame(notebook)
         frame.name = name
@@ -631,6 +653,11 @@ class ChangeSettings:
             row += 1
 
     def add_entry(self, frame, key, value, row):
+        """
+        Displays and entry on the screen.
+        It is in the format:
+            Name of setting     Date type     tkinter Entry for input
+        """
         dtype_name = self.stringify(type(value).__name__)
         label = tk.Label(frame, text=key)
         dtype = tk.Label(frame, text=dtype_name)
@@ -641,19 +668,34 @@ class ChangeSettings:
         entry.grid(row=row, column=3, sticky="news")
 
     def add_entries(self, notebook, settings):
+        """
+        Displays the all of the settings given on the tkinter window
+        """
         for key, value in settings.items():
             self.add_block(notebook, key, value)
 
     def done(self):
+        """
+        Checks if all of the data types are correct and saves them
+        It also closes the window and displays a message saying:
+            "Restart the program for the changes to take effect."
+        """
         x, y = self.root.winfo_x(), self.root.winfo_y()
         new_settings = settings_module.Settings(None)
         if self.set(new_settings) != "error":
             new_settings.save()
+            self.close()
+    
+    def close(self):
             self.root.destroy()
             msg = "Restart the program for the changes to take effect."
             info(msg, x, y)
 
     def set(self, settings: settings_module.Settings) -> str:
+        """
+        Iterates over all of the user input and updates the settings
+        that it receives.
+        """
         for block_frame in self.notebook.winfo_children():
             block_name = block_frame.name
             children = block_frame.winfo_children()[4:]
@@ -715,6 +757,11 @@ class ChangeSettings:
             return name
 
     def check_match_type(self, data, dtype_stringified):
+        """
+        Checks if the data type of the variable is correct.
+        It uses the settings module and the global functions
+        there
+        """
         dtype = self.unstringify(dtype_stringified)
         try:
             data = settings_module.parse_value(data)
@@ -725,7 +772,7 @@ class ChangeSettings:
 
 
 def _info(text: str, x: int, y :int) -> None:
-    root = tk.Tk()
+    root = tk.Toplevel()
     root.resizable(False, False)
     root.title("Info")
     root.geometry("+%d+%d" % (x, y))
@@ -738,15 +785,36 @@ def _info(text: str, x: int, y :int) -> None:
     root.mainloop()
 
 def info(text: str, x: int=None, y: int=None) -> None:
+    """
+    Displays a message on the screen with 1 button ("Ok")
+    It takes in the message (as a string) and 2 ints for the
+    coordinates. It spawns the new window on the coordinates.
+    given. To make sure that it doesn't effect the main thread
+    all of it is handled in a separe thread.
+    """
     # The x and the y coordinates that new new window will take
     thread = threading.Thread(target=_info, args=(text, x, y))
     thread.deamon = True
     thread.start()
 
-def askopen(filetypes: tuple, title: str="Select file") -> str:
+def askopen(filetypes: tuple, title="Select a file") -> str:
+    """
+    Asks the user for a file to open.
+    It takes in 2 inputs:
+        A tuple of the file types
+        A string of the title of the window
+            Defaults to "Select a file"
+    """
     filename = askopenfilename(title=title, filetypes=filetypes)
     return filename
 
 def asksave(filetypes: tuple, title: str="Save file") -> str:
+    """
+    Asks the user for a file to save data to.
+    It takes in 2 inputs:
+        A tuple of the file types
+        A string of the title of the window
+            Defaults to "Select a file"
+    """
     filename = asksaveasfilename(title=title, filetypes=filetypes)
     return filename
