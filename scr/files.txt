@@ -1,9 +1,9 @@
 # File name                  Version Number
 board.py                            4
-main.py                             8
+main.py                             9
 settings.ini                        7
 widgets.py                          9
-reset_app.py                        3
+reset_app.py                        4
 reset_settings.py                   0
 
 Constants/Help.txt                  3
