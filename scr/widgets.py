@@ -1,9 +1,10 @@
 #https://stackoverflow.com/questions/40617515/python-tkinter-text-modified-callback
 from tkinter.filedialog import askopenfilename, asksaveasfilename
-import Constants.settings as settings
+import Constants.settings as settings_module
 from functools import partial
 from tkinter import ttk
 import tkinter as tk
+from tkinter import ttk
 import threading
 import time
 import re
@@ -596,77 +597,127 @@ class Logger:
 class ChangeSettings:
     def __init__(self, x, y):
         self.root = tk.Tk()
-        self.entries = []
-        all_settings = settings.Settings()
+        self.notebook = ttk.Notebook(self.root)
+        self.notebook.grid(row=1, column=1)
+        all_settings = settings_module.Settings()
         all_settings.pop("menu")
         all_settings.pop("widgets")
-        #all_settings.pop("movehistory")
         all_settings["move_history"].pop("auto_hide_scrollbar")
         all_settings["move_history"].pop("line_width")
         all_settings["move_history"].pop("line_height")
         all_settings["move_history"].pop("cursor_colour")
-        #all_settings.pop("root")
-        self.add_entries(self.root, all_settings, self.entries)
-        self.button = tk.Button(self.root, text="Done", command=self.done)
-        self.button.grid(row=999, column=1, columnspan=3, sticky="news")
+        self.add_entries(self.notebook, all_settings)
+        self.button = tk.Button(self.root, text="Done", bg="light grey", fg="black", command=self.done)
+        self.button.grid(row=2, column=1, sticky="news")
 
-    def add_entries(self, master, settings_subtree, list_widgets):
-        for name in reversed(settings_subtree.__dict__.keys()):
-            value = settings_subtree[name]
-            if type(value) == settings.Setting:
-                frame = tk.Frame(master, relief="sunken", borderwidth=5)
-                frame.grid(row=len(list_widgets)+1, column=1, columnspan=3,
-                           sticky="news")
-                label = tk.Label(frame, text=name, font="bold")
-                label.grid(row=1, column=1, columnspan=3)
-                new_list = [name]
-                list_widgets.append(new_list)
-                self.add_entries(frame, value, new_list)
-            else:
-                label = tk.Label(master, text=name)
-                dtype_name = type(value).__name__
-                dtype = tk.Label(master, text=dtype_name)
-                entry = tk.Entry(master)
-                entry.insert(0, str(value).replace("'", "\""))
-                label.grid(row=len(list_widgets)+1, column=1, sticky="nws")
-                dtype.grid(row=len(list_widgets)+1, column=2, sticky="nws")
-                entry.grid(row=len(list_widgets)+1, column=3, sticky="news")
-                list_widgets.append((name, dtype_name, entry))
+    def add_block(self, notebook, name, settings):
+        row = 1
+        frame = tk.Frame(notebook)
+        frame.name = name
+        notebook.add(frame, text=name)
+        label1 = tk.Label(frame, text="Setting name")
+        label2 = tk.Label(frame, text="Type")
+        label3 = tk.Label(frame, text="Entry")
+        separator = ttk.Separator(frame, orient="horizontal")
+
+        label1.grid(row=row, column=1, sticky="nws")
+        label2.grid(row=row, column=2, sticky="nws")
+        label3.grid(row=row, column=3, sticky="news")
+        separator.grid(row=row+1, column=0, columnspan=5, sticky="ew")
+
+        row += 2
+        for key, value in settings.items():
+            self.add_entry(frame, key, value, row)
+            row += 1
+
+    def add_entry(self, frame, key, value, row):
+        dtype_name = self.stringify(type(value).__name__)
+        label = tk.Label(frame, text=key)
+        dtype = tk.Label(frame, text=dtype_name)
+        entry = tk.Entry(frame)
+        entry.insert(0, str(value).replace("'", "\""))
+        label.grid(row=row, column=1, sticky="nws")
+        dtype.grid(row=row, column=2, sticky="nws")
+        entry.grid(row=row, column=3, sticky="news")
+
+    def add_entries(self, notebook, settings):
+        for key, value in settings.items():
+            self.add_block(notebook, key, value)
 
     def done(self):
-        new_settings = settings.Settings(None)
+        x, y = self.root.winfo_x(), self.root.winfo_y()
+        new_settings = settings_module.Settings(None)
         if self.set(new_settings) != "error":
             new_settings.save()
             self.root.destroy()
+            msg = "Restart the program for the changes to take effect."
+            info(msg, x, y)
 
-    def set(self, setting_subtree):
-        for element in self.entries:
-            if isinstance(element, tuple):
-                name = element[0]
-                dtype = element[1]
-                data = element[2].get()
+    def set(self, settings: settings_module.Settings) -> str:
+        for block_frame in self.notebook.winfo_children():
+            block_name = block_frame.name
+            children = block_frame.winfo_children()[4:]
+            settings_block = settings_module.Setting(None)
+
+            i = 0
+            while i+3 <= len(children):
+                name_label, dtype_label, entry = children[i:i+3]
+                i += 3
+                setting_name = name_label["text"]
+                dtype = dtype_label["text"]
+                data = entry.get()
                 if self.check_match_type(data, dtype):
-                    element[2]["bg"] = "white"
+                    entry["bg"] = "white"
                 else:
-                    element[2]["bg"] = "red"
+                    entry["bg"] = "red"
                     return "error"
-                setting_subtree[name] = settings.parse_value(data)
-            else:
-                items = {}
-                base_name = element[0]
-                for name, dtype, entry in element[1:]:
-                    data = entry.get()
-                    if self.check_match_type(data, dtype):
-                        entry["bg"] = "white"
-                    else:
-                        entry["bg"] = "red"
-                        return "error"
-                    items.update({name: settings.parse_value(data)})
-                setting_subtree[base_name] = settings.Setting(**items)
+                settings_block[setting_name] = settings_module.parse_value(data)
 
-    def check_match_type(self, data, dtype):
+            settings[block_name] = settings_block
+        return "success"
+
+    def stringify(self, name: str):
+        """
+        Converts the type names into a more user fiendly format like:
+            str => string
+            int => whole number
+            bool => boolean
+            ...
+        """
+        if name == "bool":
+            return "boolean"
+        if name == "str":
+            return "string"
+        if name == "tuple":
+            return "list" # Most users wouldn't know what a tuple is
+        if name == "int":
+            return "whole number"
+        if name == "float":
+            return "decimal"
+        else:
+            return name
+
+    def unstringify(self, name: str):
+        """
+        The reverse of self.stringify(name)
+        """
+        if name == "boolean":
+            return "bool"
+        if name == "string":
+            return "str"
+        if name == "list":
+            return "tuple"
+        if name == "whole number":
+            return "int"
+        if name == "decimal":
+            return "float"
+        else:
+            return name
+
+    def check_match_type(self, data, dtype_stringified):
+        dtype = self.unstringify(dtype_stringified)
         try:
-            data = settings.parse_value(data)
+            data = settings_module.parse_value(data)
         except:
             return False
         return type(data).__name__ == dtype
