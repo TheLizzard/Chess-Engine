@@ -12,11 +12,14 @@ TUPLE_REGEX = "\((([\w. \"]+),* *)+\)"
 
 
 class Setting(SuperClass):
-    def __init__(self, **kwargs):
-        for key, value in kwargs.items():
-            if isinstance(value, dict):
-                value = Setting(**value)
-            self.__dict__.update({key: value})
+    def __init__(self, *args, **kwargs):
+        if (args == [None]) and (len(kwargs.keys()) == 0):
+            pass
+        else:
+            for key, value in kwargs.items():
+                if isinstance(value, dict):
+                    value = Setting(**value)
+                self.__dict__.update({key: value})
 
     def __str__(self) -> str:
         return str(self.__dict__)
@@ -24,8 +27,11 @@ class Setting(SuperClass):
     def __getitem__(self, key: str):
         return self.__dict__[key]
 
-    def __setitem__(self, key, value):
-        self.__dict__[key] = value
+    def __setitem__(self, key: str, value) -> None:
+        self.__dict__.update({key: value})
+
+    def items(self):
+        return self.__dict__.items()
 
     def pop(self, idx=None):
         return self.__dict__.pop(idx)
@@ -57,8 +63,11 @@ class Settings(SuperClass):
     def __getitem__(self, key: str):
         return self.__dict__[key]
 
-    def __setitem__(self, key, value):
-        self.__dict__[key] = value
+    def __setitem__(self, key: str, value) -> None:
+        self.__dict__.update({key: value})
+
+    def items(self):
+        return self.__dict__.items()
 
     def parse(self, data: str) -> dict:
         return parse(data)
@@ -241,9 +250,9 @@ DEFAULT_SETTINGS = """
 #
 
 
-"report_errors" = True
-"update" = True
-
+startup:
+    "report_errors" = True
+    "update" = True
 
 menu:
     "tearoff" = False
@@ -267,7 +276,7 @@ gameboard:
     "last_move_colour_white" = "#BBBBBB"
     "last_move_colour_black" = "#666666"
 
-gameboard.user: # Same for multiplayer as well
+user: # Same for multiplayer as well
     "arrow_colour" = "light green"
     "arrow_width" = 5
     "ring_colour" = "light green"
@@ -275,7 +284,7 @@ gameboard.user: # Same for multiplayer as well
     "ring_radius" = 27
     "available_moves_dots_colour" = "black"
 
-gameboard.computer:
+computer:
     "depth" = None
     # In seconds
     "time" = 2
