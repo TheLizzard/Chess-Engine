@@ -1,5 +1,5 @@
 # File name                  Version Number
-board.py                            3
+board.py                            4
 main.py                             8
 settings.ini                        7
 widgets.py                          9
@@ -33,7 +33,7 @@ Tables/syzygy/KBNvK.rtbz            0
 
 Players/ai.py                       2
 Players/computer.py                 4
-Players/multiplayer.py              4
+Players/multiplayer.py              5
 Players/player.py                   3
 Players/user.py                     3
 
