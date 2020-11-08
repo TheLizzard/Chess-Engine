@@ -1,6 +1,5 @@
 from copy import deepcopy
 from time import sleep
-from math import log
 import subprocess
 import os
 
@@ -34,44 +33,46 @@ class AI(Player):
                 return None
             number_of_moves_played = len(self.board.move_stack)
 
-            legal_moves = tuple(self.board.legal_moves)
-            board_other = deepcopy(self.board)
-            board_other.push(legal_moves[0])
-            self_branching_factor = len(legal_moves)
-            other_branching_factor = len(tuple(board_other.legal_moves))
+            number_of_pieces = self.number_of_pieces(self.board.board_fen())
 
-            branching_factor = (self_branching_factor+other_branching_factor)/2
-
-            if number_of_moves_played < 25:
-                nodes_to_be_searched = 75000
-                quietness = 1
-            elif number_of_moves_played < 35:
-                nodes_to_be_searched = 50000
-                quietness = 0.8
+            if number_of_pieces < 10:
+                depth = 5
+                quietness = 4
+            elif number_of_pieces < 21:
+                depth = 4
+                quietness = 3
             else:
-                nodes_to_be_searched = 100000
-                quietness = 0.6
-            depth = int(log(nodes_to_be_searched)/log(branching_factor)+0.5)
-            quietness = int(depth*quietness+0.5)
+                depth = 3
+                quietness = 3
 
             folder = os.getcwd()+"\\ccarotmodule\\"
             hashed_move = str(self._go(folder, self.board,
                                        str(depth), str(quietness)))
-            while len(hashed_move) < 5:
-                hashed_move = "0"+hashed_move
-            _from = int(hashed_move[:2])
-            to = int(hashed_move[2:4])
-            promotion = int(hashed_move[4])+1
-            move = chess.Move(_from, to, promotion)
-            if move not in self.board.legal_moves:
-                move = chess.Move(_from, to)
+            move = self.decode_move(hashed_move)
             self.callback(move)
+
+    def decode_move(self, hashed_move):
+        while len(hashed_move) < 5:
+            hashed_move = "0"+hashed_move
+        _from = int(hashed_move[:2])
+        to = int(hashed_move[2:4])
+        promotion = int(hashed_move[4])+1
+        move = chess.Move(_from, to, promotion)
+        if move not in self.board.legal_moves:
+            move = chess.Move(_from, to)
+        return move
+    
+    def number_of_pieces(self, fen):
+        fen = fen.lower()
+        number = 0
+        for piece_type in ("p", "k", "b", "r", "q"):
+            number += fen.count(piece_type)
+        return number+2 # Add 2 for the 2 kings
 
     def check_tables(self, board):
         move = self.polyglot_move(board)
         if move is None:
-            move = self.syzygy_move(board)
-            return move
+            return self.syzygy_move(board)
         else:
             return move
 
