@@ -31,7 +31,6 @@ class AI(Player):
             if move is not None:
                 self.callback(move)
                 return None
-            number_of_moves_played = len(self.board.move_stack)
 
             number_of_pieces = self.number_of_pieces(self.board.board_fen())
 
