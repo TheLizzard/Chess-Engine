@@ -45,10 +45,16 @@ class AI(Player):
                 quietness = 3
 
             folder = os.getcwd()+"\\ccarotmodule\\"
-            hashed_move = str(self._go(folder, self.board,
-                                       str(depth), str(quietness)))
-            move = self.decode_move(hashed_move)
-            self.callback(move)
+            hashed_move = self._go(folder, self.board, str(depth), str(quietness))
+            if hashed_move == 0:
+                # checc.Board.legal_moves doesn't support indexing
+                # But I am still going to take the first item
+                for move in self.board.legal_moves:
+                    self.callback(move)
+                    break
+            else:
+                move = self.decode_move(str(hashed_move))
+                self.callback(move)
 
     def decode_move(self, hashed_move):
         while len(hashed_move) < 5:
