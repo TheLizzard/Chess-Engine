@@ -1,7 +1,5 @@
 try:
-    import chess
-    import requests
-    import PIL
+    import chess, requests, PIL
     del PIL, requests, chess
 except ImportError as error:
     print("You are missing some dependencies.")
@@ -137,7 +135,7 @@ class App(SuperClass):
         self.eval_text = tk.Label(self.eval_frame, fg=fg, bg=bg, font=font,
                                   **self.widget_kwargs)
         self.eval_text.grid(row=1, column=1, sticky="news")
-        self.eval_text.config(text="x=∈ℤ")
+        self.eval_text.config(text="x∈ℤ")
 
     def set_up_suggestedmoves(self) -> None:
         settings = SETTINGS.suggested_moves
@@ -275,6 +273,8 @@ class App(SuperClass):
             w.set(self.board.pgn())
 
     def start_game(self, event: str) -> None:
+        if event == "analyse":
+            event = "play_vs_human"
         if event == "evaluate":
             # This is only active when `self.allowed_analyses` is True
             if self.allowed_analyses:
@@ -283,7 +283,6 @@ class App(SuperClass):
                     self.stop_analysing()
                 else:
                     self.start_analysing()
-
         elif event == "play_vs_computer":
             # Add user as `colour` and computer as `not colour`
             colour = self.ask_if_user_white()
@@ -292,13 +291,11 @@ class App(SuperClass):
             self.reset(False)
             self.board.add_user_as_player(colour)
             self.board.add_computer_as_player(not colour)
-
         elif event == "play_vs_human":
             # Add the 2 user players and reset the board
             self.reset(True)
             self.board.add_user_as_player(True)
             self.board.add_user_as_player(False)
-
         elif event == "play_vs_ai":
             # Add user as `colour` and AI as `not colour`
             colour = self.ask_if_user_white()
@@ -307,7 +304,6 @@ class App(SuperClass):
             self.reset(False)
             self.board.add_user_as_player(colour)
             self.board.add_ai_as_player(not colour)
-
         elif event == "play_multiplayer":
             # Start multiplayer
             self.reset(False)
@@ -371,28 +367,36 @@ class App(SuperClass):
         return pgn2[len(pgn1)-len(pgn2):][:-1], False
 
     def start_analysing(self) -> None:
-        if self.allowed_analyses and (not self.analysing):
-            self.analysing = True
-            self.analyses = Analyse(self.board.board)
-            self.analyses.start()
-            self.eval_frame.grid()
-            self.update()
+        if self.allowed_analyses:
+            self.analyses_var.set(True)
+            if not self.analysing:
+                self.analysing = True
+                self.analyses = Analyse(self.board.board)
+                self.analyses.start()
+                self.eval_frame.grid()
+                self.update()
+        else:
+            self.analyses_var.set(False)
 
     def stop_analysing(self) -> None:
         if self.analysing:
+            self.analyses_var.set(False)
             self.analysing = False
             if self.analyses is not None:
                 self.analyses.kill()
-            self.eval_frame.grid_remove()
+            if not self.allowed_analyses:
+                self.eval_text.config(text="x∈ℤ")
+                self.suggestedmoves_text.config(text="No moves to suggest")
 
     def restart_analysing(self) -> None:
         if self.analysing and self.allowed_analyses:
             self.stop_analysing()
             self.start_analysing()
 
-    def toggle_analyses(self, *events) -> None:
+    def toggle_analyses(self, *events) -> str:
         if not self.allowed_analyses:
-            return None # User not allowed analyses
+            self.root.after(100, self.analyses_var.set, False)
+            return "break" # User not allowed analyses
         if self.analysing:
             self.stop_analysing()
         else:
