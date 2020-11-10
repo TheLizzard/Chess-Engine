@@ -16,7 +16,7 @@ Use:
 """
 
 
-from Constants.SuperClass import SuperClass
+from .SuperClass import SuperClass
 import chess.engine
 import threading
 
@@ -52,7 +52,7 @@ class Analyse(SuperClass):
         next best moves.
         """
         thread = threading.Thread(target=self.mainloop)
-        thread.deamon = True
+        thread.daemon = True
         thread.start()
 
     def mainloop(self) -> None:
