@@ -101,7 +101,8 @@ class Settings(SuperClass):
         """
         if os.path.exists(file):
             with open(file, "r") as file:
-                data = file.read()
+                # Adding default settings just for backup.
+                data = DEFAULT_SETTINGS+"\n"+file.read()
             settings = self.parse(data)
         else:
             print("Couldn't read the settings file so using the default ones.")
@@ -181,7 +182,8 @@ def parse_value(value: str):
     if value[0] == value[-1] == "\"":  #check if the value is str
         return value[1:][:-1]
 
-    if value[0] == "(":raise
+    if value[0] == "(":
+        raise ValueError("Open braket without a closing one.")
     return "\""+value+"\""
 
     raise ValueError("The value is not a valid type: "+value)
@@ -260,7 +262,7 @@ menu:
     "File" = ("Open", "Save", "Save as", "-----", "Exit")
     "Edit" = ("Undo Move", "Redo Move", "-----", "Change Position")
     "View" = ("Current FEN", "Game PGN")
-    "Game" = ("Evaluate", "-", "Play vs Computer", "Play vs Human", "Play vs AI", "Play Multiplayer")
+    "Game" = ("Evaluate", "Analyse", "-----", "Play vs Computer", "Play vs Human", "Play vs AI", "Play Multiplayer")
     "Settings" = ("All Settings")
     "Help" = ("Licence", "Help")
 
