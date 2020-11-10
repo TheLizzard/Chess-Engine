@@ -1,26 +1,26 @@
 # File name                  Version Number
-board.py                            4
-main.py                             9
-settings.ini                        7
-widgets.py                          9
-reset_app.py                        4
-reset_settings.py                   0
+board.py                            5
+main.py                             10
+settings.ini                        8
+widgets.py                          10
+reset_app.py                        5
+reset_settings.py                   1
 
-Constants/Help.txt                  3
-Constants/Licence.txt               2
-Constants/analyse.py                2
-Constants/piece.py                  2
-Constants/position.py               2
-Constants/settings.py               6
-Constants/SuperClass.py             5
+Constants/Help.txt                  4
+Constants/Licence.txt               3
+Constants/analyse.py                3
+Constants/piece.py                  3
+Constants/position.py               3
+Constants/settings.py               7
+Constants/SuperClass.py             6
 
-Networking/bits.py                  2
-Networking/compression.py           2
-Networking/connector.py             4
-Networking/reporter.py              2
-Networking/updater.py               5
+Networking/bits.py                  3
+Networking/compression.py           3
+Networking/connector.py             5
+Networking/reporter.py              3
+Networking/updater.py               6
 
-ccarotmodule/ccarotmodule32bit.exe  0
+ccarotmodule/ccarotmodule32bit.exe  1
 ccarotmodule/Data/PAWN_EVAL.txt     0
 ccarotmodule/Data/KNIGHT_EVAL.txt   0
 ccarotmodule/Data/BISHOP_EVAL.txt   0
@@ -32,11 +32,11 @@ Tables/downloader.py                0
 Tables/syzygy/KBNvK.rtbw            0
 Tables/syzygy/KBNvK.rtbz            0
 
-Players/ai.py                       2
-Players/computer.py                 4
-Players/multiplayer.py              5
-Players/player.py                   3
-Players/user.py                     3
+Players/ai.py                       3
+Players/computer.py                 5
+Players/multiplayer.py              6
+Players/player.py                   4
+Players/user.py                     4
 
 Sprites/set.2/bishop.black.png      0
 Sprites/set.2/bishop.white.png      0
