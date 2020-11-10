@@ -401,6 +401,7 @@ class Question:
         self.set_result(self.entry.get())
 
 
+# Only used for debuging
 class ScrolledListboxes(tk.Frame):
     def __init__(self, *args, width=None, **kwargs):
         super().__init__(*args, **kwargs)
@@ -452,6 +453,7 @@ class ScrolledListboxes(tk.Frame):
         self.lb2.yview(yview)
 
 
+# Only used for debuging
 class Logger:
     def __init__(self):
         self.old_data = []
@@ -601,6 +603,7 @@ class ChangeSettings:
         settings.
         """
         self.root = tk.Tk()
+        self.root.geometry("+%d+%d" % (x, y))
         self.root.title("Settings changer")
         self.notebook = ttk.Notebook(self.root)
         self.notebook.grid(row=2, column=1, columnspan=2)
