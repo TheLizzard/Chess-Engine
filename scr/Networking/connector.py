@@ -3,7 +3,7 @@ import re
 import socket
 import threading
 
-from Networking.bits import Bits
+from .bits import Bits
 
 
 class Event:
@@ -21,7 +21,7 @@ class Reciever:
         self.callback = callback
         self.sock = sock
         thread = threading.Thread(target=self.start)
-        thread.deamon = True
+        thread.daemon = True
         thread.start()
 
     def __del__(self) -> None:
@@ -75,7 +75,7 @@ class Connector:
             self.our_sock.listen(1)
             self.our_sock_running = True
             thread = threading.Thread(target=self.wait_for_connection)
-            thread.deamon = True
+            thread.daemon = True
             thread.start()
         elif (ip is None) or (port is None):
             raise ValueError("If not server, you need to specify port and ip.")
