@@ -20,7 +20,7 @@ Networking/connector.py             5
 Networking/reporter.py              3
 Networking/updater.py               6
 
-ccarotmodule/ccarotmodule32bit.exe  1
+ccarotmodule/ccarotmodule32bit.exe  2
 ccarotmodule/Data/PAWN_EVAL.txt     0
 ccarotmodule/Data/KNIGHT_EVAL.txt   0
 ccarotmodule/Data/BISHOP_EVAL.txt   0
