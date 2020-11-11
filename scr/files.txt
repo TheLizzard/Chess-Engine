@@ -1,6 +1,6 @@
 # File name                  Version Number
 board.py                            5
-main.py                             10
+main.py                             11
 settings.ini                        8
 widgets.py                          10
 reset_app.py                        5
