@@ -36,7 +36,7 @@ Tables/syzygy/KBNvK.rtbz            0
 
 Players/ai.py                       4
 Players/computer.py                 5
-Players/multiplayer.py              6
+Players/multiplayer.py              7
 Players/player.py                   4
 Players/user.py                     4
 
