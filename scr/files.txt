@@ -21,6 +21,7 @@ Networking/reporter.py              3
 Networking/updater.py               6
 
 ccarotmodule/ccarotmodule32bit.exe  2
+ccarotmodule/ccarotmodule32bit      0
 ccarotmodule/Data/PAWN_EVAL.txt     0
 ccarotmodule/Data/KNIGHT_EVAL.txt   0
 ccarotmodule/Data/BISHOP_EVAL.txt   0
@@ -52,5 +53,5 @@ Sprites/set.2/rook.black.png        0
 Sprites/set.2/rook.white.png        0
 
 Stockfish/stockfish_11_x32.exe      0
-Stockfish/stockfish_11_x64          0
+Stockfish/stockfish_11_x64          1
 Stockfish/stockfish_11_x64.exe      0
