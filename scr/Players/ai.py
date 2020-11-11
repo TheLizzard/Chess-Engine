@@ -9,13 +9,14 @@ import chess
 
 
 import Constants.settings as settings
+import widgets
 from .player import Player
 
 
-AI_FOLDER = settings.Settings().evaluation.ai.replace("/", "\\")
+AI_FOLDER = settings.Settings().evaluation.ai
 os_bits = str(settings.get_os_bits()) # Get the bit version of the OS
 os_extension = settings.get_os_extension()
-RUN_COMMAND = os.getcwd()+"\\"+AI_FOLDER+os_bits+"bit"+os_extension
+RUN_COMMAND = os.getcwd()+"/"+AI_FOLDER+os_bits+"bit"+os_extension
 del AI_FOLDER, os_bits, os_extension # clean up
 
 
@@ -27,6 +28,14 @@ class AI(Player):
         if self.board.turn != self.colour:
             return None
         if self.alowed_to_play:
+            # Doesn't work on Linux for some reason :(
+            if RUN_COMMAND[-4:] != ".exe":
+                root = self.master.winfo_toplevel()
+                x, y = root.winfo_x(), root.winfo_y()
+                widgets.info("The AI doesn't work on Linux. Sorry :(", x, y)
+                super().stop()
+                return None
+
             move = self.check_tables(self.board)
             if move is not None:
                 self.callback(move)
@@ -44,7 +53,7 @@ class AI(Player):
                 depth = 3
                 quietness = 3
 
-            folder = os.getcwd()+"\\ccarotmodule\\"
+            folder = os.getcwd()+"/ccarotmodule/"
             hashed_move = self._go(folder, self.board, str(depth), str(quietness))
             if hashed_move == 0:
                 # checc.Board.legal_moves doesn't support indexing
