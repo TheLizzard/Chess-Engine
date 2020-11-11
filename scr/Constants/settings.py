@@ -111,15 +111,16 @@ class Settings(SuperClass):
 
     def save(self):
         contents = self.get_all("", self)
-        with open("settings.ini", "a") as file:
+        contents = SETTINGS_HEADER+contents.strip()
+        with open("settings.ini", "w") as file:
             file.write(contents)
 
     def get_all(self, contents, settings_subtree, indent=0):
-        for key in reversed(settings_subtree.__dict__.keys()):
-            value = settings_subtree[key]
+        for key, value in settings_subtree.items():
             if type(value) == Setting:
                 contents += key.lower()+":\n"
                 contents = self.get_all(contents, value, indent+1)
+                contents += "\n"
             else:
                 if not isinstance(value, str):
                     value = str(value)
@@ -236,8 +237,7 @@ def get_os_extension() -> int:
         raise OSError("Can't recognise the OS type.")
 
 
-DEFAULT_SETTINGS = """
-
+SETTINGS_HEADER = """
 # This is a file that contains all of the settings
 # There 6 types allowed:
 #      --------- ---------------------------- -----------------
@@ -251,8 +251,10 @@ DEFAULT_SETTINGS = """
 #     | tuple   | ("values", 1, True, False) | (0.0, None)     |
 #      --------- ---------------------------- -----------------
 #
+"""
+SETTINGS_HEADER = SETTINGS_HEADER.strip()+"\n\n\n"
 
-
+DEFAULT_SETTINGS = """
 startup:
     "report_errors" = True
     "update" = True
@@ -323,6 +325,7 @@ move_history:
     "cursor_colour" = "white"
     "font" = ("Lucida Console", 10)
 """
+DEFAULT_SETTINGS = SETTINGS_HEADER+DEFAULT_SETTINGS.strip()+"\n"
 
 
 REGEXES_BACKUP = {
