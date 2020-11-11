@@ -11,7 +11,7 @@ Constants/Licence.txt               3
 Constants/analyse.py                3
 Constants/piece.py                  3
 Constants/position.py               3
-Constants/settings.py               7
+Constants/settings.py               8
 Constants/SuperClass.py             6
 
 Networking/bits.py                  3
