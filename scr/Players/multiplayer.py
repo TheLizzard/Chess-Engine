@@ -53,7 +53,6 @@ class Multiplayer(User, SuperClass):
         self.running = False
         self.connector.unbind()
         self.connector.kill()
-        del self.connector
         super().stop()
         super().destroy()
 
@@ -76,6 +75,7 @@ class Multiplayer(User, SuperClass):
             self.logger.log("connection.build", ip, PORT, sep="  ")
 
     def send_move(self, move: chess.Move) -> None:
+        self.sent_undo_move_request = False
         """
         This function only encodes and sends a given move.
         """
@@ -229,19 +229,20 @@ class Multiplayer(User, SuperClass):
         self.send_move(chess.Move(from_square=code, to_square=code))
 
     def send_undo_move(self, _=None) -> None:
-        if not self.sent_undo_move_request:
-            self.sent_undo_move_request = True
-            self.send_special_move(code=0)
-        else:
+        if self.sent_undo_move_request:
             root = self.master.winfo_toplevel()
             x, y = root.winfo_x(), root.winfo_y()
             widgets.info("Can't send more than 1 undo request.", x, y)
+        else:
+            self.sent_undo_move_request = True
+            self.send_special_move(code=0)
 
     def undo(self) -> str:
         """
         This is called when the other player want to undo and we
         can eather allow them or block them.
         """
+        self.sent_undo_move_request = False
         # Ask the user if they want to allow or block the undo request
         root = self.master.winfo_toplevel()
         x, y = root.winfo_x(), root.winfo_y()
