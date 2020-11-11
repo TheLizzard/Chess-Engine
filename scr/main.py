@@ -229,7 +229,7 @@ class App(SuperClass):
             if self.board.set_pgn(data) == "break":
                 return "break" # If the players rejected the open
             self.file_open = filename
-            self.clear_pgn()
+            self.update_pgn()
             self.restart_analysing()
 
     def save_as(self, _=None) -> None:
