@@ -1,7 +1,7 @@
 # File name                  Version Number
 board.py                            5
 main.py                             11
-settings.ini                        8
+settings.ini                        9
 widgets.py                          10
 reset_app.py                        5
 reset_settings.py                   1
@@ -53,6 +53,6 @@ Sprites/set.2/queen.white.png       0
 Sprites/set.2/rook.black.png        0
 Sprites/set.2/rook.white.png        0
 
-Stockfish/stockfish_11_x32.exe      0
-Stockfish/stockfish_11_x64          1
-Stockfish/stockfish_11_x64.exe      0
+Stockfish/stockfish_11_x32.exe      2
+Stockfish/stockfish_11_x64          2
+Stockfish/stockfish_11_x64.exe      2
