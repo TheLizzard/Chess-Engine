@@ -1,12 +1,12 @@
 # File name                  Version Number
 board.py                            5
-main.py                             11
+main.py                             12
 settings.ini                        9
 widgets.py                          10
 reset_app.py                        5
 reset_settings.py                   1
 
-Constants/Help.txt                  4
+Constants/Help.txt                  5
 Constants/Licence.txt               3
 Constants/analyse.py                3
 Constants/piece.py                  3
