@@ -269,7 +269,7 @@ class App(SuperClass):
             w = widgets.CopyableEntryWindow(width=40)
             w.set(self.board.fen())
         elif event == "game_pgn":
-            w = widgets.CopyableTextWindow()
+            w = widgets.CopyableTextWindow(width=20, height=15)
             w.set(self.board.pgn())
 
     def start_game(self, event: str) -> None:
