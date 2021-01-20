@@ -177,6 +177,9 @@ class HelpWindow(TextWindow):
             self.text.delete("end-1l", "end")
 
     def style_text(self, text: str) -> None:
+        """
+        Adds the tags to make the text bold/italic/grey
+        """
         ITALIC_REGEX = "![^\n]*!"
         BOLD_REGEX = "#[^\n]*#"
         KEYBOARD_COMBINATION_REGEX = "`[^\n]*`"
@@ -185,6 +188,9 @@ class HelpWindow(TextWindow):
         self.add_tag("grey", KEYBOARD_COMBINATION_REGEX)
 
     def add_tag(self, tag_name: str, regex: str):
+        """
+        Searches the text and tags it based on the regex given
+        """
         pos = "1.0"
         while True:
             count_var = tk.StringVar(self.root)
@@ -201,11 +207,17 @@ class HelpWindow(TextWindow):
             pos = end+"-2c"
 
     def config_tags(self) -> None:
+        """
+        Configures the tags.
+        """
         self.text.tag_config("bold", font=("", 12, "bold"))
         self.text.tag_config("grey", background="#EEEEEE")
         self.text.tag_config("italic", font=("", 10, "italic", "underline"))
 
     def get_text(self) -> str:
+        """
+        Gets the text from the file and removes the comments
+        """
         with open("Constants/Help.txt", "r") as file:
             data = file.read()
         output = ""
