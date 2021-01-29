@@ -1,5 +1,5 @@
 # Chess-Engine
-This is a simple GUI chess engine for Linux and Windows. This has been created for a Computer Science project. My candidate number is 4180.
+This is a simple GUI chess engine for Linux and Windows. This has been created for a Computer Science project. My candidate number is 6401.
 
 ## Dependencies:
 There are 2 dependancies:
