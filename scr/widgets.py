@@ -166,6 +166,7 @@ class LicenceWindow(TextWindow):
             data = file.read()
         return data
 
+
 class HelpWindow(TextWindow):
     def __init__(self):
         super().__init__(wrap="word")
@@ -635,7 +636,7 @@ class ChangeSettings:
                                       command=self.reset_settings)
         self.button_save.grid(row=1, column=1, sticky="news")
         self.button_reset.grid(row=1, column=2, sticky="news")
-    
+
     def reset_settings(self):
         """
         Resets all of the settings to their default values.
@@ -699,8 +700,12 @@ class ChangeSettings:
         if self.set(new_settings) != "error":
             new_settings.save()
             self.close()
-    
+
     def close(self, coords=None):
+        """
+        Closes the window and and displays a message that reads:
+            "Restart the program for the changes to take effect."
+        """
         coords = (self.root.winfo_x(), self.root.winfo_y())
         self.root.destroy()
         msg = "Restart the program for the changes to take effect."
@@ -783,7 +788,6 @@ class ChangeSettings:
         except:
             return False
         return type(data).__name__ == dtype
-
 
 
 def _info(text: str, x: int, y :int) -> None:
