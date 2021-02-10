@@ -45,16 +45,13 @@ class AI(Player):
 
             if number_of_pieces < 10:
                 depth = 5
-                quietness = 4
             elif number_of_pieces < 21:
                 depth = 4
-                quietness = 3
             else:
                 depth = 3
-                quietness = 3
 
             folder = os.getcwd()+"/ccarotmodule/"
-            hashed_move = self._go(folder, self.board, str(depth), str(quietness))
+            hashed_move = self._go(folder, self.board, str(depth))
             if hashed_move == 0:
                 # checc.Board.legal_moves doesn't support indexing
                 # But I am still going to take the first item
@@ -119,8 +116,8 @@ class AI(Player):
             move = syzygy.get_dtz(board)
         return move
 
-    def _go(self, folder, board, depth, quietness) -> int:
-        command = [RUN_COMMAND, folder, board.fen(), depth, quietness]
+    def _go(self, folder, board, depth) -> int:
+        command = [RUN_COMMAND, folder, board.fen(), depth]
         print(command)
         process = subprocess.Popen(command, shell=True)
         while process.poll() is None:
@@ -128,8 +125,8 @@ class AI(Player):
         _eval = process.returncode
         return _eval
 
-    def open_game(self, pgn: str) -> str:
-        return "break"
+    # def open_game(self, pgn: str) -> str:
+    #     return "break"
 
-    def set_fen(self, fen: str) -> str:
-        return "break"
+    # def set_fen(self, fen: str) -> str:
+    #     return "break"
