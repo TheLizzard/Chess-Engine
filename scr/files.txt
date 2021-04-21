@@ -1,18 +1,18 @@
 # File name                  Version Number
-board.py                            5
-main.py                             12
-settings.ini                        9
+board.py                            6
+main.py                             13
+settings.ini                        10
 widgets.py                          10
-reset_app.py                        5
-reset_settings.py                   1
+reset_app.py                        6
+reset_settings.py                   2
 
-Constants/Help.txt                  5
-Constants/Licence.txt               3
-Constants/analyse.py                3
-Constants/piece.py                  3
-Constants/position.py               3
-Constants/settings.py               8
-Constants/SuperClass.py             6
+Constants/Help.txt                  6
+Constants/Licence.txt               4
+Constants/analyse.py                4
+Constants/piece.py                  4
+Constants/position.py               4
+Constants/settings.py               9
+Constants/SuperClass.py             7
 
 Networking/bits.py                  3
 Networking/compression.py           3
