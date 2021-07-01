@@ -10,9 +10,6 @@ There are 2 dependancies:
   * On `Windows` do: `python -m pip install pillow`
   * On `Linux` do: `pip3 install pillow; sudo apt-get install python3-pil python3-pil.imagetk`
 
-## How to download:
-Download the <a href=https://github.com/TheLizzard/Chess-Engine-Downloader>downloader</a> and run `downloader.py` using `python 3`. It will download all of the nessasary files with their updates.
-
 ## How to run:
 Using `python 3` run `scr/main.py`.
 
